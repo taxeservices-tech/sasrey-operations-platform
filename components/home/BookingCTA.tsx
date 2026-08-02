@@ -1,32 +1,59 @@
+import Button from "../ui/Button";
+import { Phone, CalendarCheck, Plane } from "lucide-react";
+
 export default function BookingCTA() {
   return (
-    <section className="bg-sky-600 py-24 text-white">
-      <div className="mx-auto max-w-5xl px-6 text-center">
+    <section className="bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 py-28">
+      <div className="mx-auto max-w-7xl px-6">
 
-        <h2 className="text-5xl font-bold">
-          Ready to Explore Jamaica?
-        </h2>
+        <div className="mx-auto max-w-4xl text-center text-white">
 
-        <p className="mt-8 text-xl leading-9 text-sky-100">
-          Book your airport transfer, private tour or corporate transportation
-          today and travel with confidence.
-        </p>
+          <span className="rounded-full bg-white/20 px-5 py-2 text-sm font-semibold uppercase tracking-[0.3em]">
+            Book With Confidence
+          </span>
 
-        <div className="mt-12 flex flex-col justify-center gap-6 sm:flex-row">
+          <h2 className="mt-8 text-5xl font-black leading-tight md:text-6xl">
+            Your Jamaican Adventure
+            <br />
+            Starts Here.
+          </h2>
 
-          <a
-            href="#"
-            className="rounded-full bg-white px-10 py-4 text-lg font-semibold text-sky-600 transition hover:bg-slate-100"
-          >
-            Book Your Ride
-          </a>
+          <p className="mx-auto mt-8 max-w-3xl text-xl leading-9 text-sky-100">
+            Airport transfers, private tours, cruise transportation and
+            executive travel delivered with professionalism, comfort and
+            reliability throughout Jamaica.
+          </p>
 
-          <a
-            href="https://wa.me/1876XXXXXXXX"
-            className="rounded-full border-2 border-white px-10 py-4 text-lg font-semibold transition hover:bg-white hover:text-sky-600"
-          >
-            WhatsApp Us
-          </a>
+          <div className="mt-14 flex flex-wrap justify-center gap-10">
+
+            <div className="flex items-center gap-3">
+              <Plane size={24} />
+              <span>Airport Transfers</span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <CalendarCheck size={24} />
+              <span>Easy Online Booking</span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Phone size={24} />
+              <span>24/7 Customer Support</span>
+            </div>
+
+          </div>
+
+          <div className="mt-16 flex flex-wrap justify-center gap-6">
+
+            <Button>
+              Book Your Ride
+            </Button>
+
+            <Button variant="secondary">
+              Contact Us
+            </Button>
+
+          </div>
 
         </div>
 

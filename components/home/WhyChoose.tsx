@@ -1,78 +1,134 @@
-export default function WhyChoose() {
-  const features = [
-    {
-      icon: "🛡️",
-      title: "Safe & Reliable",
-      description:
-        "Your safety is our priority. Every trip is handled with professionalism and care.",
-    },
-    {
-      icon: "⏰",
-      title: "Always On Time",
-      description:
-        "Punctual airport pickups and timely transportation throughout Jamaica.",
-    },
-    {
-      icon: "🚖",
-      title: "Professional Drivers",
-      description:
-        "Friendly, licensed and experienced drivers dedicated to excellent service.",
-    },
-    {
-      icon: "🌴",
-      title: "Island-wide Service",
-      description:
-        "From Montego Bay to Negril, Ocho Rios, Kingston and beyond.",
-    },
-    {
-      icon: "⭐",
-      title: "Premium Experience",
-      description:
-        "Comfortable vehicles, clean interiors and personalized customer service.",
-    },
-    {
-      icon: "💳",
-      title: "Easy Booking",
-      description:
-        "Simple booking process with secure payment options and responsive support.",
-    },
-  ];
+import {
+  ShieldCheck,
+  Clock3,
+  Star,
+  MapPinned,
+  Plane,
+  HeartHandshake,
+} from "lucide-react";
 
+const reasons = [
+  {
+    icon: ShieldCheck,
+    title: "Safety First",
+    description:
+      "Licensed drivers, insured vehicles and a commitment to safe transportation for every journey.",
+  },
+  {
+    icon: Clock3,
+    title: "Always On Time",
+    description:
+      "Flight tracking, punctual pickups and dependable service so you're never left waiting.",
+  },
+  {
+    icon: Star,
+    title: "Premium Experience",
+    description:
+      "Friendly service, spotless vehicles and personalized attention from booking to drop-off.",
+  },
+  {
+    icon: MapPinned,
+    title: "Island-wide Coverage",
+    description:
+      "Airport transfers, private tours and transportation across Jamaica's most popular destinations.",
+  },
+  {
+    icon: Plane,
+    title: "Airport Specialists",
+    description:
+      "Professional airport meet & greet service from Sangster International Airport and beyond.",
+  },
+  {
+    icon: HeartHandshake,
+    title: "Customer Focused",
+    description:
+      "Every trip is tailored to provide comfort, reliability and a memorable Jamaican experience.",
+  },
+];
+
+export default function WhyChoose() {
   return (
-    <section id="why-us" className="bg-white py-24">
+    <section
+      id="why-choose"
+      className="bg-white py-28"
+    >
       <div className="mx-auto max-w-7xl px-6">
 
-        <div className="mb-16 text-center">
-          <h2 className="text-5xl font-bold text-gray-900">
-            Why Choose SASREY?
+        {/* Heading */}
+
+        <div className="mx-auto mb-20 max-w-3xl text-center">
+
+          <span className="rounded-full bg-sky-100 px-5 py-2 text-sm font-semibold uppercase tracking-[0.3em] text-sky-700">
+            Why Choose SASREY
+          </span>
+
+          <h2 className="mt-6 text-5xl font-black text-slate-900">
+            More Than Transportation.
+            <br />
+            We Deliver Peace of Mind.
           </h2>
 
-          <p className="mx-auto mt-6 max-w-3xl text-xl text-gray-600">
-            We combine professionalism, comfort and reliability to give every
-            customer an exceptional travel experience.
+          <p className="mt-6 text-xl leading-8 text-slate-600">
+            From the moment you arrive in Jamaica until your journey is
+            complete, SASREY is committed to providing safe, dependable
+            and unforgettable transportation experiences.
           </p>
+
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {/* Cards */}
 
-          {features.map((feature) => (
-            <div
-              key={feature.title}
-              className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm transition duration-300 hover:-translate-y-2 hover:shadow-xl"
-            >
-              <div className="mb-6 text-6xl">
-                {feature.icon}
+        <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+
+          {reasons.map((reason) => {
+            const Icon = reason.icon;
+
+            return (
+              <div
+                key={reason.title}
+                className="group rounded-3xl border border-slate-200 bg-white p-8 shadow-md transition-all duration-500 hover:-translate-y-2 hover:border-sky-500 hover:shadow-2xl"
+              >
+
+                <div className="mb-6 inline-flex rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-500 p-4 shadow-lg transition-transform duration-500 group-hover:scale-110">
+
+                  <Icon
+                    size={36}
+                    className="text-white"
+                  />
+
+                </div>
+
+                <h3 className="mb-4 text-2xl font-bold text-slate-900 group-hover:text-sky-600">
+                  {reason.title}
+                </h3>
+
+                <p className="leading-8 text-slate-600">
+                  {reason.description}
+                </p>
+
               </div>
+            );
+          })}
 
-              <h3 className="text-2xl font-bold text-gray-900">
-                {feature.title}
-              </h3>
+        </div>
 
-              <p className="mt-4 leading-7 text-gray-600">
-                {feature.description}
-              </p>
-            </div>
-          ))}
+        {/* Bottom Statement */}
+
+        <div className="mt-20 rounded-3xl bg-gradient-to-r from-sky-600 to-cyan-600 p-12 text-center text-white shadow-2xl">
+
+          <h3 className="text-3xl font-black">
+            Your Journey Starts Here.
+          </h3>
+
+          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-sky-100">
+            Whether you're visiting Jamaica for business, vacation or a
+            special event, our professional team is ready to make every
+            mile comfortable, safe and memorable.
+          </p>
+
+          <button className="mt-10 rounded-full bg-white px-10 py-5 text-lg font-semibold text-sky-700 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+            Start Your Journey
+          </button>
 
         </div>
 

@@ -1,74 +1,156 @@
-export default function Testimonials() {
-  const reviews = [
-    {
-      name: "Sarah Williams",
-      country: "USA",
-      review:
-        "Excellent airport transfer service. Our driver was waiting for us when we landed and made us feel welcome from the very beginning.",
-    },
-    {
-      name: "Michael Brown",
-      country: "Canada",
-      review:
-        "We booked a full-day tour with SASREY and it was the highlight of our vacation. Professional, friendly and always on time.",
-    },
-    {
-      name: "Emma Johnson",
-      country: "United Kingdom",
-      review:
-        "Clean vehicle, professional driver and outstanding customer service. I highly recommend SASREY for anyone visiting Jamaica.",
-    },
-  ];
+import {
+  Star,
+  Quote,
+} from "lucide-react";
 
+const testimonials = [
+  {
+    name: "Sarah Williams",
+    country: "United Kingdom",
+    service: "Airport Transfer",
+    review:
+      "Excellent service from the moment we landed. Our driver was waiting at the airport, helped with our luggage and made the journey to our resort comfortable and stress-free.",
+  },
+  {
+    name: "Michael Anderson",
+    country: "United States",
+    service: "Private Tour",
+    review:
+      "Professional, punctual and incredibly friendly. The private tour exceeded our expectations and we felt completely safe throughout the day.",
+  },
+  {
+    name: "Jennifer Morgan",
+    country: "Canada",
+    service: "Round Trip Transfer",
+    review:
+      "Booking was simple, communication was excellent and the vehicle was spotless. I highly recommend SASREY for anyone visiting Jamaica.",
+  },
+];
+
+export default function Testimonials() {
   return (
     <section
       id="testimonials"
-      className="bg-slate-50 py-24"
+      className="bg-slate-50 py-28"
     >
       <div className="mx-auto max-w-7xl px-6">
 
-        <div className="mb-16 text-center">
+        {/* Heading */}
 
-          <h2 className="text-5xl font-bold text-gray-900">
-            What Our Customers Say
+        <div className="mx-auto mb-20 max-w-3xl text-center">
+
+          <span className="rounded-full bg-sky-100 px-5 py-2 text-sm font-semibold uppercase tracking-[0.3em] text-sky-700">
+            Testimonials
+          </span>
+
+          <h2 className="mt-6 text-5xl font-black text-slate-900">
+            Trusted by Travelers
+            <br />
+            From Around the World.
           </h2>
 
-          <p className="mx-auto mt-6 max-w-3xl text-xl text-gray-600">
-            We're proud to provide exceptional transportation and tour
-            experiences throughout Jamaica.
+          <p className="mt-6 text-xl leading-8 text-slate-600">
+            Creating memorable journeys through exceptional service,
+            professional drivers and reliable transportation across Jamaica.
           </p>
 
         </div>
 
+        {/* Cards */}
+
         <div className="grid gap-8 lg:grid-cols-3">
 
-          {reviews.map((review) => (
+          {testimonials.map((testimonial) => (
             <div
-              key={review.name}
-              className="rounded-3xl bg-white p-8 shadow-lg transition duration-300 hover:-translate-y-2 hover:shadow-2xl"
+              key={testimonial.name}
+              className="group rounded-3xl bg-white p-8 shadow-lg transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl"
             >
-              <div className="mb-6 text-3xl text-yellow-500">
-                ⭐⭐⭐⭐⭐
+
+              <Quote
+                size={42}
+                className="text-sky-500"
+              />
+
+              <div className="mt-6 flex gap-1">
+
+                {[1,2,3,4,5].map((star)=>(
+                  <Star
+                    key={star}
+                    size={18}
+                    className="fill-yellow-400 text-yellow-400"
+                  />
+                ))}
+
               </div>
 
-              <p className="leading-8 text-gray-600 italic">
-                "{review.review}"
+              <p className="mt-6 leading-8 text-slate-600 italic">
+                "{testimonial.review}"
               </p>
 
-              <div className="mt-8">
+              <div className="mt-8 border-t border-slate-200 pt-6">
 
-                <h3 className="text-xl font-bold">
-                  {review.name}
+                <h3 className="text-xl font-bold text-slate-900">
+                  {testimonial.name}
                 </h3>
 
-                <p className="text-gray-500">
-                  {review.country}
+                <p className="mt-1 text-sky-600">
+                  {testimonial.country}
                 </p>
+
+                <span className="mt-4 inline-block rounded-full bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-700">
+                  {testimonial.service}
+                </span>
 
               </div>
 
             </div>
           ))}
+
+        </div>
+
+        {/* Bottom Stats */}
+
+        <div className="mt-20 grid gap-8 text-center md:grid-cols-4">
+
+          <div>
+            <h3 className="text-5xl font-black text-sky-600">
+              5★
+            </h3>
+
+            <p className="mt-2 text-slate-600">
+              Customer Experience
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-5xl font-black text-sky-600">
+              24/7
+            </h3>
+
+            <p className="mt-2 text-slate-600">
+              Customer Support
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-5xl font-black text-sky-600">
+              100%
+            </h3>
+
+            <p className="mt-2 text-slate-600">
+              Private Transportation
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-5xl font-black text-sky-600">
+              Island
+            </h3>
+
+            <p className="mt-2 text-slate-600">
+              Wide Coverage
+            </p>
+          </div>
 
         </div>
 
