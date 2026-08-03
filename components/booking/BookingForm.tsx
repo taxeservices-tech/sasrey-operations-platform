@@ -1,4 +1,29 @@
+"use client";
+
+import { useMemo } from "react";
+
+import { routes } from "@/app/lib/routes";
+import { useBooking } from "@/context/BookingContext";
+
 export default function BookingForm() {
+  const { booking, updateBooking } = useBooking();
+
+  const pickupLocations = [
+    ...new Set(routes.map((route) => route.pickup)),
+  ];
+
+  const availableDestinations = useMemo(() => {
+    if (!booking.pickup) return [];
+
+    return [
+      ...new Set(
+        routes
+          .filter((route) => route.pickup === booking.pickup)
+          .map((route) => route.destination)
+      ),
+    ];
+  }, [booking.pickup]);
+
   return (
     <div className="rounded-3xl bg-white p-10 shadow-xl">
       <h2 className="mb-8 text-3xl font-black text-slate-900">
@@ -6,6 +31,9 @@ export default function BookingForm() {
       </h2>
 
       <div className="grid gap-6 md:grid-cols-2">
+
+        {/* Full Name */}
+
         <div>
           <label className="mb-2 block font-semibold">
             Full Name
@@ -14,8 +42,16 @@ export default function BookingForm() {
           <input
             className="w-full rounded-xl border border-slate-300 p-4"
             placeholder="John Smith"
+            value={booking.customerName ?? ""}
+            onChange={(e) =>
+              updateBooking({
+                customerName: e.target.value,
+              })
+            }
           />
         </div>
+
+        {/* Email */}
 
         <div>
           <label className="mb-2 block font-semibold">
@@ -26,8 +62,16 @@ export default function BookingForm() {
             type="email"
             className="w-full rounded-xl border border-slate-300 p-4"
             placeholder="john@email.com"
+            value={booking.email ?? ""}
+            onChange={(e) =>
+              updateBooking({
+                email: e.target.value,
+              })
+            }
           />
         </div>
+
+        {/* Phone */}
 
         <div>
           <label className="mb-2 block font-semibold">
@@ -37,8 +81,16 @@ export default function BookingForm() {
           <input
             className="w-full rounded-xl border border-slate-300 p-4"
             placeholder="+1 876..."
+            value={booking.phone ?? ""}
+            onChange={(e) =>
+              updateBooking({
+                phone: e.target.value,
+              })
+            }
           />
         </div>
+
+        {/* Flight */}
 
         <div>
           <label className="mb-2 block font-semibold">
@@ -48,30 +100,82 @@ export default function BookingForm() {
           <input
             className="w-full rounded-xl border border-slate-300 p-4"
             placeholder="AA123"
+            value={booking.flightNumber ?? ""}
+            onChange={(e) =>
+              updateBooking({
+                flightNumber: e.target.value,
+              })
+            }
           />
         </div>
+
+        {/* Pickup */}
 
         <div>
           <label className="mb-2 block font-semibold">
             Pickup Location
           </label>
 
-          <input
+          <select
             className="w-full rounded-xl border border-slate-300 p-4"
-            placeholder="MBJ Airport"
-          />
+            value={booking.pickup ?? ""}
+            onChange={(e) =>
+              updateBooking({
+                pickup: e.target.value,
+                destination: "",
+                service: "",
+              })
+            }
+          >
+            <option value="">Select Pickup</option>
+
+            {pickupLocations.map((pickup) => (
+              <option key={pickup} value={pickup}>
+                {pickup}
+              </option>
+            ))}
+          </select>
         </div>
+
+        {/* Destination */}
 
         <div>
           <label className="mb-2 block font-semibold">
             Destination
           </label>
 
-          <input
+          <select
             className="w-full rounded-xl border border-slate-300 p-4"
-            placeholder="Secrets Wild Orchid"
-          />
+            value={booking.destination ?? ""}
+            onChange={(e) => {
+              const destination = e.target.value;
+
+              const route = routes.find(
+                (r) =>
+                  r.pickup === booking.pickup &&
+                  r.destination === destination
+              );
+
+              updateBooking({
+                destination,
+                service: route?.service ?? "",
+              });
+            }}
+          >
+            <option value="">Select Destination</option>
+
+            {availableDestinations.map((destination) => (
+              <option
+                key={destination}
+                value={destination}
+              >
+                {destination}
+              </option>
+            ))}
+          </select>
         </div>
+
+        {/* Pickup Date */}
 
         <div>
           <label className="mb-2 block font-semibold">
@@ -81,8 +185,16 @@ export default function BookingForm() {
           <input
             type="date"
             className="w-full rounded-xl border border-slate-300 p-4"
+            value={booking.pickupDate ?? ""}
+            onChange={(e) =>
+              updateBooking({
+                pickupDate: e.target.value,
+              })
+            }
           />
         </div>
+
+        {/* Pickup Time */}
 
         <div>
           <label className="mb-2 block font-semibold">
@@ -92,38 +204,95 @@ export default function BookingForm() {
           <input
             type="time"
             className="w-full rounded-xl border border-slate-300 p-4"
+            value={booking.pickupTime ?? ""}
+            onChange={(e) =>
+              updateBooking({
+                pickupTime: e.target.value,
+              })
+            }
           />
         </div>
+
+        {/* Passengers */}
 
         <div>
           <label className="mb-2 block font-semibold">
             Passengers
           </label>
 
-          <select className="w-full rounded-xl border border-slate-300 p-4">
-            <option>1</option>
-            <option>2</option>
-            <option>3</option>
-            <option>4</option>
-            <option>5</option>
-            <option>6</option>
-            <option>7</option>
+          <select
+            className="w-full rounded-xl border border-slate-300 p-4"
+            value={booking.passengers ?? 1}
+            onChange={(e) =>
+              updateBooking({
+                passengers: Number(e.target.value),
+              })
+            }
+          >
+            {[1, 2, 3, 4, 5, 6, 7].map((number) => (
+              <option key={number} value={number}>
+                {number}
+              </option>
+            ))}
           </select>
         </div>
+
+        {/* Service */}
 
         <div>
           <label className="mb-2 block font-semibold">
             Service Type
           </label>
 
-          <select className="w-full rounded-xl border border-slate-300 p-4">
-            <option>Airport Transfer</option>
-            <option>Round Trip</option>
-            <option>Private Tour</option>
-            <option>Cruise Transfer</option>
-          </select>
+          <input
+            readOnly
+            className="w-full rounded-xl border border-slate-300 bg-slate-100 p-4"
+            value={booking.service ?? ""}
+            placeholder="Automatically selected"
+          />
+        </div>
+
+      </div>
+
+      {/* Optional Extras */}
+
+      <div className="mt-8 rounded-2xl border border-slate-200 p-6">
+        <h3 className="mb-4 text-xl font-bold">
+          Optional Extras
+        </h3>
+
+        <div className="space-y-4">
+
+          <label className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={booking.childSeat ?? false}
+              onChange={(e) =>
+                updateBooking({
+                  childSeat: e.target.checked,
+                })
+              }
+            />
+            <span>Child Seat (+USD $10)</span>
+          </label>
+
+          <label className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={booking.extraStop ?? false}
+              onChange={(e) =>
+                updateBooking({
+                  extraStop: e.target.checked,
+                })
+              }
+            />
+            <span>Extra Stop (+USD $15)</span>
+          </label>
+
         </div>
       </div>
+
+      {/* Special Requests */}
 
       <div className="mt-8">
         <label className="mb-2 block font-semibold">
@@ -133,9 +302,16 @@ export default function BookingForm() {
         <textarea
           rows={5}
           className="w-full rounded-xl border border-slate-300 p-4"
-          placeholder="Child seat, supermarket stop, wheelchair assistance..."
+          placeholder="Child seat position, supermarket stop, wheelchair assistance..."
+          value={booking.specialRequests ?? ""}
+          onChange={(e) =>
+            updateBooking({
+              specialRequests: e.target.value,
+            })
+          }
         />
       </div>
+
     </div>
   );
 }

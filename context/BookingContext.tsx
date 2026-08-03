@@ -7,55 +7,48 @@ import {
   type ReactNode,
 } from "react";
 
-import type { Booking } from "../types/booking";
+import type { Booking } from "@/types/booking";
 
 interface BookingContextType {
-  booking: Booking | null;
+  booking: Partial<Booking>;
 
-  setBooking: (booking: Booking) => void;
+  updateBooking: (
+    values: Partial<Booking>
+  ) => void;
 
-  updateBooking: (updates: Partial<Booking>) => void;
-
-  clearBooking: () => void;
+  resetBooking: () => void;
 }
 
-const BookingContext = createContext<BookingContextType | undefined>(
-  undefined
-);
+const BookingContext =
+  createContext<BookingContextType | null>(null);
 
 export function BookingProvider({
   children,
 }: {
   children: ReactNode;
 }) {
-  const [booking, setBookingState] = useState<Booking | null>(null);
+  const [booking, setBooking] =
+    useState<Partial<Booking>>({});
 
-  function setBooking(booking: Booking) {
-    setBookingState(booking);
+  function updateBooking(
+    values: Partial<Booking>
+  ) {
+    setBooking((previous) => ({
+      ...previous,
+      ...values,
+    }));
   }
 
-  function updateBooking(updates: Partial<Booking>) {
-    setBookingState((current) => {
-      if (!current) return updates as Booking;
-
-      return {
-        ...current,
-        ...updates,
-      };
-    });
-  }
-
-  function clearBooking() {
-    setBookingState(null);
+  function resetBooking() {
+    setBooking({});
   }
 
   return (
     <BookingContext.Provider
       value={{
         booking,
-        setBooking,
         updateBooking,
-        clearBooking,
+        resetBooking,
       }}
     >
       {children}
@@ -68,7 +61,7 @@ export function useBooking() {
 
   if (!context) {
     throw new Error(
-      "useBooking must be used within a BookingProvider"
+      "useBooking must be used inside BookingProvider"
     );
   }
 
