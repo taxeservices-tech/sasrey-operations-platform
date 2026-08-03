@@ -1,36 +1,33 @@
-import Hero from "@/components/home/Hero";
-import HeroStats from "@/components/home/HeroStats";
-import DiscoverJamaica from "@/components/home/DiscoverJamaica";
-import Services from "@/components/home/Services";
-import Fleet from "@/components/home/Fleet";
-import WhyChoose from "@/components/home/WhyChoose";
-import Testimonials from "@/components/home/Testimonials";
-import BookingCTA from "@/components/home/BookingCTA";
-import QuoteCalculator from "@/components/booking/QuoteCalculator";
-import Footer from "@/components/home/Footer";
+import BookingHero from "@/components/booking/BookingHero";
+import BookingBenefits from "@/components/booking/BookingBenefits";
+import BookingForm from "@/components/booking/BookingForm";
+import BookingSummary from "@/components/booking/BookingSummary";
 
-export default function Home() {
+export default function BookPage() {
   return (
-    <main>
-      <Hero />
+    <main className="min-h-screen bg-slate-50">
 
-      <HeroStats />
+      {/* Hero */}
+      <BookingHero />
 
-      <DiscoverJamaica />
+      {/* Benefits */}
+      <BookingBenefits />
 
-      <Services />
+      {/* Booking Content */}
+      <section className="mx-auto max-w-7xl px-6 py-20">
 
-      <Fleet />
+        <div className="grid gap-10 lg:grid-cols-[2fr_1fr]">
 
-      <WhyChoose />
+          {/* Booking Form */}
+          <BookingForm />
 
-      <Testimonials />
+          {/* Booking Summary */}
+          <BookingSummary />
 
-      <BookingCTA />
+        </div>
 
-      <QuoteCalculator />
+      </section>
 
-      <Footer />
     </main>
   );
 }
