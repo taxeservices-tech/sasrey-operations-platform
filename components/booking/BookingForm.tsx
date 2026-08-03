@@ -212,7 +212,29 @@ export default function BookingForm() {
             }
           />
         </div>
+{/* Waiting Time */}
 
+<div>
+  <label className="mb-2 block font-semibold">
+    Waiting Time
+  </label>
+
+  <select
+    className="w-full rounded-xl border border-slate-300 p-4"
+    value={booking.waitingTimeHours ?? 0}
+    onChange={(e) =>
+      updateBooking({
+        waitingTimeHours: Number(e.target.value),
+      })
+    }
+  >
+    <option value={0}>No Waiting Time</option>
+    <option value={1}>1 Hour</option>
+    <option value={2}>2 Hours</option>
+    <option value={3}>3 Hours</option>
+    <option value={4}>4 Hours</option>
+  </select>
+</div>
         {/* Passengers */}
 
         <div>
@@ -236,7 +258,33 @@ export default function BookingForm() {
             ))}
           </select>
         </div>
+{/* Trip Type */}
 
+<div>
+  <label className="mb-2 block font-semibold">
+    Trip Type
+  </label>
+
+  <select
+    className="w-full rounded-xl border border-slate-300 p-4"
+    value={booking.tripType ?? "One Way"}
+    onChange={(e) =>
+      updateBooking({
+        tripType: e.target.value as
+          | "One Way"
+          | "Round Trip",
+      })
+    }
+  >
+    <option value="One Way">
+      One Way
+    </option>
+
+    <option value="Round Trip">
+      Round Trip
+    </option>
+  </select>
+</div>
         {/* Service */}
 
         <div>
