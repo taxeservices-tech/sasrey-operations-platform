@@ -6,8 +6,11 @@ import { calculateBookingPrice } from "@/app/lib/pricing";
 import { useBooking } from "@/context/BookingContext";
 
 export default function BookingSummary() {
-  const { booking } = useBooking();
-
+  const {
+  booking,
+  currentStep,
+  setCurrentStep,
+} = useBooking();
   const quote = useMemo(() => {
     if (!booking.pickup || !booking.destination) {
       return null;
@@ -151,11 +154,12 @@ export default function BookingSummary() {
       </div>
 
       <button
-        disabled={!quote}
-        className="mt-8 w-full rounded-full bg-sky-500 py-5 text-lg font-bold transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-700"
-      >
-        Continue Booking →
-      </button>
+  disabled={!quote}
+  onClick={() => setCurrentStep(2)}
+  className="mt-8 w-full rounded-full bg-sky-500 py-5 text-lg font-bold transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-700"
+>
+  Continue Booking →
+</button>
     </aside>
   );
 }
