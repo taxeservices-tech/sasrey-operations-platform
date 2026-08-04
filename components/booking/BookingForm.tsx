@@ -29,7 +29,31 @@ export default function BookingForm() {
       <h2 className="mb-8 text-3xl font-black text-slate-900">
         Booking Details
       </h2>
+<div className="mb-8">
+  <label className="mb-2 block font-semibold">
+    Service Category
+  </label>
 
+  <select
+    className="w-full rounded-xl border border-slate-300 p-4"
+    value={booking.serviceCategory ?? "Airport Transfer"}
+    onChange={(e) =>
+      updateBooking({
+        serviceCategory: e.target.value as
+          | "Airport Transfer"
+          | "Tour",
+      })
+    }
+  >
+    <option value="Airport Transfer">
+      🚖 Airport Transfer
+    </option>
+
+    <option value="Tour">
+      🏝️ Tour
+    </option>
+  </select>
+</div>
       <div className="grid gap-6 md:grid-cols-2">
 
         {/* Full Name */}
@@ -90,7 +114,8 @@ export default function BookingForm() {
           />
         </div>
 
-        {/* Flight */}
+
+   {/* Flight */}
 
         <div>
           <label className="mb-2 block font-semibold">

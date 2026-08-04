@@ -11,11 +11,9 @@ import type { Booking } from "@/types/booking";
 
 interface BookingContextType {
   booking: Partial<Booking>;
-
-  updateBooking: (
-    values: Partial<Booking>
-  ) => void;
-
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
+  updateBooking: (values: Partial<Booking>) => void;
   resetBooking: () => void;
 }
 
@@ -29,6 +27,9 @@ export function BookingProvider({
 }) {
   const [booking, setBooking] =
     useState<Partial<Booking>>({});
+
+  const [currentStep, setCurrentStep] =
+    useState(1);
 
   function updateBooking(
     values: Partial<Booking>
@@ -47,6 +48,8 @@ export function BookingProvider({
     <BookingContext.Provider
       value={{
         booking,
+        currentStep,
+        setCurrentStep,
         updateBooking,
         resetBooking,
       }}
