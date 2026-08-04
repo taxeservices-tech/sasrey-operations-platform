@@ -11,7 +11,10 @@ export default function BookingSummary() {
   currentStep,
   setCurrentStep,
 } = useBooking();
-  const quote = useMemo(() => {
+
+console.log("BookPage currentStep:", currentStep);
+
+const quote = useMemo(() => {
     if (!booking.pickup || !booking.destination) {
       return null;
     }
@@ -155,7 +158,10 @@ export default function BookingSummary() {
 
       <button
   disabled={!quote}
-  onClick={() => setCurrentStep(2)}
+  onClick={() => {
+  setCurrentStep(2);
+  alert("Current step set to 2");
+}}
   className="mt-8 w-full rounded-full bg-sky-500 py-5 text-lg font-bold transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-700"
 >
   Continue Booking →

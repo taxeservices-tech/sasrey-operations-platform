@@ -1,12 +1,17 @@
 "use client";
-
+import AirportTransferForm from "./AirportTransferForm";
+import TourBookingForm from "./TourBookingForm";
 import { useMemo } from "react";
 
 import { routes } from "@/app/lib/routes";
 import { useBooking } from "@/context/BookingContext";
 
 export default function BookingForm() {
-  const { booking, updateBooking } = useBooking();
+ const {
+  booking,
+  updateBooking,
+  currentStep,
+} = useBooking();
 
   const pickupLocations = [
     ...new Set(routes.map((route) => route.pickup)),
@@ -15,6 +20,7 @@ export default function BookingForm() {
   const availableDestinations = useMemo(() => {
     if (!booking.pickup) return [];
 
+  booking.serviceCategory === "Tour";
     return [
       ...new Set(
         routes
@@ -387,4 +393,5 @@ export default function BookingForm() {
 
     </div>
   );
+
 }
