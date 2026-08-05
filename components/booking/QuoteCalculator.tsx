@@ -158,7 +158,7 @@ export default function QuoteCalculator() {
 
           {/* RIGHT PANEL */}
 
-          <div className="rounded-3xl bg-sky-50 p-8">
+<div className="w-full rounded-3xl bg-sky-50 p-8">
 
             <h3 className="text-3xl font-black text-slate-900">
               Quote Summary
@@ -166,7 +166,7 @@ export default function QuoteCalculator() {
 
             <div className="mt-8 space-y-5">
 
-              <div className="flex justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <span>Vehicle</span>
                 <strong>Toyota Noah</strong>
               </div>

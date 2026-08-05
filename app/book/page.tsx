@@ -2,13 +2,11 @@
 
 import BookingHero from "@/components/booking/BookingHero";
 import BookingBenefits from "@/components/booking/BookingBenefits";
-import BookingForm from "@/components/booking/BookingForm";
-import BookingSummary from "@/components/booking/BookingSummary";
-import BookingReview from "@/components/booking/BookingReview";
+import BookingWizard from "@/components/booking/BookingWizard";
 import { useBooking } from "@/context/BookingContext";
 
 export default function BookPage() {
-  const { currentStep } = useBooking();
+  const { booking } = useBooking();
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -16,20 +14,7 @@ export default function BookPage() {
 
       <BookingBenefits />
 
-      <div className="mx-auto max-w-7xl px-6 py-4 text-xl font-bold text-red-600">
-        Current Step: {currentStep}
-      </div>
-
-      <section className="mx-auto max-w-7xl px-6 py-20">
-        {currentStep === 1 ? (
-          <div className="grid gap-10 lg:grid-cols-[2fr_1fr]">
-            <BookingForm />
-            <BookingSummary />
-          </div>
-        ) : (
-          <BookingReview />
-        )}
-      </section>
+      <BookingWizard booking={booking as any} />
     </main>
   );
 }

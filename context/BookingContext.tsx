@@ -29,7 +29,7 @@ export function BookingProvider({
     useState<Partial<Booking>>({});
 
   const [currentStep, setCurrentStep] =
-    useState(1);
+  useState(1);
 
   function updateBooking(
     values: Partial<Booking>
