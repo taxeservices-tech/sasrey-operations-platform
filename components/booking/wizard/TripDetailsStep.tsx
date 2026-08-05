@@ -1,8 +1,10 @@
 "use client";
 
+import ExtrasSection from "./ExtrasSection";
 import TravelDetails from "./TravelDetails";
 import ServiceCategory from "./ServiceCategory";
 import PickupDestination from "./PickupDestination";
+import FlightDetails from "./FlightDetails";
 
 export default function TripDetailsStep() {
   return (
@@ -11,16 +13,16 @@ export default function TripDetailsStep() {
         Trip Details
       </h2>
 
-      <p className="mt-2 text-slate-600">
-        Tell us about your trip so we can prepare an accurate quotation.
-      </p>
-
-      <div className="mt-8 space-y-8">
+           <div className="mt-8 space-y-8">
         <ServiceCategory />
 
         <PickupDestination />
 
         <TravelDetails />
+
+        <FlightDetails />
+
+        <ExtrasSection />
       </div>
     </div>
   );
