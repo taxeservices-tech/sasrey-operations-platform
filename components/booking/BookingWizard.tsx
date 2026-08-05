@@ -1,19 +1,17 @@
 "use client";
 
 import { useBooking } from "@/context/BookingContext";
-import type { Booking } from "@/types/booking";
 import TripDetailsStep from "./wizard/TripDetailsStep";
 import QuoteSummary from "./QuoteSummary";
 
-interface BookingWizardProps {
-  booking: Partial<Booking>;
-}
+export default function BookingWizard() {
+  const {
+    booking,
+    currentStep,
+    setCurrentStep,
+  } = useBooking();
 
-export default function BookingWizard({
-  booking,
-}: BookingWizardProps) {
-  const { currentStep, setCurrentStep } = useBooking();
-console.log("BookingWizard currentStep:", currentStep);
+  console.log("BookingWizard currentStep:", currentStep);
 
   return (
     <section className="bg-white py-24">
@@ -28,7 +26,9 @@ console.log("BookingWizard currentStep:", currentStep);
           <div className="mt-4 h-3 overflow-hidden rounded-full bg-slate-200">
             <div
               className="h-full rounded-full bg-sky-500 transition-all duration-300"
-              style={{ width: `${currentStep * 20}%` }}
+              style={{
+                width: `${currentStep * 20}%`,
+              }}
             />
           </div>
         </div>
@@ -40,31 +40,40 @@ console.log("BookingWizard currentStep:", currentStep);
           </h2>
 
           <p className="mt-3 text-slate-600">
-            We will build the booking process one step at a time.
+            Book your airport transfer in a few simple steps.
           </p>
         </div>
 
-{/* Step Content */}
-<div className="grid gap-10 lg:grid-cols-[3fr_2fr]">
+        {/* Step Content */}
+        <div className="grid gap-10 lg:grid-cols-[3fr_2fr]">
 
-{currentStep === 1 && <TripDetailsStep />}
+          <div>
 
-{currentStep === 2 && (
-  <div className="rounded-3xl border p-10">
-    <h2 className="text-3xl font-bold">
-      Passenger Details
-    </h2>
-    <p className="mt-4 text-slate-600">
-      Step 2 coming next...
-    </p>
-  </div>
-)}
- 
-  <QuoteSummary />
-  
-  </div>
+            {currentStep === 1 && (
+              <TripDetailsStep />
+            )}
 
-<div className="mt-10 flex justify-end">
+            {currentStep === 2 && (
+              <div className="rounded-2xl border border-slate-200 p-8">
+                <h2 className="text-3xl font-bold">
+                  Passenger Details
+                </h2>
+
+                <p className="mt-4 text-slate-600">
+                  Step 2 coming next.
+                </p>
+              </div>
+            )}
+
+          </div>
+
+          <QuoteSummary />
+
+        </div>
+
+        {/* Navigation */}
+        <div className="mt-10 flex justify-end">
+
           <button
             onClick={() => {
               if (currentStep < 5) {
@@ -73,8 +82,11 @@ console.log("BookingWizard currentStep:", currentStep);
             }}
             className="rounded-full bg-sky-500 px-8 py-4 text-lg font-semibold text-white transition hover:bg-sky-600"
           >
-            {currentStep === 5 ? "Finish" : "Continue →"}
+            {currentStep === 5
+              ? "Finish"
+              : "Continue →"}
           </button>
+
         </div>
 
       </div>
