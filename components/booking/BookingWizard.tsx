@@ -3,7 +3,7 @@
 import { useBooking } from "@/context/BookingContext";
 import type { Booking } from "@/types/booking";
 import TripDetailsStep from "./wizard/TripDetailsStep";
-import QuoteCalculator from "./QuoteCalculator";
+import QuoteSummary from "./QuoteSummary";
 
 interface BookingWizardProps {
   booking: Partial<Booking>;
@@ -13,6 +13,7 @@ export default function BookingWizard({
   booking,
 }: BookingWizardProps) {
   const { currentStep, setCurrentStep } = useBooking();
+console.log("BookingWizard currentStep:", currentStep);
 
   return (
     <section className="bg-white py-24">
@@ -46,9 +47,20 @@ export default function BookingWizard({
 {/* Step Content */}
 <div className="grid gap-10 lg:grid-cols-[3fr_2fr]">
 
-<TripDetailsStep />
+{currentStep === 1 && <TripDetailsStep />}
+
+{currentStep === 2 && (
+  <div className="rounded-3xl border p-10">
+    <h2 className="text-3xl font-bold">
+      Passenger Details
+    </h2>
+    <p className="mt-4 text-slate-600">
+      Step 2 coming next...
+    </p>
+  </div>
+)}
  
-  <QuoteCalculator />
+  <QuoteSummary />
   
   </div>
 

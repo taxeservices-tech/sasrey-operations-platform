@@ -21,7 +21,9 @@ export default function BookingForm() {
     if (!booking.pickup) return [];
 
   booking.serviceCategory === "Tour";
-    return [
+ console.log("Current booking:", booking);
+  
+  return [
       ...new Set(
         routes
           .filter((route) => route.pickup === booking.pickup)

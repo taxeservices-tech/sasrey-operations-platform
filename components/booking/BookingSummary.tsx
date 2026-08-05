@@ -156,12 +156,13 @@ const quote = useMemo(() => {
         </ul>
       </div>
 
-      <button
+     <button
   disabled={!quote}
   onClick={() => {
-  setCurrentStep(2);
-  alert("Current step set to 2");
-}}
+    setCurrentStep(2);
+  }}
+
+
   className="mt-8 w-full rounded-full bg-sky-500 py-5 text-lg font-bold transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-700"
 >
   Continue Booking →

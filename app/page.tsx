@@ -1,33 +1,25 @@
+"use client";
+
 import BookingHero from "@/components/booking/BookingHero";
 import BookingBenefits from "@/components/booking/BookingBenefits";
-import BookingForm from "@/components/booking/BookingForm";
-import BookingSummary from "@/components/booking/BookingSummary";
+import BookingWizard from "@/components/booking/BookingWizard";
+import { useBooking } from "@/context/BookingContext";
 
 export default function BookPage() {
+  const { booking } = useBooking();
+
   return (
     <main className="min-h-screen bg-slate-50">
-
       {/* Hero */}
       <BookingHero />
 
       {/* Benefits */}
       <BookingBenefits />
 
-      {/* Booking Content */}
+      {/* Booking Wizard */}
       <section className="mx-auto max-w-7xl px-6 py-20">
-
-        <div className="grid gap-10 lg:grid-cols-[2fr_1fr]">
-
-          {/* Booking Form */}
-          <BookingForm />
-
-          {/* Booking Summary */}
-          <BookingSummary />
-
-        </div>
-
+        <BookingWizard booking={booking} />
       </section>
-
     </main>
   );
 }
