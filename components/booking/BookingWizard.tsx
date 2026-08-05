@@ -1,5 +1,6 @@
 "use client";
 
+import PassengerDetailsStep from "./wizard/PassengerDetailsStep";
 import { useBooking } from "@/context/BookingContext";
 import TripDetailsStep from "./wizard/TripDetailsStep";
 import QuoteSummary from "./QuoteSummary";
@@ -53,17 +54,9 @@ export default function BookingWizard() {
               <TripDetailsStep />
             )}
 
-            {currentStep === 2 && (
-              <div className="rounded-2xl border border-slate-200 p-8">
-                <h2 className="text-3xl font-bold">
-                  Passenger Details
-                </h2>
-
-                <p className="mt-4 text-slate-600">
-                  Step 2 coming next.
-                </p>
-              </div>
-            )}
+          {currentStep === 2 && (
+  <PassengerDetailsStep />
+)}
 
           </div>
 
