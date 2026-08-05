@@ -1,5 +1,8 @@
 "use client";
 
+import ConfirmationStep from "./wizard/ConfirmationStep";
+import PaymentStep from "./wizard/PaymentStep";
+import ReviewStep from "./wizard/ReviewStep";
 import PassengerDetailsStep from "./wizard/PassengerDetailsStep";
 import { useBooking } from "@/context/BookingContext";
 import TripDetailsStep from "./wizard/TripDetailsStep";
@@ -50,15 +53,19 @@ export default function BookingWizard() {
 
           <div>
 
-            {currentStep === 1 && (
-              <TripDetailsStep />
-            )}
+{currentStep === 1 && <TripDetailsStep />}
 
-          {currentStep === 2 && (
-  <PassengerDetailsStep />
+{currentStep === 2 && <PassengerDetailsStep />}
+
+{currentStep === 3 && <ReviewStep />}
+
+{currentStep === 4 && (
+    <PaymentStep />
+  )}{currentStep === 5 && (
+  <ConfirmationStep />
 )}
 
-          </div>
+</div>
 
           <QuoteSummary />
 
