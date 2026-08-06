@@ -1,9 +1,26 @@
 "use client";
 
 import { useBooking } from "@/context/BookingContext";
+import { calculateBookingPrice } from "@/app/lib/pricing";
 
 export default function ReviewStep() {
   const { booking } = useBooking();
+
+  const quote =
+    booking.pickup &&
+    booking.destination &&
+    booking.tripType &&
+    booking.passengers
+      ? calculateBookingPrice({
+          pickup: booking.pickup,
+          destination: booking.destination,
+          tripType: booking.tripType,
+          passengers: booking.passengers,
+          childSeat: booking.childSeat,
+          extraStop: booking.extraStop,
+          waitingTimeHours: booking.waitingTimeHours,
+        })
+      : null;
 
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
@@ -22,12 +39,72 @@ export default function ReviewStep() {
         <ReviewItem label="Date" value={booking.pickupDate} />
         <ReviewItem label="Time" value={booking.pickupTime} />
         <ReviewItem label="Trip Type" value={booking.tripType} />
-        <ReviewItem label="Passengers" value={String(booking.passengers)} />
+        <ReviewItem
+          label="Passengers"
+          value={booking.passengers?.toString()}
+        />
         <ReviewItem label="Flight" value={booking.flightNumber} />
         <ReviewItem label="Airline" value={booking.airline} />
         <ReviewItem label="Customer" value={booking.customerName} />
         <ReviewItem label="Email" value={booking.email} />
         <ReviewItem label="Phone" value={booking.phone} />
+
+        {quote && (
+          <div className="md:col-span-2 mt-8 rounded-2xl border border-slate-200 p-6">
+            <h3 className="mb-4 text-2xl font-bold text-slate-900">
+              Fare Summary
+            </h3>
+
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span>Vehicle</span>
+                <strong>{quote.vehicle}</strong>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Base Fare</span>
+                <strong>USD ${quote.baseFare.toFixed(2)}</strong>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Passenger Fee</span>
+                <strong>USD ${quote.passengerFee.toFixed(2)}</strong>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Child Seat</span>
+                <strong>USD ${quote.childSeatFee.toFixed(2)}</strong>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Extra Stop</span>
+                <strong>USD ${quote.extraStopFee.toFixed(2)}</strong>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Waiting Time</span>
+                <strong>USD ${quote.waitingTimeFee.toFixed(2)}</strong>
+              </div>
+
+              <hr className="border-slate-300" />
+
+              <div className="flex justify-between text-xl font-bold">
+                <span>Total</span>
+                <span>USD ${quote.total.toFixed(2)}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Deposit (25%)</span>
+                <span>USD ${quote.deposit.toFixed(2)}</span>
+              </div>
+
+              <div className="flex justify-between text-xl font-bold text-sky-600">
+                <span>Balance</span>
+                <span>USD ${quote.balance.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -47,7 +124,7 @@ function ReviewItem({
       </p>
 
       <p className="mt-1 text-lg font-medium text-slate-900">
-        {value || "-"}
+        {value ?? "-"}
       </p>
     </div>
   );
