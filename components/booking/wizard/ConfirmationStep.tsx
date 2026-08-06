@@ -1,9 +1,31 @@
 "use client";
 
+import { calculateBookingPrice } from "@/app/lib/pricing";
 import { useBooking } from "@/context/BookingContext";
 
 export default function ConfirmationStep() {
-  const { booking, setCurrentStep } = useBooking();
+  const { booking, setCurrentStep, resetBooking } = useBooking();
+
+  const quote =
+    booking.pickup &&
+    booking.destination &&
+    booking.tripType &&
+    booking.passengers
+      ? calculateBookingPrice({
+          pickup: booking.pickup,
+          destination: booking.destination,
+          tripType: booking.tripType,
+          passengers: booking.passengers,
+          childSeat: booking.childSeat,
+          extraStop: booking.extraStop,
+          waitingTimeHours: booking.waitingTimeHours,
+        })
+      : null;
+
+  function handleNewBooking() {
+    resetBooking();
+    setCurrentStep(1);
+  }
 
   return (
     <div className="rounded-3xl border border-green-200 bg-white p-10 shadow-sm">
@@ -30,18 +52,89 @@ export default function ConfirmationStep() {
         </h3>
 
         <div className="grid gap-4 md:grid-cols-2">
+          <SummaryItem
+            label="Service"
+            value={booking.serviceCategory}
+          />
 
-          <SummaryItem label="Service" value={booking.serviceCategory} />
-          <SummaryItem label="Pickup" value={booking.pickup} />
-          <SummaryItem label="Destination" value={booking.destination} />
-          <SummaryItem label="Pickup Date" value={booking.pickupDate} />
-          <SummaryItem label="Pickup Time" value={booking.pickupTime} />
-          <SummaryItem label="Passengers" value={booking.passengers} />
-          <SummaryItem label="Total" value={`USD ${booking.total.toFixed(2)}`} />
-          <SummaryItem label="Deposit" value={`USD ${booking.deposit.toFixed(2)}`} />
-          <SummaryItem label="Balance" value={`USD ${booking.balance.toFixed(2)}`} />
-          <SummaryItem label="Payment Method" value={booking.paymentMethod} />
+          <SummaryItem
+            label="Pickup"
+            value={booking.pickup}
+          />
 
+          <SummaryItem
+            label="Destination"
+            value={booking.destination}
+          />
+
+          <SummaryItem
+            label="Pickup Date"
+            value={booking.pickupDate}
+          />
+
+          <SummaryItem
+            label="Pickup Time"
+            value={booking.pickupTime}
+          />
+
+          <SummaryItem
+            label="Passengers"
+            value={booking.passengers}
+          />
+
+          <SummaryItem
+            label="Payment Method"
+            value={booking.paymentMethod}
+          />
+
+          {quote && (
+            <>
+              <SummaryItem
+                label="Vehicle"
+                value={quote.vehicle}
+              />
+
+              <SummaryItem
+                label="Base Fare"
+                value={`USD ${quote.baseFare.toFixed(2)}`}
+              />
+
+              <SummaryItem
+                label="Passenger Fee"
+                value={`USD ${quote.passengerFee.toFixed(2)}`}
+              />
+
+              <SummaryItem
+                label="Child Seat"
+                value={`USD ${quote.childSeatFee.toFixed(2)}`}
+              />
+
+              <SummaryItem
+                label="Extra Stop"
+                value={`USD ${quote.extraStopFee.toFixed(2)}`}
+              />
+
+              <SummaryItem
+                label="Waiting Time"
+                value={`USD ${quote.waitingTimeFee.toFixed(2)}`}
+              />
+
+              <SummaryItem
+                label="Total"
+                value={`USD ${quote.total.toFixed(2)}`}
+              />
+
+              <SummaryItem
+                label="Deposit"
+                value={`USD ${quote.deposit.toFixed(2)}`}
+              />
+
+              <SummaryItem
+                label="Balance"
+                value={`USD ${quote.balance.toFixed(2)}`}
+              />
+            </>
+          )}
         </div>
       </div>
 
@@ -51,16 +144,29 @@ export default function ConfirmationStep() {
         </h3>
 
         <ul className="mt-4 list-disc space-y-2 pl-6 text-slate-700">
-          <li>Your booking request will be reviewed by our reservations team.</li>
-          <li>You will receive a booking confirmation by email.</li>
-          <li>Your 25% deposit secures your reservation.</li>
-          <li>The remaining balance is due before your scheduled trip.</li>
+          <li>
+            Your booking request will be reviewed by our
+            reservations team.
+          </li>
+
+          <li>
+            You will receive a booking confirmation by email.
+          </li>
+
+          <li>
+            Your 25% deposit secures your reservation.
+          </li>
+
+          <li>
+            The remaining balance is due before your scheduled
+            trip.
+          </li>
         </ul>
       </div>
 
       <div className="mt-10 flex justify-center">
         <button
-          onClick={() => setCurrentStep(1)}
+          onClick={handleNewBooking}
           className="rounded-full bg-sky-600 px-8 py-4 font-semibold text-white transition hover:bg-sky-700"
         >
           Book Another Trip
