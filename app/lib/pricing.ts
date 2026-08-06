@@ -1,11 +1,4 @@
-export interface RoutePricing {
-  pickup: string;
-  destination: string;
-  basePrice: number;
-  roundTrip: number;
-  additionalPassengerFee: number;
-  maxPassengers: number;
-}
+import { routes } from "./routes";
 
 export interface BookingPriceInput {
   pickup: string;
@@ -40,97 +33,47 @@ export interface BookingPriceResult {
   balance: number;
 }
 
-export const routes: RoutePricing[] = [
-  {
-    pickup: "MBJ Airport",
-    destination: "Montego Bay Hotels",
-    basePrice: 35,
-    roundTrip: 70,
-    additionalPassengerFee: 10,
-    maxPassengers: 7,
-  },
-  {
-    pickup: "MBJ Airport",
-    destination: "Rose Hall",
-    basePrice: 45,
-    roundTrip: 90,
-    additionalPassengerFee: 10,
-    maxPassengers: 7,
-  },
-  {
-    pickup: "MBJ Airport",
-    destination: "Falmouth",
-    basePrice: 60,
-    roundTrip: 120,
-    additionalPassengerFee: 15,
-    maxPassengers: 7,
-  },
-  {
-    pickup: "MBJ Airport",
-    destination: "Runaway Bay",
-    basePrice: 95,
-    roundTrip: 190,
-    additionalPassengerFee: 15,
-    maxPassengers: 7,
-  },
-  {
-    pickup: "MBJ Airport",
-    destination: "Negril",
-    basePrice: 120,
-    roundTrip: 240,
-    additionalPassengerFee: 20,
-    maxPassengers: 7,
-  },
-  {
-    pickup: "MBJ Airport",
-    destination: "Ocho Rios",
-    basePrice: 120,
-    roundTrip: 240,
-    additionalPassengerFee: 20,
-    maxPassengers: 7,
-  },
-  {
-    pickup: "MBJ Airport",
-    destination: "Kingston",
-    basePrice: 280,
-    roundTrip: 560,
-    additionalPassengerFee: 35,
-    maxPassengers: 7,
-  },
-];
-
 export function calculateBookingPrice(
   booking: BookingPriceInput
 ): BookingPriceResult | null {
-
   const route = routes.find(
-    (r) =>
-      r.pickup === booking.pickup &&
-      r.destination === booking.destination
+    (route) =>
+      route.active &&
+      route.pickup === booking.pickup &&
+      route.destination === booking.destination
   );
 
-  if (!route) return null;
+  if (!route) {
+    return null;
+  }
 
   const baseFare =
     booking.tripType === "Round Trip"
-      ? route.roundTrip
+      ? route.roundTripPrice
       : route.basePrice;
 
-  const extraPassengers =
-    Math.max(booking.passengers - 1, 0);
+  const extraPassengers = Math.max(
+    booking.passengers - 1,
+    0
+  );
 
   const passengerFee =
     extraPassengers *
     route.additionalPassengerFee;
 
   const childSeatFee =
-    booking.childSeat ? 10 : 0;
+    booking.childSeat
+      ? route.childSeatFee
+      : 0;
 
   const extraStopFee =
-    booking.extraStop ? 15 : 0;
+    booking.extraStop
+      ? route.extraStopFee
+      : 0;
 
   const waitingTimeFee =
-    (booking.waitingTimeHours ?? 0) * 20;
+    (booking.waitingTimeHours ?? 0) *
+    route.waitingTimeFee;
 
   const total =
     baseFare +
@@ -139,14 +82,16 @@ export function calculateBookingPrice(
     extraStopFee +
     waitingTimeFee;
 
-  const deposit =
-    Number((total * 0.25).toFixed(2));
+  const deposit = Number(
+    (total * 0.25).toFixed(2)
+  );
 
-  const balance =
-    Number((total * 0.75).toFixed(2));
+  const balance = Number(
+    (total * 0.75).toFixed(2)
+  );
 
   return {
-    vehicle: "Toyota Noah",
+    vehicle: route.vehicle,
 
     baseFare,
 

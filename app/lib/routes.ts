@@ -1,43 +1,182 @@
 export interface Route {
   id: string;
+
+  service: "Airport Transfer" | "Tour";
+
   pickup: string;
   destination: string;
-  service: string;
+
   vehicle: string;
-  price: number;
+
+  basePrice: number;
+  roundTripPrice: number;
+
+  additionalPassengerFee: number;
+
+  maxPassengers: number;
+
+  childSeatFee: number;
+  extraStopFee: number;
+  waitingTimeFee: number;
+
+  currency: "USD";
+
+  active: boolean;
 }
 
 export const routes: Route[] = [
   {
     id: "AP001",
+    service: "Airport Transfer",
     pickup: "MBJ Airport",
     destination: "Montego Bay Hotels",
-    service: "Airport Transfer",
     vehicle: "Toyota Noah",
-    price: 35,
+
+    basePrice: 35,
+    roundTripPrice: 70,
+
+    additionalPassengerFee: 10,
+
+    maxPassengers: 7,
+
+    childSeatFee: 10,
+    extraStopFee: 15,
+    waitingTimeFee: 20,
+
+    currency: "USD",
+
+    active: true,
   },
   {
     id: "AP002",
-    pickup: "MBJ Airport",
-    destination: "Negril",
     service: "Airport Transfer",
+    pickup: "MBJ Airport",
+    destination: "Rose Hall",
     vehicle: "Toyota Noah",
-    price: 120,
+
+    basePrice: 45,
+    roundTripPrice: 90,
+
+    additionalPassengerFee: 10,
+
+    maxPassengers: 7,
+
+    childSeatFee: 10,
+    extraStopFee: 15,
+    waitingTimeFee: 20,
+
+    currency: "USD",
+
+    active: true,
   },
   {
     id: "AP003",
-    pickup: "MBJ Airport",
-    destination: "Ocho Rios",
     service: "Airport Transfer",
+    pickup: "MBJ Airport",
+    destination: "Falmouth",
     vehicle: "Toyota Noah",
-    price: 140,
+
+    basePrice: 60,
+    roundTripPrice: 120,
+
+    additionalPassengerFee: 15,
+
+    maxPassengers: 7,
+
+    childSeatFee: 10,
+    extraStopFee: 15,
+    waitingTimeFee: 20,
+
+    currency: "USD",
+
+    active: true,
   },
   {
     id: "AP004",
-    pickup: "MBJ Airport",
-    destination: "Falmouth",
     service: "Airport Transfer",
+    pickup: "MBJ Airport",
+    destination: "Runaway Bay",
     vehicle: "Toyota Noah",
-    price: 60,
+
+    basePrice: 95,
+    roundTripPrice: 190,
+
+    additionalPassengerFee: 15,
+
+    maxPassengers: 7,
+
+    childSeatFee: 10,
+    extraStopFee: 15,
+    waitingTimeFee: 20,
+
+    currency: "USD",
+
+    active: true,
+  },
+  {
+    id: "AP005",
+    service: "Airport Transfer",
+    pickup: "MBJ Airport",
+    destination: "Negril",
+    vehicle: "Toyota Noah",
+
+    basePrice: 120,
+    roundTripPrice: 240,
+
+    additionalPassengerFee: 20,
+
+    maxPassengers: 7,
+
+    childSeatFee: 10,
+    extraStopFee: 15,
+    waitingTimeFee: 20,
+
+    currency: "USD",
+
+    active: true,
+  },
+  {
+    id: "AP006",
+    service: "Airport Transfer",
+    pickup: "MBJ Airport",
+    destination: "Ocho Rios",
+    vehicle: "Toyota Noah",
+
+    basePrice: 120,
+    roundTripPrice: 240,
+
+    additionalPassengerFee: 20,
+
+    maxPassengers: 7,
+
+    childSeatFee: 10,
+    extraStopFee: 15,
+    waitingTimeFee: 20,
+
+    currency: "USD",
+
+    active: true,
+  },
+  {
+    id: "AP007",
+    service: "Airport Transfer",
+    pickup: "MBJ Airport",
+    destination: "Kingston",
+    vehicle: "Toyota Noah",
+
+    basePrice: 280,
+    roundTripPrice: 560,
+
+    additionalPassengerFee: 35,
+
+    maxPassengers: 7,
+
+    childSeatFee: 10,
+    extraStopFee: 15,
+    waitingTimeFee: 20,
+
+    currency: "USD",
+
+    active: true,
   },
 ];
