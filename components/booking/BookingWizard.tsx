@@ -1,5 +1,7 @@
 "use client";
 
+import { processBooking } from "@/app/lib/bookingService";
+import type { Booking } from "@/types/booking";
 import { useState } from "react";
 
 import ConfirmationStep from "./wizard/ConfirmationStep";
@@ -25,7 +27,8 @@ export default function BookingWizard() {
   } = useBooking();
 
   const [errors, setErrors] = useState<string[]>([]);
-
+const [submitting, setSubmitting] = useState(false);
+const [successMessage, setSuccessMessage] = useState("");
   function handleContinue() {
     let result = {
       valid: true,
@@ -73,6 +76,37 @@ export default function BookingWizard() {
 
   function handlePrevious() {
     setErrors([]);
+async function handleSubmit() {
+  try {
+    setSubmitting(true);
+    setErrors([]);
+    setSuccessMessage("");
+
+    const result = await processBooking(
+      booking as Booking
+    );
+
+    if (!result.success) {
+      setErrors(result.errors);
+      return;
+    }
+
+    setSuccessMessage(
+      `Booking confirmed! Reference: ${result.bookingReference}`
+    );
+
+    resetBooking();
+    setCurrentStep(1);
+  } catch (error) {
+    console.error(error);
+
+    setErrors([
+      "An unexpected error occurred while submitting your booking.",
+    ]);
+  } finally {
+    setSubmitting(false);
+  }
+}
 
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
@@ -111,7 +145,13 @@ export default function BookingWizard() {
             Book your airport transfer in a few simple steps.
           </p>
         </div>
-
+{successMessage && (
+  <div className="mb-8 rounded-2xl border border-green-300 bg-green-50 p-6">
+    <h3 className="font-bold text-green-700">
+      {successMessage}
+    </h3>
+  </div>
+)}
         {/* Validation Errors */}
 
         {errors.length > 0 && (
@@ -152,34 +192,40 @@ export default function BookingWizard() {
 
         </div>
 
-        {/* Navigation */}
+    {/* Navigation */}
 
-        <div className="mt-10 flex justify-between">
+<div className="mt-10 flex justify-between">
 
-          <button
-            onClick={handlePrevious}
-            disabled={currentStep === 1}
-            className={`rounded-full px-8 py-4 text-lg font-semibold transition ${
-              currentStep === 1
-                ? "cursor-not-allowed bg-slate-200 text-slate-400"
-                : "bg-slate-700 text-white hover:bg-slate-800"
-            }`}
-          >
-            ← Previous
-          </button>
+  <button
+    onClick={handlePrevious}
+    disabled={currentStep === 1}
+    className={`rounded-full px-8 py-4 text-lg font-semibold transition ${
+      currentStep === 1
+        ? "cursor-not-allowed bg-slate-200 text-slate-400"
+        : "bg-slate-700 text-white hover:bg-slate-800"
+    }`}
+  >
+    ← Previous
+  <button
+  onClick={
+    currentStep === 5
+      ? handleSubmit
+      : handleContinue
+  }
+  disabled={submitting}
+  className="rounded-full bg-sky-500 px-8 py-4 text-lg font-semibold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50"
+>
+  {submitting
+    ? "Submitting..."
+    : currentStep === 5
+      ? "Finish"
+      : "Continue →"}
+</button>
 
-          <button
-            onClick={handleContinue}
-            className="rounded-full bg-sky-500 px-8 py-4 text-lg font-semibold text-white transition hover:bg-sky-600"
-          >
-            {currentStep === 5
-              ? "Finish"
-              : "Continue →"}
-          </button>
+</div>
 
-        </div>
+</section>
 
-      </div>
-    </section>
-  );
+);
 }
+

@@ -1,36 +1,26 @@
 import type { Booking } from "@/types/booking";
 
-import {
-  calculateBookingPrice,
-} from "./pricing";
-
-import {
-  validateBooking,
-} from "./validation";
-
-import {
-  generateBookingReference,
-} from "./bookingReference";
+import { calculateBookingPrice } from "./pricing";
+import { validateBooking } from "./validation";
+import { generateBookingReference } from "./bookingReference";
+import { saveBooking } from "./bookingRepository";
 
 export interface BookingServiceResult {
   success: boolean;
-
   bookingReference?: string;
-
   errors: string[];
-
   booking?: Booking;
 }
 
-export function processBooking(
+export async function processBooking(
   booking: Booking
-): BookingServiceResult {
-  const errors = validateBooking(booking);
+): Promise<BookingServiceResult> {
+  const validation = validateBooking(booking);
 
-  if (errors.length > 0) {
+  if (!validation.valid) {
     return {
       success: false,
-      errors,
+      errors: validation.errors,
     };
   }
 
@@ -41,44 +31,47 @@ export function processBooking(
     passengers: booking.passengers,
     childSeat: booking.childSeat,
     extraStop: booking.extraStop,
-    waitingTimeHours:
-      booking.waitingTimeHours,
+    waitingTimeHours: booking.waitingTimeHours,
   });
 
   if (!pricing) {
     return {
       success: false,
-      errors: [
-        "Unable to calculate booking price.",
-      ],
+      errors: ["Unable to calculate booking price."],
     };
   }
 
-  const bookingReference =
-    generateBookingReference();
+  const bookingReference = generateBookingReference();
 
-  return {
-    success: true,
+  const completedBooking: Booking = {
+    ...booking,
 
     bookingReference,
 
-    booking: {
-      ...booking,
+    vehicle: pricing.vehicle,
 
-      vehicle: pricing.vehicle,
+    baseFare: pricing.baseFare,
 
-      baseFare: pricing.baseFare,
+    additionalPassengerFee: pricing.passengerFee,
 
-      additionalPassengerFee:
-        pricing.passengerFee,
+    additionalPassengerTotal: pricing.passengerFee,
 
-      total: pricing.total,
+    total: pricing.total,
 
-      deposit: pricing.deposit,
+    deposit: pricing.deposit,
 
-      balance: pricing.balance,
-    },
+    balance: pricing.balance,
+  };
 
+  await saveBooking(
+    completedBooking,
+    bookingReference
+  );
+
+  return {
+    success: true,
+    bookingReference,
+    booking: completedBooking,
     errors: [],
   };
 }
