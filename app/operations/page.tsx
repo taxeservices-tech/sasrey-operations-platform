@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import PaymentRecorder from "@/components/operations/PaymentRecorder";
+import PaymentsLedger from "@/components/accounting/PaymentsLedger";
 
 interface BookingRecord {
   "Booking ID": string;
@@ -50,7 +51,9 @@ function formatTime(value: string): string {
   return value || "";
 }
 
-function formatCurrency(value: string | number): string {
+function formatCurrency(
+  value: string | number
+): string {
   const amount = Number(value);
 
   if (Number.isNaN(amount)) {
@@ -60,14 +63,18 @@ function formatCurrency(value: string | number): string {
   return `$${amount.toFixed(2)}`;
 }
 
-function isValidBooking(booking: BookingRecord): boolean {
+function isValidBooking(
+  booking: BookingRecord
+): boolean {
   return Boolean(
     booking["Booking ID"]?.trim() &&
       booking["Customer Name"]?.trim()
   );
 }
 
-function getStatusClasses(status: string): string {
+function getStatusClasses(
+  status: string
+): string {
   switch (status.toLowerCase()) {
     case "confirmed":
       return "bg-green-100 text-green-700";
@@ -84,7 +91,9 @@ function getStatusClasses(status: string): string {
   }
 }
 
-function getStatusPriority(status: string): number {
+function getStatusPriority(
+  status: string
+): number {
   switch (status.toLowerCase()) {
     case "pending":
       return 1;
@@ -103,7 +112,9 @@ function getStatusPriority(status: string): number {
   }
 }
 
-function getConfirmedFirstPriority(status: string): number {
+function getConfirmedFirstPriority(
+  status: string
+): number {
   switch (status.toLowerCase()) {
     case "confirmed":
       return 1;
@@ -125,8 +136,11 @@ function getConfirmedFirstPriority(status: string): number {
 function getPickupTimestamp(
   booking: BookingRecord
 ): number {
-  const date = booking["Pickup Date"]?.trim() ?? "";
-  const time = booking["Pickup Time"]?.trim() ?? "";
+  const date =
+    booking["Pickup Date"]?.trim() ?? "";
+
+  const time =
+    booking["Pickup Time"]?.trim() ?? "";
 
   if (!date) {
     return Number.MAX_SAFE_INTEGER;
@@ -144,21 +158,29 @@ function getPickupTimestamp(
 }
 
 export default function OperationsPage() {
-  const [bookings, setBookings] = useState<BookingRecord[]>(
-    []
-  );
+  const [bookings, setBookings] = useState<
+    BookingRecord[]
+  >([]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
 
   const [error, setError] = useState("");
 
-  const [updatingBookingId, setUpdatingBookingId] =
-    useState<string | null>(null);
+  const [
+    updatingBookingId,
+    setUpdatingBookingId,
+  ] = useState<string | null>(null);
 
-  const [selectedBooking, setSelectedBooking] =
-    useState<BookingRecord | null>(null);
+  const [
+    selectedBooking,
+    setSelectedBooking,
+  ] = useState<BookingRecord | null>(
+    null
+  );
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] =
+    useState("");
 
   const [statusFilter, setStatusFilter] =
     useState("All");
@@ -166,16 +188,24 @@ export default function OperationsPage() {
   const [sortOption, setSortOption] =
     useState<SortOption>("pickup-asc");
 
+  const [
+    paymentRefreshKey,
+    setPaymentRefreshKey,
+  ] = useState(0);
+
   useEffect(() => {
     async function loadBookings() {
       try {
         setLoading(true);
         setError("");
 
-        const response = await fetch("/api/bookings", {
-          method: "GET",
-          cache: "no-store",
-        });
+        const response = await fetch(
+          "/api/bookings",
+          {
+            method: "GET",
+            cache: "no-store",
+          }
+        );
 
         const data: BookingsResponse =
           await response.json();
@@ -217,20 +247,27 @@ export default function OperationsPage() {
     status: string
   ) {
     try {
-      setUpdatingBookingId(bookingReference);
+      setUpdatingBookingId(
+        bookingReference
+      );
+
       setError("");
 
-      const response = await fetch("/api/bookings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: "updateStatus",
-          bookingReference,
-          status,
-        }),
-      });
+      const response = await fetch(
+        "/api/bookings",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            action: "updateStatus",
+            bookingReference,
+            status,
+          }),
+        }
+      );
 
       const data: {
         success?: boolean;
@@ -246,27 +283,30 @@ export default function OperationsPage() {
         );
       }
 
-      setBookings((currentBookings) =>
-        currentBookings.map((booking) =>
-          booking["Booking ID"] ===
-          bookingReference
-            ? {
-                ...booking,
-                Status: status,
-              }
-            : booking
-        )
+      setBookings(
+        (currentBookings) =>
+          currentBookings.map(
+            (booking) =>
+              booking["Booking ID"] ===
+              bookingReference
+                ? {
+                    ...booking,
+                    Status: status,
+                  }
+                : booking
+          )
       );
 
-      setSelectedBooking((currentBooking) =>
-        currentBooking &&
-        currentBooking["Booking ID"] ===
-          bookingReference
-          ? {
-              ...currentBooking,
-              Status: status,
-            }
-          : currentBooking
+      setSelectedBooking(
+        (currentBooking) =>
+          currentBooking &&
+          currentBooking["Booking ID"] ===
+            bookingReference
+            ? {
+                ...currentBooking,
+                Status: status,
+              }
+            : currentBooking
       );
     } catch (err) {
       console.error(
@@ -288,8 +328,8 @@ export default function OperationsPage() {
     const normalizedSearch =
       searchTerm.trim().toLowerCase();
 
-    const matchingBookings = bookings.filter(
-      (booking) => {
+    const matchingBookings =
+      bookings.filter((booking) => {
         const matchesSearch =
           !normalizedSearch ||
           [
@@ -313,9 +353,11 @@ export default function OperationsPage() {
           booking.Status.toLowerCase() ===
             statusFilter.toLowerCase();
 
-        return matchesSearch && matchesStatus;
-      }
-    );
+        return (
+          matchesSearch &&
+          matchesStatus
+        );
+      });
 
     return [...matchingBookings].sort(
       (a, b) => {
@@ -333,12 +375,16 @@ export default function OperationsPage() {
             );
 
           case "customer-asc":
-            return a["Customer Name"].localeCompare(
+            return a[
+              "Customer Name"
+            ].localeCompare(
               b["Customer Name"]
             );
 
           case "customer-desc":
-            return b["Customer Name"].localeCompare(
+            return b[
+              "Customer Name"
+            ].localeCompare(
               a["Customer Name"]
             );
 
@@ -350,8 +396,12 @@ export default function OperationsPage() {
 
           case "status-confirmed":
             return (
-              getConfirmedFirstPriority(a.Status) -
-              getConfirmedFirstPriority(b.Status)
+              getConfirmedFirstPriority(
+                a.Status
+              ) -
+              getConfirmedFirstPriority(
+                b.Status
+              )
             );
 
           case "price-asc":
@@ -397,8 +447,8 @@ export default function OperationsPage() {
           </h1>
 
           <p className="mt-3 text-slate-600">
-            View current booking records and operational
-            details.
+            View current booking records and
+            operational details.
           </p>
         </div>
 
@@ -570,7 +620,8 @@ export default function OperationsPage() {
                     disabled={
                       !searchTerm &&
                       statusFilter === "All" &&
-                      sortOption === "pickup-asc"
+                      sortOption ===
+                        "pickup-asc"
                     }
                     className="w-full rounded-xl border border-slate-300 px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 lg:w-auto"
                   >
@@ -643,7 +694,9 @@ export default function OperationsPage() {
                     {filteredBookings.map(
                       (booking, index) => {
                         const bookingId =
-                          booking["Booking ID"];
+                          booking[
+                            "Booking ID"
+                          ];
 
                         const status =
                           booking.Status ||
@@ -898,8 +951,9 @@ export default function OperationsPage() {
                           </p>
 
                           <p className="mt-1 text-sm text-slate-500">
-                            Try changing the search,
-                            status filter, or sort
+                            Try changing the
+                            search, status
+                            filter, or sort
                             option.
                           </p>
                         </td>
@@ -1158,7 +1212,8 @@ export default function OperationsPage() {
                     <p className="whitespace-pre-wrap text-sm leading-6 text-slate-700">
                       {selectedBooking[
                         "Special Requests"
-                      ] || "No special requests."}
+                      ] ||
+                        "No special requests."}
                     </p>
                   </div>
                 </section>
@@ -1209,12 +1264,16 @@ export default function OperationsPage() {
                   </div>
                 </section>
 
-                  <PaymentRecorder
+                <PaymentRecorder
                   bookingReference={
-                    selectedBooking["Booking ID"]
+                    selectedBooking[
+                      "Booking ID"
+                    ]
                   }
                   total={Number(
-                    selectedBooking["Price USD"]
+                    selectedBooking[
+                      "Price USD"
+                    ]
                   )}
                   deposit={Number(
                     selectedBooking.Deposit
@@ -1224,6 +1283,11 @@ export default function OperationsPage() {
                   )}
                   onPaymentRecorded={() => {
                     setError("");
+
+                    setPaymentRefreshKey(
+                      (currentKey) =>
+                        currentKey + 1
+                    );
                   }}
                 />
 
@@ -1231,8 +1295,6 @@ export default function OperationsPage() {
                   ?.toLowerCase() ===
                   "pending" && (
                   <section className="flex flex-wrap gap-3 border-t border-slate-200 pt-6">
-    
-                  
                     <button
                       type="button"
                       onClick={() =>
@@ -1375,6 +1437,12 @@ export default function OperationsPage() {
             </div>
           </div>
         )}
+
+        <div className="mt-8">
+          <PaymentsLedger
+            refreshKey={paymentRefreshKey}
+          />
+        </div>
       </div>
     </main>
   );
