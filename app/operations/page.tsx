@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import PaymentRecorder from "@/components/operations/PaymentRecorder";
 
 interface BookingRecord {
   "Booking ID": string;
@@ -1208,10 +1209,30 @@ export default function OperationsPage() {
                   </div>
                 </section>
 
+                  <PaymentRecorder
+                  bookingReference={
+                    selectedBooking["Booking ID"]
+                  }
+                  total={Number(
+                    selectedBooking["Price USD"]
+                  )}
+                  deposit={Number(
+                    selectedBooking.Deposit
+                  )}
+                  balance={Number(
+                    selectedBooking.Balance
+                  )}
+                  onPaymentRecorded={() => {
+                    setError("");
+                  }}
+                />
+
                 {selectedBooking.Status
                   ?.toLowerCase() ===
                   "pending" && (
                   <section className="flex flex-wrap gap-3 border-t border-slate-200 pt-6">
+    
+                  
                     <button
                       type="button"
                       onClick={() =>
