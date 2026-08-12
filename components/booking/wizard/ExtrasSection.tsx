@@ -15,10 +15,10 @@ export default function ExtrasSection() {
         <label className="flex items-center gap-3">
           <input
             type="checkbox"
-            checked={booking.childSeat ?? false}
+            checked={(booking.childSeat ?? 0) > 0}
             onChange={(e) =>
               updateBooking({
-                childSeat: e.target.checked,
+                childSeat: e.target.checked ? 1 : 0,
               })
             }
           />
@@ -29,10 +29,10 @@ export default function ExtrasSection() {
         <label className="flex items-center gap-3">
           <input
             type="checkbox"
-            checked={booking.extraStop ?? false}
+            checked={(booking.extraStop ?? 0) > 0}
             onChange={(e) =>
               updateBooking({
-                extraStop: e.target.checked,
+                extraStop: e.target.checked ? 1 : 0,
               })
             }
           />

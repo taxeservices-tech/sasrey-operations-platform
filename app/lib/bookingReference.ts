@@ -1,21 +1,15 @@
-export function generateBookingReference(
-  sequence: number = 1
-): string {
+export function generateBookingReference(): string {
   const now = new Date();
 
   const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
 
-  const month = String(
-    now.getMonth() + 1
-  ).padStart(2, "0");
+  const timestamp = Date.now().toString().slice(-8);
 
-  const day = String(
-    now.getDate()
-  ).padStart(2, "0");
+  const randomPart = Math.floor(
+    1000 + Math.random() * 9000
+  ).toString();
 
-  const bookingNumber = String(
-    sequence
-  ).padStart(6, "0");
-
-  return `SAS-${year}${month}${day}-${bookingNumber}`;
+  return `SAS-${year}${month}${day}-${timestamp}${randomPart}`;
 }

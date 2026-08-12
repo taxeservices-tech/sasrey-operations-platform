@@ -33,28 +33,6 @@ export default function FlightDetails() {
           }
         />
       </div>
-
-      <div>
-        <label
-          htmlFor="airline"
-          className="mb-2 block font-semibold"
-        >
-          Airline
-        </label>
-
-        <input
-          id="airline"
-          type="text"
-          placeholder="American Airlines"
-          className="w-full rounded-xl border border-slate-300 p-4"
-          value={booking.airline ?? ""}
-          onChange={(e) =>
-            updateBooking({
-              airline: e.target.value,
-            })
-          }
-        />
-      </div>
     </div>
   );
 }

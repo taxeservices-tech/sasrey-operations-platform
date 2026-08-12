@@ -53,9 +53,9 @@ export function calculateBookingPrice(
       : route.basePrice;
 
   const extraPassengers = Math.max(
-    booking.passengers - 1,
-    0
-  );
+  booking.passengers - 4,
+  0
+);
 
   const passengerFee =
     extraPassengers *

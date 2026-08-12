@@ -4,6 +4,7 @@ import { calculateBookingPrice } from "./pricing";
 import { validateBooking } from "./validation";
 import { generateBookingReference } from "./bookingReference";
 import { saveBooking } from "./bookingRepository";
+import { routes } from "./routes";
 
 export interface BookingServiceResult {
   success: boolean;
@@ -29,8 +30,8 @@ export async function processBooking(
     destination: booking.destination,
     tripType: booking.tripType,
     passengers: booking.passengers,
-    childSeat: booking.childSeat,
-    extraStop: booking.extraStop,
+    childSeat: booking.childSeat > 0,
+    extraStop: booking.extraStop > 0,
     waitingTimeHours: booking.waitingTimeHours,
   });
 
@@ -41,12 +42,31 @@ export async function processBooking(
     };
   }
 
+  const route = routes.find(
+    (item) =>
+      item.pickup === booking.pickup &&
+      item.destination === booking.destination &&
+      item.service === booking.serviceCategory &&
+      item.vehicle === pricing.vehicle
+  );
+
+  if (!route) {
+    return {
+      success: false,
+      errors: [
+        `No route found for ${booking.pickup} to ${booking.destination}.`,
+      ],
+    };
+  }
+
   const bookingReference = generateBookingReference();
 
   const completedBooking: Booking = {
     ...booking,
 
     bookingReference,
+
+    status: "Pending",
 
     vehicle: pricing.vehicle,
 
@@ -61,6 +81,8 @@ export async function processBooking(
     deposit: pricing.deposit,
 
     balance: pricing.balance,
+
+    routeId: route.id,
   };
 
   await saveBooking(

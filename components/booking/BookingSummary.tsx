@@ -7,26 +7,37 @@ import { useBooking } from "@/context/BookingContext";
 
 export default function BookingSummary() {
   const {
-  booking,
-  currentStep,
-  setCurrentStep,
-} = useBooking();
+    booking,
+    currentStep,
+    setCurrentStep,
+  } = useBooking();
 
-console.log("BookPage currentStep:", currentStep);
+  console.log(
+    "BookPage currentStep:",
+    currentStep
+  );
 
-const quote = useMemo(() => {
-    if (!booking.pickup || !booking.destination) {
+  const quote = useMemo(() => {
+    if (
+      !booking.pickup ||
+      !booking.destination
+    ) {
       return null;
     }
 
     return calculateBookingPrice({
       pickup: booking.pickup,
       destination: booking.destination,
-      tripType: booking.tripType ?? "One Way",
-      passengers: booking.passengers ?? 1,
-      childSeat: booking.childSeat,
-      extraStop: booking.extraStop,
-      waitingTimeHours: booking.waitingTimeHours ?? 0,
+      tripType:
+        booking.tripType ?? "One Way",
+      passengers:
+        booking.passengers ?? 1,
+      childSeat:
+        (booking.childSeat ?? 0) > 0,
+      extraStop:
+        (booking.extraStop ?? 0) > 0,
+      waitingTimeHours:
+        booking.waitingTimeHours ?? 0,
     });
   }, [booking]);
 
@@ -37,7 +48,6 @@ const quote = useMemo(() => {
       </h2>
 
       <div className="mt-8 space-y-5">
-
         <div className="flex justify-between">
           <span>Vehicle</span>
 
@@ -141,7 +151,6 @@ const quote = useMemo(() => {
               : "75%"}
           </span>
         </div>
-
       </div>
 
       <div className="mt-10 rounded-2xl bg-slate-800 p-5">
@@ -151,22 +160,22 @@ const quote = useMemo(() => {
 
         <ul className="mt-3 space-y-2 text-sm text-slate-300">
           <li>✓ 25% deposit required</li>
-          <li>✓ Balance due 15 days before departure</li>
+          <li>
+            ✓ Balance due 15 days before departure
+          </li>
           <li>✓ Secure payment options</li>
         </ul>
       </div>
 
-     <button
-  disabled={!quote}
-  onClick={() => {
-    setCurrentStep(2);
-  }}
-
-
-  className="mt-8 w-full rounded-full bg-sky-500 py-5 text-lg font-bold transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-700"
->
-  Continue Booking →
-</button>
+      <button
+        disabled={!quote}
+        onClick={() => {
+          setCurrentStep(2);
+        }}
+        className="mt-8 w-full rounded-full bg-sky-500 py-5 text-lg font-bold transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-700"
+      >
+        Continue Booking →
+      </button>
     </aside>
   );
 }

@@ -26,22 +26,44 @@ export function BookingProvider({
   children: ReactNode;
 }) {
   const [booking, setBooking] =
-    useState<Partial<Booking>>({});
+    useState<Partial<Booking>>({
+      serviceCategory: "Airport Transfer",
+      tripType: "One Way",
+      passengers: 1,
+      waitingTimeHours: 0,
+      childSeat: 0,
+      extraStop: 0,
+    });
 
   const [currentStep, setCurrentStep] =
-  useState(1);
+    useState(1);
 
   function updateBooking(
     values: Partial<Booking>
   ) {
-    setBooking((previous) => ({
-      ...previous,
-      ...values,
-    }));
+    console.log(
+      "Updating booking with:",
+      values
+    );
+
+    setBooking((previous) => {
+      const updated = {
+        ...previous,
+        ...values,
+      };
+
+      console.log(
+        "Updated booking:",
+        updated
+      );
+
+      return updated;
+    });
   }
 
   function resetBooking() {
     setBooking({});
+    setCurrentStep(1);
   }
 
   return (
@@ -60,7 +82,8 @@ export function BookingProvider({
 }
 
 export function useBooking() {
-  const context = useContext(BookingContext);
+  const context =
+    useContext(BookingContext);
 
   if (!context) {
     throw new Error(

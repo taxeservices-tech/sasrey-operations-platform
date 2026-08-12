@@ -16,9 +16,15 @@ export default function ReviewStep() {
           destination: booking.destination,
           tripType: booking.tripType,
           passengers: booking.passengers,
-          childSeat: booking.childSeat,
-          extraStop: booking.extraStop,
-          waitingTimeHours: booking.waitingTimeHours,
+
+          childSeat:
+            (booking.childSeat ?? 0) > 0,
+
+          extraStop:
+            (booking.extraStop ?? 0) > 0,
+
+          waitingTimeHours:
+            booking.waitingTimeHours ?? 0,
         })
       : null;
 
@@ -33,24 +39,63 @@ export default function ReviewStep() {
       </p>
 
       <div className="mt-8 grid gap-4 md:grid-cols-2">
-        <ReviewItem label="Service" value={booking.serviceCategory} />
-        <ReviewItem label="Pickup" value={booking.pickup} />
-        <ReviewItem label="Destination" value={booking.destination} />
-        <ReviewItem label="Date" value={booking.pickupDate} />
-        <ReviewItem label="Time" value={booking.pickupTime} />
-        <ReviewItem label="Trip Type" value={booking.tripType} />
+        <ReviewItem
+          label="Service"
+          value={booking.serviceCategory}
+        />
+
+        <ReviewItem
+          label="Pickup"
+          value={booking.pickup}
+        />
+
+        <ReviewItem
+          label="Destination"
+          value={booking.destination}
+        />
+
+        <ReviewItem
+          label="Date"
+          value={booking.pickupDate}
+        />
+
+        <ReviewItem
+          label="Time"
+          value={booking.pickupTime}
+        />
+
+        <ReviewItem
+          label="Trip Type"
+          value={booking.tripType}
+        />
+
         <ReviewItem
           label="Passengers"
           value={booking.passengers?.toString()}
         />
-        <ReviewItem label="Flight" value={booking.flightNumber} />
-        <ReviewItem label="Airline" value={booking.airline} />
-        <ReviewItem label="Customer" value={booking.customerName} />
-        <ReviewItem label="Email" value={booking.email} />
-        <ReviewItem label="Phone" value={booking.phone} />
+
+        <ReviewItem
+          label="Flight"
+          value={booking.flightNumber}
+        />
+
+        <ReviewItem
+          label="Customer"
+          value={booking.customerName}
+        />
+
+        <ReviewItem
+          label="Email"
+          value={booking.email}
+        />
+
+        <ReviewItem
+          label="Phone"
+          value={booking.phone}
+        />
 
         {quote && (
-          <div className="md:col-span-2 mt-8 rounded-2xl border border-slate-200 p-6">
+          <div className="mt-8 rounded-2xl border border-slate-200 p-6 md:col-span-2">
             <h3 className="mb-4 text-2xl font-bold text-slate-900">
               Fare Summary
             </h3>
@@ -58,49 +103,84 @@ export default function ReviewStep() {
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span>Vehicle</span>
-                <strong>{quote.vehicle}</strong>
+
+                <strong>
+                  {quote.vehicle}
+                </strong>
               </div>
 
               <div className="flex justify-between">
                 <span>Base Fare</span>
-                <strong>USD ${quote.baseFare.toFixed(2)}</strong>
+
+                <strong>
+                  USD $
+                  {quote.baseFare.toFixed(2)}
+                </strong>
               </div>
 
               <div className="flex justify-between">
                 <span>Passenger Fee</span>
-                <strong>USD ${quote.passengerFee.toFixed(2)}</strong>
+
+                <strong>
+                  USD $
+                  {quote.passengerFee.toFixed(2)}
+                </strong>
               </div>
 
               <div className="flex justify-between">
                 <span>Child Seat</span>
-                <strong>USD ${quote.childSeatFee.toFixed(2)}</strong>
+
+                <strong>
+                  USD $
+                  {quote.childSeatFee.toFixed(2)}
+                </strong>
               </div>
 
               <div className="flex justify-between">
                 <span>Extra Stop</span>
-                <strong>USD ${quote.extraStopFee.toFixed(2)}</strong>
+
+                <strong>
+                  USD $
+                  {quote.extraStopFee.toFixed(2)}
+                </strong>
               </div>
 
               <div className="flex justify-between">
                 <span>Waiting Time</span>
-                <strong>USD ${quote.waitingTimeFee.toFixed(2)}</strong>
+
+                <strong>
+                  USD $
+                  {quote.waitingTimeFee.toFixed(2)}
+                </strong>
               </div>
 
               <hr className="border-slate-300" />
 
               <div className="flex justify-between text-xl font-bold">
                 <span>Total</span>
-                <span>USD ${quote.total.toFixed(2)}</span>
+
+                <span>
+                  USD $
+                  {quote.total.toFixed(2)}
+                </span>
               </div>
 
               <div className="flex justify-between">
                 <span>Deposit (25%)</span>
-                <span>USD ${quote.deposit.toFixed(2)}</span>
+
+                <span>
+                  USD $
+                  {quote.deposit.toFixed(2)}
+                </span>
               </div>
 
               <div className="flex justify-between text-xl font-bold text-sky-600">
                 <span>Balance</span>
-                <span>USD ${quote.balance.toFixed(2)}</span>
+
+                <span>
+                  USD $
+                  {quote.balance.toFixed(2)}
+                </span>
               </div>
             </div>
           </div>

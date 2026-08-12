@@ -16,8 +16,8 @@ export default function PaymentStep() {
           destination: booking.destination,
           tripType: booking.tripType,
           passengers: booking.passengers,
-          childSeat: booking.childSeat,
-          extraStop: booking.extraStop,
+          childSeat: (booking.childSeat ?? 0) > 0,
+          extraStop: (booking.extraStop ?? 0) > 0,
           waitingTimeHours: booking.waitingTimeHours,
         })
       : null;

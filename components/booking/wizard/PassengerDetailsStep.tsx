@@ -16,7 +16,6 @@ export default function PassengerDetailsStep() {
       </p>
 
       <div className="mt-8 grid gap-6 md:grid-cols-2">
-
         <div>
           <label
             htmlFor="customerName"
@@ -79,28 +78,6 @@ export default function PassengerDetailsStep() {
             }
           />
         </div>
-
-        <div>
-          <label
-            htmlFor="country"
-            className="mb-2 block font-semibold"
-          >
-            Country
-          </label>
-
-          <input
-            id="country"
-            type="text"
-            className="w-full rounded-xl border border-slate-300 p-4"
-            value={booking.country ?? ""}
-            onChange={(e) =>
-              updateBooking({
-                country: e.target.value,
-              })
-            }
-          />
-        </div>
-
       </div>
     </div>
   );

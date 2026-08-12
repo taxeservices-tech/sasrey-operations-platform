@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { routes } from "@/app/lib/pricing";
+import { routes } from "@/app/lib/routes";
 
 export default function QuoteCalculator() {
   const [pickup] = useState("MBJ Airport");
@@ -22,7 +22,7 @@ export default function QuoteCalculator() {
   const baseFare =
     tripType === "One Way"
       ? selectedRoute.basePrice
-      : selectedRoute.roundTrip;
+      : selectedRoute.roundTripPrice;
 
   const extraPassengers = Math.max(0, passengers - 4);
 

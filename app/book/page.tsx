@@ -3,18 +3,15 @@
 import BookingHero from "@/components/booking/BookingHero";
 import BookingBenefits from "@/components/booking/BookingBenefits";
 import BookingWizard from "@/components/booking/BookingWizard";
-import { useBooking } from "@/context/BookingContext";
 
 export default function BookPage() {
-  const { booking } = useBooking();
-
   return (
     <main className="min-h-screen bg-slate-50">
       <BookingHero />
 
       <BookingBenefits />
 
-      <BookingWizard booking={booking as any} />
+      <BookingWizard />
     </main>
   );
 }
