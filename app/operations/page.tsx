@@ -1,8 +1,8 @@
 "use client";
-
 import { useEffect, useMemo, useState } from "react";
 import PaymentRecorder from "@/components/operations/PaymentRecorder";
 import PaymentsLedger from "@/components/accounting/PaymentsLedger";
+import AccountingSummary from "@/components/accounting/AccountingSummary";
 
 interface BookingRecord {
   "Booking ID": string;
@@ -1438,11 +1438,15 @@ export default function OperationsPage() {
           </div>
         )}
 
-        <div className="mt-8">
-          <PaymentsLedger
-            refreshKey={paymentRefreshKey}
-          />
-        </div>
+        <div className="mt-8 space-y-8">
+  <AccountingSummary
+    refreshKey={paymentRefreshKey}
+  />
+
+  <PaymentsLedger
+    refreshKey={paymentRefreshKey}
+  />
+</div>
       </div>
     </main>
   );

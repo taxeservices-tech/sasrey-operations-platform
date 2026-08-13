@@ -20,6 +20,193 @@ interface AppsScriptPaymentsResponse {
   payments?: PaymentRecord[];
 }
 
+interface AccountingSummary {
+  bookingValue: number;
+  paymentsReceived: number;
+  outstanding: number;
+  depositsReceived: number;
+  balancesReceived: number;
+  otherPayments: number;
+  creditCardReceived: number;
+  bankTransferReceived: number;
+  bookingCount: number;
+  paidBookingCount: number;
+  partiallyPaidBookingCount: number;
+  unpaidBookingCount: number;
+}
+
+function toAmount(
+  value: string | number | undefined
+): number {
+  const amount = Number(value);
+
+  return Number.isFinite(amount)
+    ? amount
+    : 0;
+}
+
+function roundCurrency(
+  value: number
+): number {
+  return (
+    Math.round(
+      (value + Number.EPSILON) * 100
+    ) / 100
+  );
+}
+
+function buildAccountingSummary(
+  payments: PaymentRecord[]
+): AccountingSummary {
+  const bookings = new Map<
+    string,
+    {
+      total: number;
+      paid: number;
+    }
+  >();
+
+  let depositsReceived = 0;
+  let balancesReceived = 0;
+  let otherPayments = 0;
+
+  let creditCardReceived = 0;
+  let bankTransferReceived = 0;
+
+  for (const payment of payments) {
+    const bookingId =
+      payment["Booking ID"]
+        ?.trim() ?? "";
+
+    if (!bookingId) {
+      continue;
+    }
+
+    const total = toAmount(
+      payment.Total
+    );
+
+    const amountPaid = toAmount(
+      payment["Amount Paid"]
+    );
+
+    if (!bookings.has(bookingId)) {
+      bookings.set(bookingId, {
+        total,
+        paid: 0,
+      });
+    }
+
+    const booking =
+      bookings.get(bookingId)!;
+
+    if (total > 0) {
+      booking.total = total;
+    }
+
+    booking.paid += amountPaid;
+
+    const paymentType =
+      payment["Payment Type"]
+        ?.trim()
+        .toLowerCase();
+
+    if (paymentType === "deposit") {
+      depositsReceived += amountPaid;
+    } else if (
+      paymentType === "balance"
+    ) {
+      balancesReceived += amountPaid;
+    } else {
+      otherPayments += amountPaid;
+    }
+
+    const paymentMethod =
+      payment["Payment Method"]
+        ?.trim()
+        .toLowerCase();
+
+    if (
+      paymentMethod === "credit card"
+    ) {
+      creditCardReceived +=
+        amountPaid;
+    } else if (
+      paymentMethod ===
+      "bank transfer"
+    ) {
+      bankTransferReceived +=
+        amountPaid;
+    }
+  }
+
+  let bookingValue = 0;
+  let paymentsReceived = 0;
+  let outstanding = 0;
+
+  let paidBookingCount = 0;
+  let partiallyPaidBookingCount = 0;
+  let unpaidBookingCount = 0;
+
+  for (const booking of bookings.values()) {
+    bookingValue += booking.total;
+    paymentsReceived += booking.paid;
+
+    outstanding += Math.max(
+      booking.total -
+        booking.paid,
+      0
+    );
+
+    if (
+      booking.total > 0 &&
+      booking.paid >= booking.total
+    ) {
+      paidBookingCount++;
+    } else if (
+      booking.paid > 0
+    ) {
+      partiallyPaidBookingCount++;
+    } else {
+      unpaidBookingCount++;
+    }
+  }
+
+  return {
+    bookingValue: roundCurrency(
+      bookingValue
+    ),
+    paymentsReceived: roundCurrency(
+      paymentsReceived
+    ),
+    outstanding: roundCurrency(
+      outstanding
+    ),
+    depositsReceived: roundCurrency(
+      depositsReceived
+    ),
+    balancesReceived: roundCurrency(
+      balancesReceived
+    ),
+    otherPayments: roundCurrency(
+      otherPayments
+    ),
+    creditCardReceived:
+      roundCurrency(
+        creditCardReceived
+      ),
+    bankTransferReceived:
+      roundCurrency(
+        bankTransferReceived
+      ),
+    bookingCount:
+      bookings.size,
+    paidBookingCount,
+    partiallyPaidBookingCount,
+    unpaidBookingCount,
+  };
+}
+
 export async function GET() {
   try {
     const appsScriptUrl =
@@ -50,7 +237,9 @@ export async function GET() {
     let data: AppsScriptPaymentsResponse;
 
     try {
-      data = JSON.parse(responseText);
+      data = JSON.parse(
+        responseText
+      );
     } catch {
       return NextResponse.json(
         {
@@ -89,9 +278,15 @@ export async function GET() {
         ? data.payments
         : [];
 
+    const summary =
+      buildAccountingSummary(
+        payments
+      );
+
     return NextResponse.json({
       success: true,
       payments,
+      summary,
     });
   } catch (error) {
     console.error(
