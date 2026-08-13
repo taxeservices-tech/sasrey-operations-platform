@@ -60,7 +60,9 @@ function toAmount(
 ): number {
   const amount = Number(value);
 
-  return Number.isFinite(amount) ? amount : 0;
+  return Number.isFinite(amount)
+    ? amount
+    : 0;
 }
 
 function formatCurrency(
@@ -100,6 +102,43 @@ function getStatusClasses(
   }
 }
 
+function getPaymentTypeClasses(
+  paymentType: string
+): string {
+  switch (
+    paymentType.trim().toLowerCase()
+  ) {
+    case "deposit":
+      return "bg-blue-100 text-blue-700";
+
+    case "balance":
+      return "bg-green-100 text-green-700";
+
+    case "other":
+      return "bg-slate-100 text-slate-700";
+
+    default:
+      return "bg-slate-100 text-slate-700";
+  }
+}
+
+function getPaymentMethodClasses(
+  paymentMethod: string
+): string {
+  switch (
+    paymentMethod.trim().toLowerCase()
+  ) {
+    case "credit card":
+      return "bg-purple-100 text-purple-700";
+
+    case "bank transfer":
+      return "bg-sky-100 text-sky-700";
+
+    default:
+      return "bg-slate-100 text-slate-700";
+  }
+}
+
 export default function PaymentsLedger({
   refreshKey = 0,
 }: PaymentsLedgerProps) {
@@ -124,6 +163,11 @@ export default function PaymentsLedger({
 
   const [paymentMethodFilter, setPaymentMethodFilter] =
     useState<PaymentMethodFilter>("All");
+
+  const [
+    expandedBookingId,
+    setExpandedBookingId,
+  ] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadPayments() {
@@ -181,9 +225,8 @@ export default function PaymentsLedger({
    * Build complete booking summaries from
    * all payment transactions first.
    *
-   * This is important because filters should
-   * not change the financial totals for a
-   * booking.
+   * Filters must not change the underlying
+   * financial reconciliation for a booking.
    */
   const bookingSummaries =
     useMemo<BookingPaymentSummary[]>(
@@ -236,10 +279,6 @@ export default function PaymentsLedger({
           const summary =
             grouped.get(bookingId)!;
 
-          /*
-           * Keep the most complete financial
-           * values found for the booking.
-           */
           if (total > 0) {
             summary.total = total;
           }
@@ -276,11 +315,6 @@ export default function PaymentsLedger({
             summary.balancePaid +
             summary.otherPaid;
 
-          /*
-           * Use the booking's financial
-           * balance as a fallback only when
-           * the total is unavailable.
-           */
           if (
             summary.total <= 0 &&
             balance >= 0
@@ -318,9 +352,6 @@ export default function PaymentsLedger({
    * Determine which bookings have matching
    * transactions for Payment Type / Method
    * filters.
-   *
-   * The booking itself remains fully
-   * reconciled using all of its transactions.
    */
   const filteredBookingIds =
     useMemo(() => {
@@ -353,9 +384,6 @@ export default function PaymentsLedger({
           continue;
         }
 
-        /*
-         * Booking ID search.
-         */
         if (
           normalizedSearch &&
           !bookingId
@@ -367,9 +395,6 @@ export default function PaymentsLedger({
           continue;
         }
 
-        /*
-         * Payment type filter.
-         */
         if (
           paymentTypeFilter !==
           "All"
@@ -387,9 +412,6 @@ export default function PaymentsLedger({
           }
         }
 
-        /*
-         * Payment method filter.
-         */
         if (
           paymentMethodFilter !==
           "All"
@@ -412,11 +434,6 @@ export default function PaymentsLedger({
         ids.add(bookingId);
       }
 
-      /*
-       * If no transaction-specific filters
-       * are active, include every booking
-       * matching the search.
-       */
       if (
         paymentTypeFilter ===
           "All" &&
@@ -477,6 +494,42 @@ export default function PaymentsLedger({
       statusFilter,
     ]);
 
+  /*
+   * Payment transactions grouped by booking.
+   * Used by the expandable transaction detail.
+   */
+  const paymentsByBooking =
+    useMemo(() => {
+      const grouped =
+        new Map<
+          string,
+          PaymentRecord[]
+        >();
+
+      for (const payment of payments) {
+        const bookingId =
+          payment["Booking ID"]
+            ?.trim() ?? "";
+
+        if (!bookingId) {
+          continue;
+        }
+
+        const existing =
+          grouped.get(bookingId);
+
+        if (existing) {
+          existing.push(payment);
+        } else {
+          grouped.set(bookingId, [
+            payment,
+          ]);
+        }
+      }
+
+      return grouped;
+    }, [payments]);
+
   const totals = useMemo(() => {
     return filteredBookingSummaries.reduce(
       (result, booking) => {
@@ -526,6 +579,18 @@ export default function PaymentsLedger({
     setStatusFilter("All");
     setPaymentTypeFilter("All");
     setPaymentMethodFilter("All");
+    setExpandedBookingId(null);
+  }
+
+  function toggleBookingDetails(
+    bookingId: string
+  ) {
+    setExpandedBookingId(
+      (current) =>
+        current === bookingId
+          ? null
+          : bookingId
+    );
   }
 
   return (
@@ -812,9 +877,13 @@ export default function PaymentsLedger({
             </div>
 
             <div className="mt-8 overflow-x-auto">
-              <table className="w-full min-w-[1100px] border-collapse text-left">
+              <table className="w-full min-w-[1150px] border-collapse text-left">
                 <thead>
                   <tr className="border-b border-slate-200">
+                    <th className="w-20 px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                      Details
+                    </th>
+
                     <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
                       Booking ID
                     </th>
@@ -855,70 +924,305 @@ export default function PaymentsLedger({
 
                 <tbody>
                   {filteredBookingSummaries.map(
-                    (booking) => (
-                      <tr
-                        key={
+                    (booking) => {
+                      const isExpanded =
+                        expandedBookingId ===
+                        booking.bookingId;
+
+                      const bookingPayments =
+                        paymentsByBooking.get(
                           booking.bookingId
-                        }
-                        className="border-b border-slate-100 last:border-b-0"
-                      >
-                        <td className="px-4 py-4 text-sm font-bold text-slate-900">
-                          {booking.bookingId}
-                        </td>
+                        ) ?? [];
 
-                        <td className="px-4 py-4 text-sm font-semibold text-slate-900">
-                          {formatCurrency(
-                            booking.total
-                          )}
-                        </td>
-
-                        <td className="px-4 py-4 text-sm text-slate-700">
-                          {formatCurrency(
-                            booking.depositDue
-                          )}
-                        </td>
-
-                        <td className="px-4 py-4 text-sm font-semibold text-slate-700">
-                          {formatCurrency(
-                            booking.depositPaid
-                          )}
-                        </td>
-
-                        <td className="px-4 py-4 text-sm font-semibold text-slate-700">
-                          {formatCurrency(
-                            booking.balancePaid
-                          )}
-                        </td>
-
-                        <td className="px-4 py-4 text-sm text-slate-700">
-                          {formatCurrency(
-                            booking.otherPaid
-                          )}
-                        </td>
-
-                        <td className="px-4 py-4 text-sm font-black text-slate-900">
-                          {formatCurrency(
-                            booking.totalPaid
-                          )}
-                        </td>
-
-                        <td className="px-4 py-4 text-sm font-black text-slate-900">
-                          {formatCurrency(
-                            booking.outstanding
-                          )}
-                        </td>
-
-                        <td className="px-4 py-4">
-                          <span
-                            className={`rounded-full px-3 py-1 text-xs font-bold ${getStatusClasses(
-                              booking.status
-                            )}`}
+                      return (
+                        <>
+                          <tr
+                            key={
+                              booking.bookingId
+                            }
+                            className="border-b border-slate-100"
                           >
-                            {booking.status}
-                          </span>
-                        </td>
-                      </tr>
-                    )
+                            <td className="px-4 py-4">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  toggleBookingDetails(
+                                    booking.bookingId
+                                  )
+                                }
+                                aria-expanded={
+                                  isExpanded
+                                }
+                                className="rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100"
+                              >
+                                {isExpanded
+                                  ? "Hide"
+                                  : "Details"}
+                              </button>
+                            </td>
+
+                            <td className="px-4 py-4 text-sm font-bold text-slate-900">
+                              {booking.bookingId}
+                            </td>
+
+                            <td className="px-4 py-4 text-sm font-semibold text-slate-900">
+                              {formatCurrency(
+                                booking.total
+                              )}
+                            </td>
+
+                            <td className="px-4 py-4 text-sm text-slate-700">
+                              {formatCurrency(
+                                booking.depositDue
+                              )}
+                            </td>
+
+                            <td className="px-4 py-4 text-sm font-semibold text-slate-700">
+                              {formatCurrency(
+                                booking.depositPaid
+                              )}
+                            </td>
+
+                            <td className="px-4 py-4 text-sm font-semibold text-slate-700">
+                              {formatCurrency(
+                                booking.balancePaid
+                              )}
+                            </td>
+
+                            <td className="px-4 py-4 text-sm text-slate-700">
+                              {formatCurrency(
+                                booking.otherPaid
+                              )}
+                            </td>
+
+                            <td className="px-4 py-4 text-sm font-black text-slate-900">
+                              {formatCurrency(
+                                booking.totalPaid
+                              )}
+                            </td>
+
+                            <td className="px-4 py-4 text-sm font-black text-slate-900">
+                              {formatCurrency(
+                                booking.outstanding
+                              )}
+                            </td>
+
+                            <td className="px-4 py-4">
+                              <span
+                                className={`rounded-full px-3 py-1 text-xs font-bold ${getStatusClasses(
+                                  booking.status
+                                )}`}
+                              >
+                                {booking.status}
+                              </span>
+                            </td>
+                          </tr>
+
+                          {isExpanded && (
+                            <tr
+                              key={`${booking.bookingId}-details`}
+                              className="border-b border-slate-200 bg-slate-50"
+                            >
+                              <td
+                                colSpan={10}
+                                className="px-4 py-6"
+                              >
+                                <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                      <h3 className="text-lg font-black text-slate-900">
+                                        Transaction
+                                        Details
+                                      </h3>
+
+                                      <p className="mt-1 text-sm text-slate-500">
+                                        {
+                                          booking.bookingId
+                                        }
+                                      </p>
+                                    </div>
+
+                                    <div className="rounded-xl bg-slate-50 px-4 py-3">
+                                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                        Transactions
+                                      </p>
+
+                                      <p className="mt-1 text-lg font-black text-slate-900">
+                                        {
+                                          bookingPayments.length
+                                        }
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  {bookingPayments.length ===
+                                  0 ? (
+                                    <div className="mt-5 rounded-xl border border-slate-200 p-4 text-sm text-slate-600">
+                                      No payment
+                                      transactions
+                                      found for this
+                                      booking.
+                                    </div>
+                                  ) : (
+                                    <div className="mt-5 overflow-x-auto">
+                                      <table className="w-full min-w-[850px] border-collapse text-left">
+                                        <thead>
+                                          <tr className="border-b border-slate-200">
+                                            <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                                              Date
+                                            </th>
+
+                                            <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                                              Type
+                                            </th>
+
+                                            <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                                              Method
+                                            </th>
+
+                                            <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                                              Amount
+                                            </th>
+
+                                            <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                                              Reference
+                                            </th>
+                                          </tr>
+                                        </thead>
+
+                                        <tbody>
+                                          {bookingPayments.map(
+                                            (
+                                              payment,
+                                              index
+                                            ) => {
+                                              const paymentType =
+                                                payment[
+                                                  "Payment Type"
+                                                ]?.trim() ||
+                                                "Other";
+
+                                              const paymentMethod =
+                                                payment[
+                                                  "Payment Method"
+                                                ]?.trim() ||
+                                                "—";
+
+                                              const paymentDate =
+                                                payment[
+                                                  "Payment Date"
+                                                ]?.trim() ||
+                                                "—";
+
+                                              const paymentReference =
+                                                payment[
+                                                  "Payment Reference"
+                                                ]?.trim() ||
+                                                "—";
+
+                                              return (
+                                                <tr
+                                                  key={`${booking.bookingId}-${paymentReference}-${paymentDate}-${index}`}
+                                                  className="border-b border-slate-100 last:border-b-0"
+                                                >
+                                                  <td className="px-3 py-4 text-sm font-semibold text-slate-700">
+                                                    {
+                                                      paymentDate
+                                                    }
+                                                  </td>
+
+                                                  <td className="px-3 py-4">
+                                                    <span
+                                                      className={`rounded-full px-3 py-1 text-xs font-bold ${getPaymentTypeClasses(
+                                                        paymentType
+                                                      )}`}
+                                                    >
+                                                      {
+                                                        paymentType
+                                                      }
+                                                    </span>
+                                                  </td>
+
+                                                  <td className="px-3 py-4">
+                                                    <span
+                                                      className={`rounded-full px-3 py-1 text-xs font-bold ${getPaymentMethodClasses(
+                                                        paymentMethod
+                                                      )}`}
+                                                    >
+                                                      {
+                                                        paymentMethod
+                                                      }
+                                                    </span>
+                                                  </td>
+
+                                                  <td className="px-3 py-4 text-sm font-black text-slate-900">
+                                                    {formatCurrency(
+                                                      toAmount(
+                                                        payment[
+                                                          "Amount Paid"
+                                                        ]
+                                                      )
+                                                    )}
+                                                  </td>
+
+                                                  <td className="px-3 py-4 text-sm font-mono text-slate-600">
+                                                    {
+                                                      paymentReference
+                                                    }
+                                                  </td>
+                                                </tr>
+                                              );
+                                            }
+                                          )}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  )}
+
+                                  <div className="mt-5 grid gap-4 sm:grid-cols-3">
+                                    <div className="rounded-xl bg-slate-50 p-4">
+                                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                        Deposit Paid
+                                      </p>
+
+                                      <p className="mt-1 font-black text-slate-900">
+                                        {formatCurrency(
+                                          booking.depositPaid
+                                        )}
+                                      </p>
+                                    </div>
+
+                                    <div className="rounded-xl bg-slate-50 p-4">
+                                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                        Balance Paid
+                                      </p>
+
+                                      <p className="mt-1 font-black text-slate-900">
+                                        {formatCurrency(
+                                          booking.balancePaid
+                                        )}
+                                      </p>
+                                    </div>
+
+                                    <div className="rounded-xl bg-slate-50 p-4">
+                                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                        Total Paid
+                                      </p>
+
+                                      <p className="mt-1 font-black text-slate-900">
+                                        {formatCurrency(
+                                          booking.totalPaid
+                                        )}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </>
+                      );
+                    }
                   )}
                 </tbody>
               </table>
