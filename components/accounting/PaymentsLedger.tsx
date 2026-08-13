@@ -20,7 +20,9 @@ interface PaymentsResponse {
   payments?: PaymentRecord[];
   message?: string;
   error?: string;
-}interface PaymentsLedgerProps {
+}
+
+interface PaymentsLedgerProps {
   refreshKey?: number;
 }
 
@@ -35,6 +37,23 @@ interface BookingPaymentSummary {
   outstanding: number;
   status: "Unpaid" | "Partially Paid" | "Paid";
 }
+
+type StatusFilter =
+  | "All"
+  | "Paid"
+  | "Partially Paid"
+  | "Unpaid";
+
+type PaymentTypeFilter =
+  | "All"
+  | "Deposit"
+  | "Balance"
+  | "Other";
+
+type PaymentMethodFilter =
+  | "All"
+  | "Credit Card"
+  | "Bank Transfer";
 
 function toAmount(
   value: string | number | undefined
@@ -83,7 +102,7 @@ function getStatusClasses(
 
 export default function PaymentsLedger({
   refreshKey = 0,
-}: PaymentsLedgerProps) { 
+}: PaymentsLedgerProps) {
   const [payments, setPayments] = useState<
     PaymentRecord[]
   >([]);
@@ -93,6 +112,18 @@ export default function PaymentsLedger({
 
   const [error, setError] =
     useState("");
+
+  const [searchTerm, setSearchTerm] =
+    useState("");
+
+  const [statusFilter, setStatusFilter] =
+    useState<StatusFilter>("All");
+
+  const [paymentTypeFilter, setPaymentTypeFilter] =
+    useState<PaymentTypeFilter>("All");
+
+  const [paymentMethodFilter, setPaymentMethodFilter] =
+    useState<PaymentMethodFilter>("All");
 
   useEffect(() => {
     async function loadPayments() {
@@ -146,6 +177,14 @@ export default function PaymentsLedger({
     loadPayments();
   }, [refreshKey]);
 
+  /*
+   * Build complete booking summaries from
+   * all payment transactions first.
+   *
+   * This is important because filters should
+   * not change the financial totals for a
+   * booking.
+   */
   const bookingSummaries =
     useMemo<BookingPaymentSummary[]>(
       () => {
@@ -275,8 +314,171 @@ export default function PaymentsLedger({
       [payments]
     );
 
+  /*
+   * Determine which bookings have matching
+   * transactions for Payment Type / Method
+   * filters.
+   *
+   * The booking itself remains fully
+   * reconciled using all of its transactions.
+   */
+  const filteredBookingIds =
+    useMemo(() => {
+      const ids = new Set<string>();
+
+      const normalizedSearch =
+        searchTerm
+          .trim()
+          .toLowerCase();
+
+      const candidateBookingIds =
+        new Set(
+          bookingSummaries.map(
+            (booking) =>
+              booking.bookingId
+          )
+        );
+
+      for (const payment of payments) {
+        const bookingId =
+          payment["Booking ID"]
+            ?.trim() ?? "";
+
+        if (
+          !bookingId ||
+          !candidateBookingIds.has(
+            bookingId
+          )
+        ) {
+          continue;
+        }
+
+        /*
+         * Booking ID search.
+         */
+        if (
+          normalizedSearch &&
+          !bookingId
+            .toLowerCase()
+            .includes(
+              normalizedSearch
+            )
+        ) {
+          continue;
+        }
+
+        /*
+         * Payment type filter.
+         */
+        if (
+          paymentTypeFilter !==
+          "All"
+        ) {
+          const paymentType =
+            payment["Payment Type"]
+              ?.trim()
+              .toLowerCase();
+
+          if (
+            paymentType !==
+            paymentTypeFilter.toLowerCase()
+          ) {
+            continue;
+          }
+        }
+
+        /*
+         * Payment method filter.
+         */
+        if (
+          paymentMethodFilter !==
+          "All"
+        ) {
+          const paymentMethod =
+            payment[
+              "Payment Method"
+            ]
+              ?.trim()
+              .toLowerCase();
+
+          if (
+            paymentMethod !==
+            paymentMethodFilter.toLowerCase()
+          ) {
+            continue;
+          }
+        }
+
+        ids.add(bookingId);
+      }
+
+      /*
+       * If no transaction-specific filters
+       * are active, include every booking
+       * matching the search.
+       */
+      if (
+        paymentTypeFilter ===
+          "All" &&
+        paymentMethodFilter ===
+          "All"
+      ) {
+        for (const booking of bookingSummaries) {
+          if (
+            !normalizedSearch ||
+            booking.bookingId
+              .toLowerCase()
+              .includes(
+                normalizedSearch
+              )
+          ) {
+            ids.add(
+              booking.bookingId
+            );
+          }
+        }
+      }
+
+      return ids;
+    }, [
+      payments,
+      bookingSummaries,
+      searchTerm,
+      paymentTypeFilter,
+      paymentMethodFilter,
+    ]);
+
+  const filteredBookingSummaries =
+    useMemo(() => {
+      return bookingSummaries.filter(
+        (booking) => {
+          if (
+            !filteredBookingIds.has(
+              booking.bookingId
+            )
+          ) {
+            return false;
+          }
+
+          if (
+            statusFilter !== "All" &&
+            booking.status !==
+              statusFilter
+          ) {
+            return false;
+          }
+
+          return true;
+        }
+      );
+    }, [
+      bookingSummaries,
+      filteredBookingIds,
+      statusFilter,
+    ]);
+
   const totals = useMemo(() => {
-    return bookingSummaries.reduce(
+    return filteredBookingSummaries.reduce(
       (result, booking) => {
         result.bookingTotal +=
           booking.total;
@@ -311,7 +513,20 @@ export default function PaymentsLedger({
         outstanding: 0,
       }
     );
-  }, [bookingSummaries]);
+  }, [filteredBookingSummaries]);
+
+  const hasActiveFilters =
+    searchTerm.trim() !== "" ||
+    statusFilter !== "All" ||
+    paymentTypeFilter !== "All" ||
+    paymentMethodFilter !== "All";
+
+  function clearFilters() {
+    setSearchTerm("");
+    setStatusFilter("All");
+    setPaymentTypeFilter("All");
+    setPaymentMethodFilter("All");
+  }
 
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
@@ -340,6 +555,186 @@ export default function PaymentsLedger({
         </div>
       </div>
 
+      {!loading &&
+        !error &&
+        payments.length > 0 && (
+          <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <div className="flex flex-col gap-4">
+              <div>
+                <h3 className="font-black text-slate-900">
+                  Reconciliation Filters
+                </h3>
+
+                <p className="mt-1 text-xs text-slate-500">
+                  Payment type and method filters
+                  show bookings containing a
+                  matching transaction. Booking
+                  totals remain fully reconciled.
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div>
+                  <label
+                    htmlFor="ledgerBookingSearch"
+                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500"
+                  >
+                    Booking ID
+                  </label>
+
+                  <input
+                    id="ledgerBookingSearch"
+                    type="text"
+                    value={searchTerm}
+                    onChange={(event) =>
+                      setSearchTerm(
+                        event.target.value
+                      )
+                    }
+                    placeholder="Search booking..."
+                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="ledgerStatusFilter"
+                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500"
+                  >
+                    Payment Status
+                  </label>
+
+                  <select
+                    id="ledgerStatusFilter"
+                    value={statusFilter}
+                    onChange={(event) =>
+                      setStatusFilter(
+                        event.target
+                          .value as StatusFilter
+                      )
+                    }
+                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                  >
+                    <option value="All">
+                      All Statuses
+                    </option>
+
+                    <option value="Paid">
+                      Paid
+                    </option>
+
+                    <option value="Partially Paid">
+                      Partially Paid
+                    </option>
+
+                    <option value="Unpaid">
+                      Unpaid
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="ledgerPaymentTypeFilter"
+                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500"
+                  >
+                    Payment Type
+                  </label>
+
+                  <select
+                    id="ledgerPaymentTypeFilter"
+                    value={
+                      paymentTypeFilter
+                    }
+                    onChange={(event) =>
+                      setPaymentTypeFilter(
+                        event.target
+                          .value as PaymentTypeFilter
+                      )
+                    }
+                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                  >
+                    <option value="All">
+                      All Types
+                    </option>
+
+                    <option value="Deposit">
+                      Deposit
+                    </option>
+
+                    <option value="Balance">
+                      Balance
+                    </option>
+
+                    <option value="Other">
+                      Other
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="ledgerPaymentMethodFilter"
+                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500"
+                  >
+                    Payment Method
+                  </label>
+
+                  <select
+                    id="ledgerPaymentMethodFilter"
+                    value={
+                      paymentMethodFilter
+                    }
+                    onChange={(event) =>
+                      setPaymentMethodFilter(
+                        event.target
+                          .value as PaymentMethodFilter
+                      )
+                    }
+                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                  >
+                    <option value="All">
+                      All Methods
+                    </option>
+
+                    <option value="Credit Card">
+                      Credit Card
+                    </option>
+
+                    <option value="Bank Transfer">
+                      Bank Transfer
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              {hasActiveFilters && (
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm font-semibold text-slate-600">
+                    Showing{" "}
+                    {
+                      filteredBookingSummaries.length
+                    }{" "}
+                    of{" "}
+                    {
+                      bookingSummaries.length
+                    }{" "}
+                    bookings
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="rounded-full border border-slate-300 bg-white px-5 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-100"
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
       {loading && (
         <div className="mt-8 rounded-2xl border border-slate-200 p-6 text-sm text-slate-600">
           Loading payment transactions...
@@ -364,7 +759,19 @@ export default function PaymentsLedger({
 
       {!loading &&
         !error &&
-        bookingSummaries.length > 0 && (
+        bookingSummaries.length > 0 &&
+        filteredBookingSummaries.length ===
+          0 && (
+          <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm font-semibold text-amber-800">
+            No bookings match the current
+            reconciliation filters.
+          </div>
+        )}
+
+      {!loading &&
+        !error &&
+        filteredBookingSummaries.length >
+          0 && (
           <>
             <div className="mt-8 grid gap-4 md:grid-cols-3">
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
@@ -447,7 +854,7 @@ export default function PaymentsLedger({
                 </thead>
 
                 <tbody>
-                  {bookingSummaries.map(
+                  {filteredBookingSummaries.map(
                     (booking) => (
                       <tr
                         key={
