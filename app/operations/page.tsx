@@ -881,7 +881,7 @@ export default function OperationsPage() {
 
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
               <div className="overflow-x-auto">
-                <table className="min-w-full text-left">
+                <table className="min-w-[1100px] text-left">
                   <thead className="bg-slate-800 text-sm text-white">
                     <tr>
                       <th className="px-4 py-4 font-semibold">
@@ -921,19 +921,7 @@ export default function OperationsPage() {
                       </th>
 
                       <th className="px-4 py-4 font-semibold">
-                        Route
-                      </th>
-
-                      <th className="px-4 py-4 font-semibold">
                         Price
-                      </th>
-
-                      <th className="px-4 py-4 font-semibold">
-                        Deposit
-                      </th>
-
-                      <th className="px-4 py-4 font-semibold">
-                        Balance
                       </th>
 
                       <th className="px-4 py-4 font-semibold">
@@ -1172,31 +1160,11 @@ export default function OperationsPage() {
                               {booking.Vehicle}
                             </td>
 
-                            <td className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-700">
-                              {
-                                booking[
-                                  "Route ID"
-                                ]
-                              }
-                            </td>
-
                             <td className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-900">
                               {formatCurrency(
                                 booking[
                                   "Price USD"
                                 ]
-                              )}
-                            </td>
-
-                            <td className="whitespace-nowrap px-4 py-4 text-sm text-slate-700">
-                              {formatCurrency(
-                                booking.Deposit
-                              )}
-                            </td>
-
-                            <td className="whitespace-nowrap px-4 py-4 text-sm text-slate-700">
-                              {formatCurrency(
-                                booking.Balance
                               )}
                             </td>
 
@@ -1230,7 +1198,7 @@ export default function OperationsPage() {
                       0 && (
                       <tr>
                         <td
-                          colSpan={16}
+                          colSpan={13}
                           className="px-6 py-12 text-center"
                         >
                           <p className="font-semibold text-slate-700">

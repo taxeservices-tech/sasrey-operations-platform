@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 
 interface PaymentRecord {
   "Booking ID"?: string;
@@ -935,11 +935,10 @@ export default function PaymentsLedger({
                         ) ?? [];
 
                       return (
-                        <>
+                        <Fragment
+                          key={booking.bookingId}
+                        >
                           <tr
-                            key={
-                              booking.bookingId
-                            }
                             className="border-b border-slate-100"
                           >
                             <td className="px-4 py-4">
@@ -1220,7 +1219,7 @@ export default function PaymentsLedger({
                               </td>
                             </tr>
                           )}
-                        </>
+                        </Fragment>
                       );
                     }
                   )}
