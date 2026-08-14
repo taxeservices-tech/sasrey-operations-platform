@@ -33,6 +33,31 @@ interface BookingsResponse {
   error?: string;
 }
 
+interface AccountingPayment {
+  "Booking ID"?: string;
+  Total?: string | number;
+  "Amount Paid"?: string | number;
+}
+
+interface AccountingResponse {
+  success: boolean;
+  payments?: AccountingPayment[];
+  message?: string;
+  error?: string;
+}
+
+type PaymentStatus =
+  | "Paid"
+  | "Partially Paid"
+  | "Unpaid";
+
+interface BookingFinancial {
+  total: number;
+  paid: number;
+  outstanding: number;
+  status: PaymentStatus;
+}
+
 type SortOption =
   | "pickup-asc"
   | "pickup-desc"
@@ -61,6 +86,96 @@ function formatCurrency(
   }
 
   return `$${amount.toFixed(2)}`;
+}
+
+function toAmount(
+  value: string | number | undefined
+): number {
+  const amount = Number(value);
+
+  return Number.isFinite(amount)
+    ? amount
+    : 0;
+}
+
+function roundCurrency(
+  value: number
+): number {
+  return (
+    Math.round(
+      (value + Number.EPSILON) * 100
+    ) / 100
+  );
+}
+
+function getPaymentStatus(
+  total: number,
+  paid: number
+): PaymentStatus {
+  const normalizedTotal =
+    roundCurrency(Math.max(total, 0));
+  const normalizedPaid =
+    roundCurrency(Math.max(paid, 0));
+
+  if (
+    normalizedTotal > 0 &&
+    normalizedPaid >= normalizedTotal
+  ) {
+    return "Paid";
+  }
+
+  if (normalizedPaid > 0) {
+    return "Partially Paid";
+  }
+
+  return "Unpaid";
+}
+
+function getPaymentStatusClasses(
+  status: PaymentStatus
+): string {
+  switch (status) {
+    case "Paid":
+      return "bg-green-100 text-green-700";
+
+    case "Partially Paid":
+      return "bg-amber-100 text-amber-700";
+
+    case "Unpaid":
+    default:
+      return "bg-slate-100 text-slate-700";
+  }
+}
+
+function getBookingFinancial(
+  booking: BookingRecord,
+  financialByBookingId: Map<
+    string,
+    BookingFinancial
+  >
+): BookingFinancial {
+  const existing =
+    financialByBookingId.get(
+      booking["Booking ID"]
+    );
+
+  if (existing) {
+    return existing;
+  }
+
+  const total = roundCurrency(
+    Math.max(
+      toAmount(booking["Price USD"]),
+      0
+    )
+  );
+
+  return {
+    total,
+    paid: 0,
+    outstanding: total,
+    status: getPaymentStatus(total, 0),
+  };
 }
 
 function isValidBooking(
@@ -185,6 +300,18 @@ export default function OperationsPage() {
   const [statusFilter, setStatusFilter] =
     useState("All");
 
+  const [
+    paymentStatusFilter,
+    setPaymentStatusFilter,
+  ] = useState("All");
+
+  const [
+    financialByBookingId,
+    setFinancialByBookingId,
+  ] = useState<Map<string, BookingFinancial>>(
+    new Map()
+  );
+
   const [sortOption, setSortOption] =
     useState<SortOption>("pickup-asc");
 
@@ -194,53 +321,144 @@ export default function OperationsPage() {
   ] = useState(0);
 
   useEffect(() => {
-    async function loadBookings() {
+    async function loadOperationsData() {
       try {
         setLoading(true);
         setError("");
 
-        const response = await fetch(
-          "/api/bookings",
-          {
+        const [
+          bookingsResponse,
+          accountingResponse,
+        ] = await Promise.all([
+          fetch("/api/bookings", {
             method: "GET",
             cache: "no-store",
-          }
-        );
+          }),
+          fetch("/api/accounting", {
+            method: "GET",
+            cache: "no-store",
+          }),
+        ]);
 
-        const data: BookingsResponse =
-          await response.json();
+        const bookingsData: BookingsResponse =
+          await bookingsResponse.json();
 
-        if (!response.ok || !data.success) {
+        if (
+          !bookingsResponse.ok ||
+          !bookingsData.success
+        ) {
           throw new Error(
-            data.message ??
-              data.error ??
+            bookingsData.message ??
+              bookingsData.error ??
               "Unable to load bookings."
           );
         }
 
+        const accountingData: AccountingResponse =
+          await accountingResponse.json();
+
+        if (
+          !accountingResponse.ok ||
+          !accountingData.success
+        ) {
+          throw new Error(
+            accountingData.message ??
+              accountingData.error ??
+              "Unable to load accounting data."
+          );
+        }
+
         const validBookings = (
-          data.bookings ?? []
+          bookingsData.bookings ?? []
         ).filter(isValidBooking);
 
+        const financialMap =
+          new Map<string, BookingFinancial>();
+
+        for (
+          const payment of accountingData.payments ?? []
+        ) {
+          const bookingId =
+            payment["Booking ID"]?.trim() ?? "";
+
+          if (!bookingId) {
+            continue;
+          }
+
+          const total = toAmount(payment.Total);
+          const amountPaid = toAmount(
+            payment["Amount Paid"]
+          );
+
+          const existing =
+            financialMap.get(bookingId);
+
+          if (!existing) {
+            financialMap.set(bookingId, {
+              total: roundCurrency(Math.max(total, 0)),
+              paid: roundCurrency(Math.max(amountPaid, 0)),
+              outstanding: 0,
+              status: "Unpaid",
+            });
+          } else {
+            if (total > 0) {
+              existing.total = roundCurrency(total);
+            }
+
+            existing.paid = roundCurrency(
+              existing.paid + Math.max(amountPaid, 0)
+            );
+          }
+        }
+
+        for (const booking of validBookings) {
+          const bookingId = booking["Booking ID"];
+          const existing = financialMap.get(bookingId);
+
+          const total =
+            existing && existing.total > 0
+              ? existing.total
+              : roundCurrency(
+                  Math.max(
+                    toAmount(booking["Price USD"]),
+                    0
+                  )
+                );
+
+          const paid = roundCurrency(
+            Math.min(Math.max(existing?.paid ?? 0, 0), total)
+          );
+
+          financialMap.set(bookingId, {
+            total,
+            paid,
+            outstanding: roundCurrency(
+              Math.max(total - paid, 0)
+            ),
+            status: getPaymentStatus(total, paid),
+          });
+        }
+
         setBookings(validBookings);
+        setFinancialByBookingId(financialMap);
       } catch (err) {
         console.error(
-          "Operations booking load error:",
+          "Operations data load error:",
           err
         );
 
         setError(
           err instanceof Error
             ? err.message
-            : "Unable to load bookings."
+            : "Unable to load operations data."
         );
       } finally {
         setLoading(false);
       }
     }
 
-    loadBookings();
-  }, []);
+    loadOperationsData();
+  }, [paymentRefreshKey]);
 
   async function updateBookingStatus(
     bookingReference: string,
@@ -328,8 +546,13 @@ export default function OperationsPage() {
     const normalizedSearch =
       searchTerm.trim().toLowerCase();
 
-    const matchingBookings =
-      bookings.filter((booking) => {
+    const matchingBookings = bookings.filter(
+      (booking) => {
+        const financial = getBookingFinancial(
+          booking,
+          financialByBookingId
+        );
+
         const matchesSearch =
           !normalizedSearch ||
           [
@@ -343,6 +566,9 @@ export default function OperationsPage() {
             booking.Deposit,
             booking.Balance,
             booking.Status,
+            financial.status,
+            financial.paid,
+            financial.outstanding,
           ]
             .join(" ")
             .toLowerCase()
@@ -353,84 +579,68 @@ export default function OperationsPage() {
           booking.Status.toLowerCase() ===
             statusFilter.toLowerCase();
 
+        const matchesPaymentStatus =
+          paymentStatusFilter === "All" ||
+          financial.status === paymentStatusFilter;
+
         return (
           matchesSearch &&
-          matchesStatus
+          matchesStatus &&
+          matchesPaymentStatus
         );
-      });
-
-    return [...matchingBookings].sort(
-      (a, b) => {
-        switch (sortOption) {
-          case "pickup-asc":
-            return (
-              getPickupTimestamp(a) -
-              getPickupTimestamp(b)
-            );
-
-          case "pickup-desc":
-            return (
-              getPickupTimestamp(b) -
-              getPickupTimestamp(a)
-            );
-
-          case "customer-asc":
-            return a[
-              "Customer Name"
-            ].localeCompare(
-              b["Customer Name"]
-            );
-
-          case "customer-desc":
-            return b[
-              "Customer Name"
-            ].localeCompare(
-              a["Customer Name"]
-            );
-
-          case "status-pending":
-            return (
-              getStatusPriority(a.Status) -
-              getStatusPriority(b.Status)
-            );
-
-          case "status-confirmed":
-            return (
-              getConfirmedFirstPriority(
-                a.Status
-              ) -
-              getConfirmedFirstPriority(
-                b.Status
-              )
-            );
-
-          case "price-asc":
-            return (
-              Number(a["Price USD"]) -
-              Number(b["Price USD"])
-            );
-
-          case "price-desc":
-            return (
-              Number(b["Price USD"]) -
-              Number(a["Price USD"])
-            );
-
-          default:
-            return 0;
-        }
       }
     );
+
+    return [...matchingBookings].sort((a, b) => {
+      switch (sortOption) {
+        case "pickup-asc":
+          return getPickupTimestamp(a) - getPickupTimestamp(b);
+
+        case "pickup-desc":
+          return getPickupTimestamp(b) - getPickupTimestamp(a);
+
+        case "customer-asc":
+          return a["Customer Name"].localeCompare(
+            b["Customer Name"]
+          );
+
+        case "customer-desc":
+          return b["Customer Name"].localeCompare(
+            a["Customer Name"]
+          );
+
+        case "status-pending":
+          return getStatusPriority(a.Status) - getStatusPriority(b.Status);
+
+        case "status-confirmed":
+          return (
+            getConfirmedFirstPriority(a.Status) -
+            getConfirmedFirstPriority(b.Status)
+          );
+
+        case "price-asc":
+          return Number(a["Price USD"]) - Number(b["Price USD"]);
+
+        case "price-desc":
+          return Number(b["Price USD"]) - Number(a["Price USD"]);
+
+        default:
+          return 0;
+      }
+    });
   }, [
     bookings,
+    financialByBookingId,
     searchTerm,
     statusFilter,
+    paymentStatusFilter,
     sortOption,
   ]);
 
   function clearFilters() {
     setSearchTerm("");
     setStatusFilter("All");
+    setPaymentStatusFilter("All");
     setSortOption("pickup-asc");
   }
 
@@ -497,7 +707,7 @@ export default function OperationsPage() {
             </div>
 
             <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="grid gap-4 lg:grid-cols-[1fr_220px_260px_auto]">
+              <div className="grid gap-4 lg:grid-cols-[1fr_220px_220px_260px_auto]">
                 <div>
                   <label
                     htmlFor="booking-search"
@@ -562,6 +772,42 @@ export default function OperationsPage() {
 
                 <div>
                   <label
+                    htmlFor="payment-status-filter"
+                    className="mb-2 block text-sm font-semibold text-slate-700"
+                  >
+                    Payment Status
+                  </label>
+
+                  <select
+                    id="payment-status-filter"
+                    value={paymentStatusFilter}
+                    onChange={(event) =>
+                      setPaymentStatusFilter(
+                        event.target.value
+                      )
+                    }
+                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                  >
+                    <option value="All">
+                      All Payment Statuses
+                    </option>
+
+                    <option value="Paid">
+                      Paid
+                    </option>
+
+                    <option value="Partially Paid">
+                      Partially Paid
+                    </option>
+
+                    <option value="Unpaid">
+                      Unpaid
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
                     htmlFor="sort-filter"
                     className="mb-2 block text-sm font-semibold text-slate-700"
                   >
@@ -620,6 +866,8 @@ export default function OperationsPage() {
                     disabled={
                       !searchTerm &&
                       statusFilter === "All" &&
+                      paymentStatusFilter ===
+                        "All" &&
                       sortOption ===
                         "pickup-asc"
                     }
@@ -687,6 +935,18 @@ export default function OperationsPage() {
                       <th className="px-4 py-4 font-semibold">
                         Balance
                       </th>
+
+                      <th className="px-4 py-4 font-semibold">
+                        Payment Status
+                      </th>
+
+                      <th className="px-4 py-4 font-semibold">
+                        Paid
+                      </th>
+
+                      <th className="px-4 py-4 font-semibold">
+                        Outstanding
+                      </th>
                     </tr>
                   </thead>
 
@@ -708,6 +968,12 @@ export default function OperationsPage() {
                         const isUpdating =
                           updatingBookingId ===
                           bookingId;
+
+                        const financial =
+                          getBookingFinancial(
+                            booking,
+                            financialByBookingId
+                          );
 
                         return (
                           <tr
@@ -933,6 +1199,28 @@ export default function OperationsPage() {
                                 booking.Balance
                               )}
                             </td>
+
+                            <td className="whitespace-nowrap px-4 py-4">
+                              <span
+                                className={`rounded-full px-3 py-1 text-xs font-bold ${getPaymentStatusClasses(
+                                  financial.status
+                                )}`}
+                              >
+                                {financial.status}
+                              </span>
+                            </td>
+
+                            <td className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-900">
+                              {formatCurrency(
+                                financial.paid
+                              )}
+                            </td>
+
+                            <td className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-900">
+                              {formatCurrency(
+                                financial.outstanding
+                              )}
+                            </td>
                           </tr>
                         );
                       }
@@ -942,7 +1230,7 @@ export default function OperationsPage() {
                       0 && (
                       <tr>
                         <td
-                          colSpan={13}
+                          colSpan={16}
                           className="px-6 py-12 text-center"
                         >
                           <p className="font-semibold text-slate-700">
@@ -952,8 +1240,8 @@ export default function OperationsPage() {
 
                           <p className="mt-1 text-sm text-slate-500">
                             Try changing the
-                            search, status
-                            filter, or sort
+                            search, booking status,
+                            payment status, or sort
                             option.
                           </p>
                         </td>
@@ -1006,6 +1294,70 @@ export default function OperationsPage() {
               </div>
 
               <div className="space-y-8 p-6">
+                {(() => {
+                  const selectedFinancial =
+                    getBookingFinancial(
+                      selectedBooking,
+                      financialByBookingId
+                    );
+
+                  return (
+                    <section>
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-bold text-slate-900">
+                          Payment Status
+                        </h3>
+
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-bold ${getPaymentStatusClasses(
+                            selectedFinancial.status
+                          )}`}
+                        >
+                          {selectedFinancial.status}
+                        </span>
+                      </div>
+
+                      <div className="mt-4 grid gap-4 md:grid-cols-3">
+                        <div className="rounded-xl border border-slate-200 p-4">
+                          <p className="text-xs font-semibold uppercase text-slate-500">
+                            Total Paid
+                          </p>
+
+                          <p className="mt-1 text-xl font-black text-slate-900">
+                            {formatCurrency(
+                              selectedFinancial.paid
+                            )}
+                          </p>
+                        </div>
+
+                        <div className="rounded-xl border border-slate-200 p-4">
+                          <p className="text-xs font-semibold uppercase text-slate-500">
+                            Outstanding
+                          </p>
+
+                          <p className="mt-1 text-xl font-black text-slate-900">
+                            {formatCurrency(
+                              selectedFinancial.outstanding
+                            )}
+                          </p>
+                        </div>
+
+                        <div className="rounded-xl border border-slate-200 p-4">
+                          <p className="text-xs font-semibold uppercase text-slate-500">
+                            Payment Total
+                          </p>
+
+                          <p className="mt-1 text-xl font-black text-slate-900">
+                            {formatCurrency(
+                              selectedFinancial.total
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </section>
+                  );
+                })()}
+
                 <section>
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-bold text-slate-900">
@@ -1252,12 +1604,15 @@ export default function OperationsPage() {
 
                     <div className="rounded-xl border border-slate-200 p-4">
                       <p className="text-xs font-semibold uppercase text-slate-500">
-                        Balance
+                        Outstanding
                       </p>
 
                       <p className="mt-1 text-xl font-black text-slate-900">
                         {formatCurrency(
-                          selectedBooking.Balance
+                          getBookingFinancial(
+                            selectedBooking,
+                            financialByBookingId
+                          ).outstanding
                         )}
                       </p>
                     </div>
@@ -1278,9 +1633,12 @@ export default function OperationsPage() {
                   deposit={Number(
                     selectedBooking.Deposit
                   )}
-                  balance={Number(
-                    selectedBooking.Balance
-                  )}
+                  balance={
+                    getBookingFinancial(
+                      selectedBooking,
+                      financialByBookingId
+                    ).outstanding
+                  }
                   onPaymentRecorded={() => {
                     setError("");
 
