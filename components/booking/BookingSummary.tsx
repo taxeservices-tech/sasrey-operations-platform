@@ -26,6 +26,9 @@ export default function BookingSummary() {
     }
 
     return calculateBookingPrice({
+     service:
+       booking.serviceCategory ??
+      "Airport Transfer",
       pickup: booking.pickup,
       destination: booking.destination,
       tripType:
@@ -41,7 +44,7 @@ export default function BookingSummary() {
     });
   }, [booking]);
 
-  return (
+return (
     <aside className="sticky top-8 h-fit rounded-3xl bg-slate-900 p-10 text-white shadow-2xl">
       <h2 className="text-3xl font-black">
         Booking Summary

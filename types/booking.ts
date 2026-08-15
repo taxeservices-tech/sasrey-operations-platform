@@ -18,7 +18,7 @@ export interface Booking {
   pickupDate: string;
   pickupTime: string;
   passengers: number;
-  serviceCategory: string;
+  serviceCategory: "Airport Transfer" | "Tour";
 
   // Passenger Details
   customerName: string;

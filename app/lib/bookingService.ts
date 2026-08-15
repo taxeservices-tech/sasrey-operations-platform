@@ -26,6 +26,8 @@ export async function processBooking(
   }
 
   const pricing = calculateBookingPrice({
+    service: booking.serviceCategory as
+      "Airport Transfer" | "Tour",
     pickup: booking.pickup,
     destination: booking.destination,
     tripType: booking.tripType,
@@ -38,7 +40,9 @@ export async function processBooking(
   if (!pricing) {
     return {
       success: false,
-      errors: ["Unable to calculate booking price."],
+      errors: [
+        `No active ${booking.serviceCategory} route found for ${booking.pickup} to ${booking.destination}.`,
+      ],
     };
   }
 

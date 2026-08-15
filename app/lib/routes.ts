@@ -11,6 +11,7 @@ export interface Route {
   basePrice: number;
   roundTripPrice: number;
 
+  includedPassengers: number;
   additionalPassengerFee: number;
 
   maxPassengers: number;
@@ -35,6 +36,7 @@ export const routes: Route[] = [
     basePrice: 35,
     roundTripPrice: 70,
 
+    includedPassengers: 4,
     additionalPassengerFee: 10,
 
     maxPassengers: 7,
@@ -57,6 +59,7 @@ export const routes: Route[] = [
     basePrice: 45,
     roundTripPrice: 90,
 
+    includedPassengers: 4,
     additionalPassengerFee: 10,
 
     maxPassengers: 7,
@@ -79,6 +82,7 @@ export const routes: Route[] = [
     basePrice: 60,
     roundTripPrice: 120,
 
+    includedPassengers: 4,
     additionalPassengerFee: 15,
 
     maxPassengers: 7,
@@ -101,6 +105,7 @@ export const routes: Route[] = [
     basePrice: 95,
     roundTripPrice: 190,
 
+    includedPassengers: 4,
     additionalPassengerFee: 15,
 
     maxPassengers: 7,
@@ -123,6 +128,7 @@ export const routes: Route[] = [
     basePrice: 120,
     roundTripPrice: 240,
 
+    includedPassengers: 4,
     additionalPassengerFee: 20,
 
     maxPassengers: 7,
@@ -145,6 +151,7 @@ export const routes: Route[] = [
     basePrice: 120,
     roundTripPrice: 240,
 
+    includedPassengers: 4,
     additionalPassengerFee: 20,
 
     maxPassengers: 7,
@@ -167,6 +174,7 @@ export const routes: Route[] = [
     basePrice: 280,
     roundTripPrice: 560,
 
+    includedPassengers: 4,
     additionalPassengerFee: 35,
 
     maxPassengers: 7,

@@ -12,6 +12,9 @@ export default function PaymentStep() {
     booking.tripType &&
     booking.passengers
       ? calculateBookingPrice({
+          service:
+          booking.serviceCategory ??
+         "Airport Transfer",
           pickup: booking.pickup,
           destination: booking.destination,
           tripType: booking.tripType,

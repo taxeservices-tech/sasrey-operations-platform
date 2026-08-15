@@ -1,6 +1,8 @@
 import { routes } from "./routes";
 
 export interface BookingPriceInput {
+  service: "Airport Transfer" | "Tour";
+
   pickup: string;
   destination: string;
 
@@ -39,11 +41,19 @@ export function calculateBookingPrice(
   const route = routes.find(
     (route) =>
       route.active &&
+      route.service === booking.service &&
       route.pickup === booking.pickup &&
       route.destination === booking.destination
   );
 
   if (!route) {
+    return null;
+  }
+
+  if (
+    booking.passengers < 1 ||
+    booking.passengers > route.maxPassengers
+  ) {
     return null;
   }
 
@@ -53,9 +63,10 @@ export function calculateBookingPrice(
       : route.basePrice;
 
   const extraPassengers = Math.max(
-  booking.passengers - 4,
-  0
-);
+    booking.passengers -
+      route.includedPassengers,
+    0
+  );
 
   const passengerFee =
     extraPassengers *

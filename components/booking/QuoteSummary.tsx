@@ -13,6 +13,9 @@ export default function QuoteSummary() {
     }
 
     return calculateBookingPrice({
+      service:
+      booking.serviceCategory ??
+      "Airport Transfer",
       pickup: booking.pickup,
       destination: booking.destination,
       tripType: booking.tripType ?? "One Way",

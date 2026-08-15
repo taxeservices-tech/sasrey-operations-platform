@@ -12,7 +12,10 @@ export default function ReviewStep() {
     booking.tripType &&
     booking.passengers
       ? calculateBookingPrice({
-          pickup: booking.pickup,
+         service:
+          booking.serviceCategory ??
+         "Airport Transfer",
+         pickup: booking.pickup,
           destination: booking.destination,
           tripType: booking.tripType,
           passengers: booking.passengers,
