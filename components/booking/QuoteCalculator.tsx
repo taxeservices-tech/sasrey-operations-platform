@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { calculateBookingPrice } from "@/app/lib/pricing";
 import { routes } from "@/app/lib/routes";
 
 export default function QuoteCalculator() {
@@ -13,27 +14,46 @@ export default function QuoteCalculator() {
     return (
       routes.find(
         (route) =>
+          route.active &&
           route.pickup === pickup &&
           route.destination === destination
       ) || routes[0]
     );
   }, [pickup, destination]);
 
-  const baseFare =
-    tripType === "One Way"
-      ? selectedRoute.basePrice
-      : selectedRoute.roundTripPrice;
+  const pricing = useMemo(() => {
+    return calculateBookingPrice({
+      service: selectedRoute.service,
+      pickup: selectedRoute.pickup,
+      destination: selectedRoute.destination,
+      tripType,
+      passengers,
+    });
+  }, [selectedRoute, tripType, passengers]);
 
-  const extraPassengers = Math.max(0, passengers - 4);
+  const passengerOptions = useMemo(() => {
+    return Array.from(
+      { length: selectedRoute.maxPassengers },
+      (_, index) => index + 1
+    );
+  }, [selectedRoute]);
 
-  const extraPassengerTotal =
-    extraPassengers * selectedRoute.additionalPassengerFee;
+  const baseFare = pricing?.baseFare ?? 0;
 
-  const total = baseFare + extraPassengerTotal;
+  const extraPassengers = pricing
+    ? Math.max(
+        passengers - selectedRoute.includedPassengers,
+        0
+      )
+    : 0;
 
-  const deposit = Number((total * 0.25).toFixed(2));
+  const extraPassengerTotal = pricing?.passengerFee ?? 0;
 
-  const balance = Number((total - deposit).toFixed(2));
+  const total = pricing?.total ?? 0;
+
+  const deposit = pricing?.deposit ?? 0;
+
+  const balance = pricing?.balance ?? 0;
 
   return (
     <section className="bg-slate-100 py-24">
@@ -52,8 +72,11 @@ export default function QuoteCalculator() {
           </h2>
 
           <p className="mx-auto mt-6 max-w-3xl text-lg text-slate-600">
-            Base fare includes 1–4 passengers.
-            Additional passengers (5–7) incur an additional charge.
+            Base fare includes{" "}
+            {selectedRoute.includedPassengers} passengers.
+            Additional passengers incur an additional charge
+            up to the vehicle capacity of{" "}
+            {selectedRoute.maxPassengers}.
           </p>
 
         </div>
@@ -112,14 +135,20 @@ export default function QuoteCalculator() {
                 }
                 className="w-full rounded-xl border p-4"
               >
-                {routes.map((route) => (
-                  <option
-                    key={route.destination}
-                    value={route.destination}
-                  >
-                    {route.destination}
-                  </option>
-                ))}
+                {routes
+                  .filter(
+                    (route) =>
+                      route.active &&
+                      route.pickup === pickup
+                  )
+                  .map((route) => (
+                    <option
+                      key={route.id}
+                      value={route.destination}
+                    >
+                      {route.destination}
+                    </option>
+                  ))}
               </select>
 
             </div>
@@ -137,7 +166,7 @@ export default function QuoteCalculator() {
                 }
                 className="w-full rounded-xl border p-4"
               >
-                {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                {passengerOptions.map((num) => (
                   <option
                     key={num}
                     value={num}
@@ -148,8 +177,12 @@ export default function QuoteCalculator() {
               </select>
 
               <p className="mt-3 text-sm text-slate-500">
-                Base fare covers up to 4 passengers.
-                Passengers 5–7 are charged per person.
+                Base fare covers up to{" "}
+                {selectedRoute.includedPassengers} passengers.
+                Passengers{" "}
+                {selectedRoute.includedPassengers + 1}–
+                {selectedRoute.maxPassengers} are charged
+                per person.
               </p>
 
             </div>
@@ -158,7 +191,7 @@ export default function QuoteCalculator() {
 
           {/* RIGHT PANEL */}
 
-<div className="w-full rounded-3xl bg-sky-50 p-8">
+          <div className="w-full rounded-3xl bg-sky-50 p-8">
 
             <h3 className="text-3xl font-black text-slate-900">
               Quote Summary
@@ -168,7 +201,7 @@ export default function QuoteCalculator() {
 
               <div className="flex items-center justify-between gap-4">
                 <span>Vehicle</span>
-                <strong>Toyota Noah</strong>
+                <strong>{selectedRoute.vehicle}</strong>
               </div>
 
               <div className="flex justify-between">
@@ -189,7 +222,6 @@ export default function QuoteCalculator() {
               </div>
 
               {extraPassengers > 0 && (
-
                 <div className="flex justify-between">
 
                   <span>
@@ -201,7 +233,6 @@ export default function QuoteCalculator() {
                   </strong>
 
                 </div>
-
               )}
 
               <hr />
@@ -239,6 +270,7 @@ export default function QuoteCalculator() {
             </div>
 
             <button
+              type="button"
               className="mt-10 w-full rounded-full bg-sky-500 py-4 text-lg font-semibold text-white transition hover:bg-sky-600"
             >
               Continue Booking
