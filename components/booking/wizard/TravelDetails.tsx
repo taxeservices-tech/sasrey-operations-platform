@@ -1,25 +1,24 @@
 "use client";
-
-import { routes } from "@/app/lib/routes";
+import { findBookingRoute } from "@/app/lib/routeResolver";
 import { useBooking } from "@/context/BookingContext";
 
 export default function TravelDetails() {
   const { booking, updateBooking } = useBooking();
 
   const matchingRoute =
-    booking.pickup && booking.destination && booking.serviceCategory
-      ? routes.find(
-          (route) =>
-            route.active &&
-            route.pickup === booking.pickup &&
-            route.destination === booking.destination &&
-            route.service === booking.serviceCategory
-        )
-      : undefined;
+  booking.pickup &&
+  booking.destination &&
+  booking.serviceCategory
+    ? findBookingRoute({
+        service: booking.serviceCategory,
+        pickup: booking.pickup,
+        destination: booking.destination,
+        passengers: booking.passengers ?? 1,
+      })
+    : null;
 
-  const maxPassengers =
-    matchingRoute?.maxPassengers ?? 7;
-
+const maxPassengers =
+  matchingRoute?.maxPassengers ?? 7;
   const passengerOptions = Array.from(
     { length: maxPassengers },
     (_, index) => index + 1
@@ -73,11 +72,27 @@ export default function TravelDetails() {
         <select
           className="w-full rounded-xl border border-slate-300 p-4"
           value={booking.passengers ?? 1}
-          onChange={(e) =>
-            updateBooking({
-              passengers: Number(e.target.value),
-            })
-          }
+          onChange={(e) => {
+  const passengers = Number(e.target.value);
+
+  const route =
+    booking.pickup &&
+    booking.destination &&
+    booking.serviceCategory
+      ? findBookingRoute({
+          service: booking.serviceCategory,
+          pickup: booking.pickup,
+          destination: booking.destination,
+          passengers,
+        })
+      : null;
+
+  updateBooking({
+    passengers,
+    routeId: route?.id,
+    vehicle: route?.vehicle,
+  });
+}}
         >
           {passengerOptions.map((number) => (
             <option key={number} value={number}>
