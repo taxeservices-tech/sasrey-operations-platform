@@ -14,25 +14,58 @@ export default function BookingForm() {
   } = useBooking();
 
   const pickupLocations = [
-    ...new Set(routes.map((route) => route.pickup)),
+    ...new Set(
+      routes
+        .filter((route) => route.active)
+        .map((route) => route.pickup)
+    ),
   ];
 
   const availableDestinations = useMemo(() => {
     if (!booking.pickup) return [];
-
-    console.log("Current booking:", booking);
 
     return [
       ...new Set(
         routes
           .filter(
             (route) =>
-              route.pickup === booking.pickup
+              route.active &&
+              route.pickup === booking.pickup &&
+              route.service ===
+                (booking.serviceCategory ??
+                  "Airport Transfer")
           )
           .map((route) => route.destination)
       ),
     ];
-  }, [booking.pickup, booking]);
+  }, [
+    booking.pickup,
+    booking.serviceCategory,
+  ]);
+
+  const selectedRoute = useMemo(() => {
+    if (
+      !booking.pickup ||
+      !booking.destination ||
+      !booking.serviceCategory
+    ) {
+      return undefined;
+    }
+
+    return routes.find(
+      (route) =>
+        route.active &&
+        route.pickup === booking.pickup &&
+        route.destination ===
+          booking.destination &&
+        route.service ===
+          booking.serviceCategory
+    );
+  }, [
+    booking.pickup,
+    booking.destination,
+    booking.serviceCategory,
+  ]);
 
   return (
     <div className="rounded-3xl bg-white p-10 shadow-xl">
@@ -57,6 +90,9 @@ export default function BookingForm() {
                 e.target.value as
                   | "Airport Transfer"
                   | "Tour",
+              destination: "",
+              vehicle: "",
+              passengers: 1,
             })
           }
         >
@@ -162,6 +198,8 @@ export default function BookingForm() {
               updateBooking({
                 pickup: e.target.value,
                 destination: "",
+                vehicle: "",
+                passengers: 1,
               })
             }
           >
@@ -192,8 +230,13 @@ export default function BookingForm() {
 
               const route = routes.find(
                 (r) =>
+                  r.active &&
                   r.pickup === booking.pickup &&
-                  r.destination === destination
+                  r.destination ===
+                    destination &&
+                  r.service ===
+                    (booking.serviceCategory ??
+                      "Airport Transfer")
               );
 
               updateBooking({
@@ -202,6 +245,9 @@ export default function BookingForm() {
                   route?.service ??
                   booking.serviceCategory ??
                   "Airport Transfer",
+                vehicle:
+                  route?.vehicle ?? "",
+                passengers: 1,
               });
             }}
           >
@@ -311,18 +357,32 @@ export default function BookingForm() {
                   Number(e.target.value),
               })
             }
+            disabled={!selectedRoute}
           >
-            {[1, 2, 3, 4, 5, 6, 7].map(
-              (number) => (
-                <option
-                  key={number}
-                  value={number}
-                >
-                  {number}
-                </option>
-              )
-            )}
+            {Array.from(
+              {
+                length:
+                  selectedRoute?.maxPassengers ??
+                  1,
+              },
+              (_, index) => index + 1
+            ).map((number) => (
+              <option
+                key={number}
+                value={number}
+              >
+                {number}
+              </option>
+            ))}
           </select>
+
+          {selectedRoute && (
+            <p className="mt-2 text-sm text-slate-500">
+              Maximum passengers:
+              {" "}
+              {selectedRoute.maxPassengers}
+            </p>
+          )}
         </div>
 
         {/* Trip Type */}
