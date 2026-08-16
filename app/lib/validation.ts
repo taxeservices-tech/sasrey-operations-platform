@@ -1,4 +1,5 @@
 import type { Booking } from "@/types/booking";
+import { routes } from "./routes";
 
 export interface ValidationResult {
   valid: boolean;
@@ -217,12 +218,28 @@ export function validateTripDetails(
     );
   }
 
+  const matchingRoute =
+    booking.pickup &&
+    booking.destination &&
+    booking.serviceCategory
+      ? routes.find(
+          (route) =>
+            route.active &&
+            route.pickup === booking.pickup &&
+            route.destination ===
+              booking.destination &&
+            route.service ===
+              booking.serviceCategory
+        )
+      : undefined;
+
   if (
     booking.passengers !== undefined &&
-    booking.passengers > 7
+    matchingRoute &&
+    booking.passengers > matchingRoute.maxPassengers
   ) {
     errors.push(
-      "Maximum passengers for this vehicle is 7."
+      `Maximum passengers for this vehicle is ${matchingRoute.maxPassengers}.`
     );
   }
 
