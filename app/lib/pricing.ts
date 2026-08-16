@@ -1,5 +1,4 @@
-import { routes } from "./routes";
-
+import { findBookingRoute } from "./routeResolver";
 export interface BookingPriceInput {
   service: "Airport Transfer" | "Tour";
 
@@ -38,13 +37,13 @@ export interface BookingPriceResult {
 export function calculateBookingPrice(
   booking: BookingPriceInput
 ): BookingPriceResult | null {
-  const route = routes.find(
-    (route) =>
-      route.active &&
-      route.service === booking.service &&
-      route.pickup === booking.pickup &&
-      route.destination === booking.destination
-  );
+  const route = findBookingRoute({
+  service: booking.service,
+  pickup: booking.pickup,
+  destination: booking.destination,
+  passengers: booking.passengers,
+});
+
 
   if (!route) {
     return null;
