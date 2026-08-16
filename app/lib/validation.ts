@@ -1,5 +1,5 @@
 import type { Booking } from "@/types/booking";
-import { routes } from "./routes";
+import { findBookingRoute } from "./routeResolver";
 
 export interface ValidationResult {
   valid: boolean;
@@ -219,29 +219,29 @@ export function validateTripDetails(
   }
 
   const matchingRoute =
-    booking.pickup &&
-    booking.destination &&
-    booking.serviceCategory
-      ? routes.find(
-          (route) =>
-            route.active &&
-            route.pickup === booking.pickup &&
-            route.destination ===
-              booking.destination &&
-            route.service ===
-              booking.serviceCategory
-        )
-      : undefined;
+  booking.pickup &&
+  booking.destination &&
+  booking.serviceCategory &&
+  booking.passengers !== undefined
+    ? findBookingRoute({
+        service: booking.serviceCategory,
+        pickup: booking.pickup,
+        destination: booking.destination,
+        passengers: booking.passengers,
+      })
+    : null;
 
   if (
-    booking.passengers !== undefined &&
-    matchingRoute &&
-    booking.passengers > matchingRoute.maxPassengers
-  ) {
-    errors.push(
-      `Maximum passengers for this vehicle is ${matchingRoute.maxPassengers}.`
-    );
-  }
+  booking.passengers !== undefined &&
+  booking.pickup &&
+  booking.destination &&
+  booking.serviceCategory &&
+  !matchingRoute
+) {
+  errors.push(
+    "No vehicle is available for the selected passenger count."
+  );
+}
 
   return {
     valid: errors.length === 0,
