@@ -1,9 +1,29 @@
 "use client";
 
+import { routes } from "@/app/lib/routes";
 import { useBooking } from "@/context/BookingContext";
 
 export default function TravelDetails() {
   const { booking, updateBooking } = useBooking();
+
+  const matchingRoute =
+    booking.pickup && booking.destination && booking.serviceCategory
+      ? routes.find(
+          (route) =>
+            route.active &&
+            route.pickup === booking.pickup &&
+            route.destination === booking.destination &&
+            route.service === booking.serviceCategory
+        )
+      : undefined;
+
+  const maxPassengers =
+    matchingRoute?.maxPassengers ?? 7;
+
+  const passengerOptions = Array.from(
+    { length: maxPassengers },
+    (_, index) => index + 1
+  );
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
@@ -59,7 +79,7 @@ export default function TravelDetails() {
             })
           }
         >
-          {[1, 2, 3, 4, 5, 6, 7].map((number) => (
+          {passengerOptions.map((number) => (
             <option key={number} value={number}>
               {number}
             </option>
