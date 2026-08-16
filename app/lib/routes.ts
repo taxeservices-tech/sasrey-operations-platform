@@ -187,4 +187,166 @@ export const routes: Route[] = [
 
     active: true,
   },
+
+  {
+    id: "AH001",
+    service: "Airport Transfer",
+    pickup: "MBJ Airport",
+    destination: "Montego Bay Hotels",
+    vehicle: "Toyota Hiace Commuter",
+
+    basePrice: 50,
+    roundTripPrice: 100,
+
+    includedPassengers: 4,
+    additionalPassengerFee: 10,
+
+    maxPassengers: 15,
+
+    childSeatFee: 10,
+    extraStopFee: 15,
+    waitingTimeFee: 20,
+
+    currency: "USD",
+
+    active: true,
+  },
+  {
+    id: "AH002",
+    service: "Airport Transfer",
+    pickup: "MBJ Airport",
+    destination: "Rose Hall",
+    vehicle: "Toyota Hiace Commuter",
+
+    basePrice: 60,
+    roundTripPrice: 120,
+
+    includedPassengers: 4,
+    additionalPassengerFee: 10,
+
+    maxPassengers: 15,
+
+    childSeatFee: 10,
+    extraStopFee: 15,
+    waitingTimeFee: 20,
+
+    currency: "USD",
+
+    active: true,
+  },
+  {
+    id: "AH003",
+    service: "Airport Transfer",
+    pickup: "MBJ Airport",
+    destination: "Falmouth",
+    vehicle: "Toyota Hiace Commuter",
+
+    basePrice: 75,
+    roundTripPrice: 150,
+
+    includedPassengers: 4,
+    additionalPassengerFee: 15,
+
+    maxPassengers: 15,
+
+    childSeatFee: 10,
+    extraStopFee: 15,
+    waitingTimeFee: 20,
+
+    currency: "USD",
+
+    active: true,
+  },
+  {
+    id: "AH004",
+    service: "Airport Transfer",
+    pickup: "MBJ Airport",
+    destination: "Runaway Bay",
+    vehicle: "Toyota Hiace Commuter",
+
+    basePrice: 100,
+    roundTripPrice: 200,
+
+    includedPassengers: 4,
+    additionalPassengerFee: 15,
+
+    maxPassengers: 15,
+
+    childSeatFee: 10,
+    extraStopFee: 15,
+    waitingTimeFee: 20,
+
+    currency: "USD",
+
+    active: true,
+  },
+  {
+    id: "AH005",
+    service: "Airport Transfer",
+    pickup: "MBJ Airport",
+    destination: "Negril",
+    vehicle: "Toyota Hiace Commuter",
+
+    basePrice: 110,
+    roundTripPrice: 220,
+
+    includedPassengers: 4,
+    additionalPassengerFee: 15,
+
+    maxPassengers: 15,
+
+    childSeatFee: 10,
+    extraStopFee: 15,
+    waitingTimeFee: 20,
+
+    currency: "USD",
+
+    active: true,
+  },
+  {
+    id: "AH006",
+    service: "Airport Transfer",
+    pickup: "MBJ Airport",
+    destination: "Ocho Rios",
+    vehicle: "Toyota Hiace Commuter",
+
+    basePrice: 125,
+    roundTripPrice: 250,
+
+    includedPassengers: 4,
+    additionalPassengerFee: 20,
+
+    maxPassengers: 15,
+
+    childSeatFee: 10,
+    extraStopFee: 15,
+    waitingTimeFee: 20,
+
+    currency: "USD",
+
+    active: true,
+  },
+  {
+    id: "AH007",
+    service: "Airport Transfer",
+    pickup: "MBJ Airport",
+    destination: "Kingston",
+    vehicle: "Toyota Hiace Commuter",
+
+    basePrice: 320,
+    roundTripPrice: 640,
+
+    includedPassengers: 4,
+    additionalPassengerFee: 35,
+
+    maxPassengers: 15,
+
+    childSeatFee: 10,
+    extraStopFee: 15,
+    waitingTimeFee: 20,
+
+    currency: "USD",
+
+    active: true,
+  },
 ];
