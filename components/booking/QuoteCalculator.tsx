@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { calculateBookingPrice } from "@/app/lib/pricing";
+import { findBookingRoute } from "@/app/lib/routeResolver";
 import { routes } from "@/app/lib/routes";
 
 export default function QuoteCalculator() {
@@ -12,15 +13,21 @@ export default function QuoteCalculator() {
 
   const selectedRoute = useMemo(() => {
     return (
+      findBookingRoute({
+        service: "Airport Transfer",
+        pickup,
+        destination,
+        passengers,
+      }) ??
       routes.find(
         (route) =>
           route.active &&
           route.pickup === pickup &&
           route.destination === destination
-      ) || routes[0]
+      ) ??
+      routes[0]
     );
-  }, [pickup, destination]);
-
+  }, [pickup, destination, passengers]);
   const pricing = useMemo(() => {
     return calculateBookingPrice({
       service: selectedRoute.service,
@@ -31,12 +38,34 @@ export default function QuoteCalculator() {
     });
   }, [selectedRoute, tripType, passengers]);
 
+    const maximumAvailablePassengers = useMemo(() => {
+    const matchingRoutes = routes.filter(
+      (route) =>
+        route.active &&
+        route.service === "Airport Transfer" &&
+        route.pickup === pickup &&
+        route.destination === destination
+    );
+
+    return matchingRoutes.reduce(
+      (maximum, route) =>
+        Math.max(maximum, route.maxPassengers),
+      0
+    );
+  }, [pickup, destination]);
+
   const passengerOptions = useMemo(() => {
+    const maximum =
+      maximumAvailablePassengers || selectedRoute.maxPassengers;
+
     return Array.from(
-      { length: selectedRoute.maxPassengers },
+      { length: maximum },
       (_, index) => index + 1
     );
-  }, [selectedRoute]);
+  }, [
+    maximumAvailablePassengers,
+    selectedRoute.maxPassengers,
+  ]);
 
   const baseFare = pricing?.baseFare ?? 0;
 
