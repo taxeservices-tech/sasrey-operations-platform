@@ -1693,6 +1693,17 @@ export default function OperationsPage() {
                   "confirmed" && (
                   <section className="flex flex-wrap gap-3 border-t border-slate-200 pt-6">
                     <button
+  type="button"
+  onClick={() => {
+    window.location.href = `/dispatch?bookingId=${encodeURIComponent(
+      selectedBooking["Booking ID"]
+    )}`;
+  }}
+  className="rounded-lg bg-sky-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-sky-700"
+>
+  Dispatch Booking
+</button>
+                    <button
                       type="button"
                       onClick={() => {
                         const confirmed =
