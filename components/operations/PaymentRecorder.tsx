@@ -153,22 +153,18 @@ export default function PaymentRecorder({
 
       onPaymentRecorded?.();
     } catch (err) {
-      console.error(
-        "Payment recording error:",
-        err
-      );
-
-      setError(
+      const errorMessage =
         err instanceof Error
           ? err.message
-          : "Unable to record payment."
-      );
+          : "Unable to record payment.";
+
+      setError(errorMessage);
     } finally {
       setSaving(false);
     }
   }
 
-  const normalizedTotal =
+    const normalizedTotal =
     typeof total === "number"
       ? Math.max(total, 0)
       : 0;
