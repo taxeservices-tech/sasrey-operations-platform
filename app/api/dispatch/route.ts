@@ -14,6 +14,8 @@ interface AppsScriptResponse {
   vehicleId?: string;
   vehicle?: string;
   dispatches?: unknown[];
+  drivers?: unknown[];
+  vehicles?: unknown[];
 }
 
 function getAppsScriptUrl(): string {
@@ -32,7 +34,8 @@ function getAppsScriptUrl(): string {
 async function parseAppsScriptResponse(
   response: Response
 ): Promise<AppsScriptResponse> {
-  const responseText = await response.text();
+  const responseText =
+    await response.text();
 
   console.log(
     "Apps Script Status:",
@@ -55,18 +58,31 @@ async function parseAppsScriptResponse(
   }
 }
 
-export async function GET() {
+export async function GET(
+  request: NextRequest
+) {
   try {
     const appsScriptUrl =
       getAppsScriptUrl();
 
+    const requestedAction =
+      request.nextUrl.searchParams.get(
+        "action"
+      ) ?? "listDispatch";
+
+    const action =
+      requestedAction.trim() ||
+      "listDispatch";
+
     console.log(
-      "Dispatch API Apps Script URL:",
-      JSON.stringify(appsScriptUrl)
+      "Dispatch GET action:",
+      action
     );
 
     const response = await fetch(
-      `${appsScriptUrl}?action=listDispatch`,
+      `${appsScriptUrl}?action=${encodeURIComponent(
+        action
+      )}`,
       {
         method: "GET",
         cache: "no-store",
@@ -88,11 +104,15 @@ export async function GET() {
           message:
             data.message ??
             data.error ??
-            "Unable to retrieve dispatch records.",
+            "Unable to retrieve dispatch data.",
           error: data.error,
           action: data.action,
           dispatches:
             data.dispatches ?? [],
+          drivers:
+            data.drivers ?? [],
+          vehicles:
+            data.vehicles ?? [],
         },
         {
           status: response.ok
@@ -115,8 +135,10 @@ export async function GET() {
         message:
           error instanceof Error
             ? error.message
-            : "Unable to retrieve dispatch records.",
+            : "Unable to retrieve dispatch data.",
         dispatches: [],
+        drivers: [],
+        vehicles: [],
       },
       {
         status: 500,
@@ -185,7 +207,8 @@ export async function POST(
             data.dispatchId,
           bookingReference:
             data.bookingReference,
-          status: data.status,
+          status:
+            data.status,
           previousStatus:
             data.previousStatus,
         },
