@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 type SheetRow = Record<
   string,
@@ -107,6 +111,13 @@ function getNextStatuses(
 }
 
 export default function DispatchPage() {
+  const bookingId =
+    typeof window !== "undefined"
+      ? new URLSearchParams(
+          window.location.search
+        ).get("bookingId") ?? ""
+      : "";
+
   const [bookings, setBookings] =
     useState<SheetRow[]>([]);
 
@@ -258,7 +269,44 @@ export default function DispatchPage() {
                 )
             )
           );
-        }
+        }if (bookingId) {
+  const requestedBooking =
+    (bookingsData.bookings ?? []).find(
+      (booking) =>
+        getValue(
+          booking,
+          "Booking ID"
+        ) === bookingId
+    );
+
+  const requestedBookingStatus =
+    getValue(
+      requestedBooking,
+      "Status",
+      "Booking Status"
+    );
+
+  const alreadyDispatched =
+    (dispatchData.dispatches ?? []).some(
+      (dispatch) =>
+        getValue(
+          dispatch,
+          "Booking ID",
+          "bookingReference"
+        ) === bookingId
+    );
+
+  if (
+    requestedBooking &&
+    requestedBookingStatus ===
+      "Confirmed" &&
+    !alreadyDispatched
+  ) {
+    setSelectedBookingId(
+      bookingId
+    );
+  }
+}
       } catch (err) {
         if (!cancelled) {
           setError(
