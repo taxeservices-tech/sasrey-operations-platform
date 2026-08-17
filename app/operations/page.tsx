@@ -1598,15 +1598,18 @@ export default function OperationsPage() {
                       "Price USD"
                     ]
                   )}
-                  deposit={Number(
-                    selectedBooking.Deposit
-                  )}
-                  balance={
+                  totalPaid={
                     getBookingFinancial(
                       selectedBooking,
                       financialByBookingId
-                    ).outstanding
+                    ).paid
                   }
+                  deposit={Number(
+                    selectedBooking.Deposit
+                  )}
+                  balance={Number(
+                    selectedBooking.Balance
+                  )}
                   onPaymentRecorded={() => {
                     setError("");
 
@@ -1616,6 +1619,7 @@ export default function OperationsPage() {
                     );
                   }}
                 />
+
 
                 {selectedBooking.Status
                   ?.toLowerCase() ===
