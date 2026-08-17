@@ -648,19 +648,35 @@ export default function OperationsPage() {
     <main className="min-h-screen bg-slate-50 px-6 py-12">
       <div className="mx-auto max-w-[1800px]">
         <div className="mb-10">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-sky-600">
-            SASREY Operations
-          </p>
+  <p className="text-sm font-semibold uppercase tracking-[0.3em] text-sky-600">
+    SASREY Operations
+  </p>
 
-          <h1 className="mt-2 text-4xl font-black text-slate-900">
-            Booking Records
-          </h1>
+  <h1 className="mt-2 text-4xl font-black text-slate-900">
+    Booking Records
+  </h1>
 
-          <p className="mt-3 text-slate-600">
-            View current booking records and
-            operational details.
-          </p>
-        </div>
+  <p className="mt-3 text-slate-600">
+    View current booking records and
+    operational details.
+  </p>
+
+  <nav className="mt-6 flex flex-wrap gap-3">
+    <a
+      href="/operations"
+      className="rounded-full bg-sky-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-sky-700"
+    >
+      Booking Records
+    </a>
+
+    <a
+      href="/dispatch"
+      className="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:border-sky-500 hover:text-sky-600"
+    >
+      Dispatch
+    </a>
+  </nav>
+</div>
 
         {loading && (
           <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
