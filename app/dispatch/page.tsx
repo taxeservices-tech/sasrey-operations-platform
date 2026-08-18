@@ -25,6 +25,51 @@ const TERMINAL_STATUSES = [
   "Completed",
   "Cancelled",
 ];
+const ACTIVE_DISPATCH_STATUSES = [
+  "Assigned",
+  "En Route",
+  "Passenger Onboard",
+];
+
+function isDispatchResourceBusy(
+  resourceId: string,
+  key: string,
+  pickupDate: string,
+  dispatches: SheetRow[]
+): boolean {
+  return dispatches.some(
+    (dispatch) => {
+      const dispatchResourceId =
+        getValue(
+          dispatch,
+          key
+        );
+
+      const dispatchStatus =
+        getValue(
+          dispatch,
+          "Dispatch Status",
+          "status"
+        );
+
+      const dispatchPickupDate =
+        getValue(
+          dispatch,
+          "Pickup Date"
+        );
+
+      return (
+        dispatchResourceId ===
+          resourceId &&
+        dispatchPickupDate ===
+          pickupDate &&
+        ACTIVE_DISPATCH_STATUSES.includes(
+          dispatchStatus
+        )
+      );
+    }
+  );
+}
 
 function getValue(
   row: SheetRow | undefined,
@@ -460,6 +505,41 @@ export default function DispatchPage() {
       );
       return;
     }
+    const pickupDate =
+      getValue(
+        selectedBooking,
+        "Pickup Date"
+      );
+
+    const driverBusy =
+      isDispatchResourceBusy(
+        selectedDriverId,
+        "Driver ID",
+        pickupDate,
+        dispatches
+      );
+
+    if (driverBusy) {
+      setError(
+        "The selected driver is already assigned to another dispatch on this pickup date."
+      );
+      return;
+    }
+
+    const vehicleBusy =
+      isDispatchResourceBusy(
+        selectedVehicleId,
+        "Vehicle ID",
+        pickupDate,
+        dispatches
+      );
+
+    if (vehicleBusy) {
+      setError(
+        "The selected vehicle is already assigned to another dispatch on this pickup date."
+      );
+      return;
+    }
 
     try {
       setSaving(true);
@@ -760,7 +840,16 @@ export default function DispatchPage() {
                         driver,
                         "Driver Status"
                       );
-
+                    const busy =
+                      isDispatchResourceBusy(
+                        driverId,
+                        "Driver ID",
+                        getValue(
+                          selectedBooking,
+                          "Pickup Date"
+                        ),
+                        dispatches
+                      );
                     return (
                       <option
                         key={
@@ -772,9 +861,9 @@ export default function DispatchPage() {
                       >
                         {driverName} (
                         {driverId}){" "}
-                        {status
-                          ? `— ${status}`
-                          : ""}
+                        {busy
+                        ? "— Busy"
+                        : "— Available"}
                       </option>
                     );
                   }
@@ -832,7 +921,16 @@ export default function DispatchPage() {
                         vehicle,
                         "Seats"
                       );
-
+                    const busy =
+                      isDispatchResourceBusy(
+                        vehicleId,
+                        "Vehicle ID",
+                        getValue(
+                          selectedBooking,
+                          "Pickup Date"
+                        ),
+                        dispatches
+                      );
                     return (
                       <option
                         key={
@@ -842,9 +940,12 @@ export default function DispatchPage() {
                           vehicleId
                         }
                       >
-                        {make} {model} —{" "}
-                        {seats} seats (
-                        {vehicleId})
+                 {make} {model} —{" "}
+                 {seats} seats (
+                 {vehicleId}){" "}
+                 {busy
+                 ? "— Busy"
+                 : "— Available"}
                       </option>
                     );
                   }
@@ -885,12 +986,30 @@ export default function DispatchPage() {
             <div className="lg:col-span-4 flex justify-end">
               <button
                 type="submit"
-                disabled={
-                  loading ||
-                  saving ||
-                  !selectedBookingId ||
+                 disabled={
+                 loading ||
+                 saving ||
+                 !selectedBookingId ||
                   !selectedDriverId ||
-                  !selectedVehicleId
+                  !selectedVehicleId ||
+                  isDispatchResourceBusy(
+                    selectedDriverId,
+                    "Driver ID",
+                    getValue(
+                      selectedBooking,
+                      "Pickup Date"
+                    ),
+                    dispatches
+                  ) ||
+                  isDispatchResourceBusy(
+                    selectedVehicleId,
+                    "Vehicle ID",
+                    getValue(
+                      selectedBooking,
+                      "Pickup Date"
+                    ),
+                    dispatches
+                  )
                 }
                 className="rounded-full bg-sky-600 px-8 py-3 font-bold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
