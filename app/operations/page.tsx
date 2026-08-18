@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import DispatchStatusBadge from "@/components/operations/DispatchStatusBadge";
 import PaymentRecorder from "@/components/operations/PaymentRecorder";
 import PaymentsLedger from "@/components/accounting/PaymentsLedger";
 import AccountingSummary from "@/components/accounting/AccountingSummary";
@@ -29,6 +30,33 @@ interface BookingRecord {
 interface BookingsResponse {
   success: boolean;
   bookings?: BookingRecord[];
+  message?: string;
+  error?: string;
+}
+interface DispatchRecord {
+  "Dispatch ID": string;
+  "Booking ID": string;
+  "Dispatch Status": string;
+  "Driver ID": string;
+  "Driver Name": string;
+  "Vehicle ID": string;
+  Vehicle: string;
+  "Pickup Date": string;
+  "Pickup Time": string;
+  Pickup: string;
+  Destination: string;
+  Passengers: string | number;
+  "Assigned At": string;
+  "En Route At": string;
+  "Passenger Onboard At": string;
+  "Completed At": string;
+  "Cancelled At": string;
+  Notes: string;
+}
+
+interface DispatchResponse {
+  success: boolean;
+  dispatches?: DispatchRecord[];
   message?: string;
   error?: string;
 }
@@ -246,6 +274,7 @@ function getConfirmedFirstPriority(
     default:
       return 5;
   }
+
 }
 
 function getPickupTimestamp(
@@ -271,12 +300,22 @@ function getPickupTimestamp(
 
   return timestamp;
 }
+function getDispatchForBooking(
+  bookingId: string,
+  dispatches: DispatchRecord[]
+): DispatchRecord | undefined {
+  return dispatches.find(
+    (dispatch) =>
+      dispatch["Booking ID"] === bookingId
+  );
+}
 
 export default function OperationsPage() {
   const [bookings, setBookings] = useState<
     BookingRecord[]
   >([]);
-
+const [dispatches, setDispatches] =
+  useState<DispatchRecord[]>([]);
   const [loading, setLoading] =
     useState(true);
 
@@ -326,19 +365,27 @@ export default function OperationsPage() {
         setLoading(true);
         setError("");
 
-        const [
-          bookingsResponse,
-          accountingResponse,
-        ] = await Promise.all([
-          fetch("/api/bookings", {
-            method: "GET",
-            cache: "no-store",
-          }),
-          fetch("/api/accounting", {
-            method: "GET",
-            cache: "no-store",
-          }),
-        ]);
+       const [
+  bookingsResponse,
+  accountingResponse,
+  dispatchResponse,
+] = await Promise.all([
+  fetch("/api/bookings", {
+    method: "GET",
+    cache: "no-store",
+  }),
+  fetch("/api/accounting", {
+    method: "GET",
+    cache: "no-store",
+  }),
+  fetch(
+    "/api/dispatch?action=listDispatch",
+    {
+      method: "GET",
+      cache: "no-store",
+    }
+  ),
+]);
 
         const bookingsData: BookingsResponse =
           await bookingsResponse.json();
@@ -356,6 +403,19 @@ export default function OperationsPage() {
 
         const accountingData: AccountingResponse =
           await accountingResponse.json();
+          const dispatchData: DispatchResponse =
+  await dispatchResponse.json();
+
+if (
+  !dispatchResponse.ok ||
+  !dispatchData.success
+) {
+  throw new Error(
+    dispatchData.message ??
+      dispatchData.error ??
+      "Unable to load dispatch data."
+  );
+}
 
         if (
           !accountingResponse.ok ||
@@ -440,6 +500,9 @@ export default function OperationsPage() {
         }
 
         setBookings(validBookings);
+        setDispatches(
+  dispatchData.dispatches ?? []
+);
         setFinancialByBookingId(financialMap);
       } catch (err) {
         console.error(
@@ -907,6 +970,9 @@ export default function OperationsPage() {
                       <th className="px-4 py-4 font-semibold">
                         Status
                       </th>
+                      <th className="px-4 py-4 font-semibold">
+                       Dispatch
+                      </th>
 
                       <th className="px-4 py-4 font-semibold">
                         Customer
@@ -1133,7 +1199,19 @@ export default function OperationsPage() {
                                 )}
                               </div>
                             </td>
-
+                                                         <td className="whitespace-nowrap px-4 py-4">
+                              <DispatchStatusBadge
+                                status={
+                                  getDispatchForBooking(
+                                    bookingId,
+                                    dispatches
+                                  )?.[
+                                    "Dispatch Status"
+                                  ] ??
+                                  "Not Dispatched"
+                                }
+                              />
+                            </td>
                             <td className="whitespace-nowrap px-4 py-4 text-sm text-slate-700">
                               {
                                 booking[
