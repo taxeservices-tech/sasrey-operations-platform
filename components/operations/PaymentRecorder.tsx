@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 type PaymentMethod =
   | "Credit Card"
@@ -8,8 +11,7 @@ type PaymentMethod =
 
 type PaymentType =
   | "Deposit"
-  | "Balance"
-  | "Other";
+  | "Balance";
 
 interface PaymentRecorderProps {
   bookingReference?: string;
@@ -39,6 +41,10 @@ export default function PaymentRecorder({
   balance,
   onPaymentRecorded,
 }: PaymentRecorderProps) {
+ console.log(
+  "PAYMENT RECORDER BOOKING REFERENCE:",
+  bookingReference
+);
   const [amountPaid, setAmountPaid] =
     useState("");
 
@@ -62,7 +68,35 @@ export default function PaymentRecorder({
 
   const [error, setError] =
     useState("");
+const normalizedDeposit =
+  typeof deposit === "number"
+    ? Math.max(deposit, 0)
+    : 0;
 
+const normalizedTotalPaid =
+  typeof totalPaid === "number"
+    ? Math.max(totalPaid, 0)
+    : 0;
+
+const remainingDeposit = Math.max(
+  normalizedDeposit - normalizedTotalPaid,
+  0
+);
+
+const depositSatisfied =
+  typeof deposit === "number" &&
+  remainingDeposit <= 0;
+ useEffect(() => {
+  if (
+    depositSatisfied &&
+    paymentType === "Deposit"
+  ) {
+    setPaymentType("Balance");
+  }
+}, [
+  depositSatisfied,
+  paymentType,
+]);
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>
   ) {
@@ -108,27 +142,27 @@ export default function PaymentRecorder({
       setSaving(true);
 
       const response = await fetch(
-        "/api/bookings",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            action: "recordPayment",
-            bookingReference:
-              normalizedBookingReference,
-            amountPaid:
-              parsedAmount,
-            paymentMethod,
-            paymentDate,
-            paymentReference:
-              normalizedPaymentReference,
-            paymentType,
-          }),
-        }
-      );
+  "/api/dispatch",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type":
+        "application/json",
+    },
+    body: JSON.stringify({
+      action: "recordPayment",
+      bookingReference:
+        normalizedBookingReference,
+      amountPaid:
+        parsedAmount,
+      paymentMethod,
+      paymentDate,
+      paymentReference:
+        normalizedPaymentReference,
+      paymentType,
+    }),
+  }
+);
 
       const data: PaymentResponse =
         await response.json();
@@ -396,17 +430,17 @@ export default function PaymentRecorder({
             className="mt-2 w-full rounded-xl border border-slate-300 p-4"
             disabled={saving}
           >
-            <option value="Deposit">
-              Deposit
-            </option>
-
-            <option value="Balance">
-              Balance
-            </option>
-
-            <option value="Other">
-              Other
-            </option>
+           <option
+  value="Deposit"
+  disabled={depositSatisfied}
+>
+  {depositSatisfied
+    ? "Deposit — Already Satisfied"
+    : "Deposit"}
+</option>
+ <option value="Balance">
+  Balance
+</option>     
           </select>
         </div>
 

@@ -27,28 +27,28 @@ export interface Route {
 
 export const routes: Route[] = [
   {
-    id: "AP001",
-    service: "Airport Transfer",
-    pickup: "MBJ Airport",
-    destination: "Montego Bay Hotels",
-    vehicle: "Toyota Noah",
+  id: "AP001",
+  service: "Airport Transfer",
+  pickup: "MBJ Airport",
+  destination: "Montego Bay Hotels",
+  vehicle: "Toyota Noah Station Wagon",
 
-    basePrice: 35,
-    roundTripPrice: 70,
+  basePrice: 35,
+  roundTripPrice: 70,
 
-    includedPassengers: 4,
-    additionalPassengerFee: 10,
+  includedPassengers: 4,
+  additionalPassengerFee: 10,
 
-    maxPassengers: 7,
+  maxPassengers: 7,
 
-    childSeatFee: 10,
-    extraStopFee: 15,
-    waitingTimeFee: 20,
+  childSeatFee: 10,
+  extraStopFee: 15,
+  waitingTimeFee: 20,
 
-    currency: "USD",
+  currency: "USD",
 
-    active: true,
-  },
+  active: true,
+},
   {
     id: "AP002",
     service: "Airport Transfer",
@@ -119,51 +119,52 @@ export const routes: Route[] = [
     active: true,
   },
   {
-    id: "AP005",
-    service: "Airport Transfer",
-    pickup: "MBJ Airport",
-    destination: "Negril",
-    vehicle: "Toyota Noah",
+  id: "AP002",
+  service: "Airport Transfer",
+  pickup: "MBJ Airport",
+  destination: "Negril",
+  vehicle: "Toyota Noah Station Wagon",
 
-    basePrice: 120,
-    roundTripPrice: 240,
+  basePrice: 120,
+  roundTripPrice: 240,
 
-    includedPassengers: 4,
-    additionalPassengerFee: 20,
+  includedPassengers: 4,
+  additionalPassengerFee: 20,
 
-    maxPassengers: 7,
+  maxPassengers: 7,
 
-    childSeatFee: 10,
-    extraStopFee: 15,
-    waitingTimeFee: 20,
+  childSeatFee: 10,
+  extraStopFee: 15,
+  waitingTimeFee: 20,
 
-    currency: "USD",
+  currency: "USD",
 
-    active: true,
-  },
+  active: true,
+},
+
   {
-    id: "AP006",
-    service: "Airport Transfer",
-    pickup: "MBJ Airport",
-    destination: "Ocho Rios",
-    vehicle: "Toyota Noah",
+  id: "AP003",
+  service: "Airport Transfer",
+  pickup: "MBJ Airport",
+  destination: "Ocho Rios",
+  vehicle: "Toyota Noah Station Wagon",
 
-    basePrice: 120,
-    roundTripPrice: 240,
+  basePrice: 90,
+  roundTripPrice: 180,
 
-    includedPassengers: 4,
-    additionalPassengerFee: 20,
+  includedPassengers: 4,
+  additionalPassengerFee: 20,
 
-    maxPassengers: 7,
+  maxPassengers: 7,
 
-    childSeatFee: 10,
-    extraStopFee: 15,
-    waitingTimeFee: 20,
+  childSeatFee: 10,
+  extraStopFee: 15,
+  waitingTimeFee: 20,
 
-    currency: "USD",
+  currency: "USD",
 
-    active: true,
-  },
+  active: true,
+},
   {
     id: "AP007",
     service: "Airport Transfer",

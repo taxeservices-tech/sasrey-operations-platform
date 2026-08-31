@@ -15,11 +15,11 @@ function getStatusClasses(status: string): string {
     case "passenger onboard":
       return "bg-purple-100 text-purple-700";
 
+    case "incident":
+      return "bg-orange-100 text-orange-700";
+
     case "completed":
       return "bg-green-100 text-green-700";
-
-    case "cancelled":
-      return "bg-red-100 text-red-700";
 
     case "not dispatched":
     default:

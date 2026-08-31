@@ -1,7 +1,17 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useState } from "react";
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
+type PaymentStatus =
+  | "Unpaid"
+  | "Partially Paid"
+  | "Deposit Paid"
+  | "Paid";
 interface PaymentRecord {
   "Booking ID"?: string;
   Total?: string | number;

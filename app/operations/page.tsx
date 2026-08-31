@@ -76,6 +76,7 @@ interface AccountingResponse {
 
 type PaymentStatus =
   | "Paid"
+  | "Deposit Paid"
   | "Partially Paid"
   | "Unpaid";
 
@@ -125,7 +126,6 @@ function toAmount(
     ? amount
     : 0;
 }
-
 function roundCurrency(
   value: number
 ): number {
@@ -142,14 +142,25 @@ function getPaymentStatus(
 ): PaymentStatus {
   const normalizedTotal =
     roundCurrency(Math.max(total, 0));
+
   const normalizedPaid =
     roundCurrency(Math.max(paid, 0));
+
+  const requiredDeposit =
+    roundCurrency(normalizedTotal * 0.25);
 
   if (
     normalizedTotal > 0 &&
     normalizedPaid >= normalizedTotal
   ) {
     return "Paid";
+  }
+
+  if (
+    normalizedTotal > 0 &&
+    normalizedPaid >= requiredDeposit
+  ) {
+    return "Deposit Paid";
   }
 
   if (normalizedPaid > 0) {
@@ -166,6 +177,9 @@ function getPaymentStatusClasses(
     case "Paid":
       return "bg-green-100 text-green-700";
 
+    case "Deposit Paid":
+      return "bg-blue-100 text-blue-700";
+
     case "Partially Paid":
       return "bg-amber-100 text-amber-700";
 
@@ -174,7 +188,6 @@ function getPaymentStatusClasses(
       return "bg-slate-100 text-slate-700";
   }
 }
-
 function getBookingFinancial(
   booking: BookingRecord,
   financialByBookingId: Map<

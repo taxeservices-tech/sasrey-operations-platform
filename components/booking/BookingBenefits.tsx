@@ -2,7 +2,7 @@ import { Wifi, Plane, ShieldCheck, MapPin } from "lucide-react";
 
 export default function BookingBenefits() {
   return (
-    <section className="mx-auto -mt-12 max-w-7xl px-6">
+    <section className="mx-auto mt-8 max-w-7xl px-6">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
 
         <div className="rounded-3xl bg-white p-8 shadow-lg">
@@ -31,6 +31,7 @@ export default function BookingBenefits() {
 
         <div className="rounded-3xl bg-white p-8 shadow-lg">
           <MapPin className="mb-4 text-sky-600" size={34} />
+
           <h3 className="text-lg font-bold">
             GPS Trip Tracking
           </h3>

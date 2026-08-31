@@ -96,19 +96,19 @@ export default function PaymentStep() {
             "Content-Type":
               "application/json",
           },
-          body: JSON.stringify({
-            action: "recordPayment",
-            bookingReference:
-              booking.bookingReference,
-            amountPaid: deposit,
-            paymentMethod:
-              booking.paymentMethod,
-            paymentDate:
-              new Date().toISOString(),
-            paymentReference:
-              paymentReference.trim(),
-            paymentType: "Deposit",
-          }),
+        body: JSON.stringify({
+  action: "recordPayment",
+  bookingReference:
+    booking.bookingReference,
+  amountPaid: deposit,
+  paymentMethod:
+    booking.paymentMethod,
+  paymentDate:
+    new Date().toISOString(),
+  paymentReference:
+    paymentReference.trim(),
+  paymentType: "Deposit",
+}),
         }
       );
 
