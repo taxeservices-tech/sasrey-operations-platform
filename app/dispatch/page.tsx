@@ -1410,7 +1410,7 @@ return (
                   );
 
                 result[service] =
-                  (result[service] || 0) + value;
+  Number(result[service] || 0) + Number(value);
 
                 return result;
               },
@@ -1418,9 +1418,26 @@ return (
             );
 
           const serviceRows = Object.entries(serviceRevenue)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 6);
+  .sort((a, b) => Number(b[1]) - Number(a[1]))
+  .slice(0, 6);
+const planningDays = 26;
 
+const requiredDailyBookedRevenue =
+  planningDays > 0
+    ? MONTHLY_REVENUE_TARGET / planningDays
+    : 0;
+
+const remainingBookedTarget = Math.max(
+  MONTHLY_REVENUE_TARGET - revenueBooked,
+  0
+);
+
+const bookingsNeededAtCurrentAverage =
+  averageBookingValue > 0
+    ? Math.ceil(
+        remainingBookedTarget / averageBookingValue
+      )
+    : 0;
           const currency = (value: number) =>
             `$${value.toLocaleString("en-US", {
               minimumFractionDigits: 2,
@@ -1544,7 +1561,7 @@ return (
                             {service}
                           </span>
                           <span className="text-sm font-black text-slate-900">
-                            {currency(value)}
+                            {currency(Number(value) || 0)}
                           </span>
                         </div>
                       ))}
