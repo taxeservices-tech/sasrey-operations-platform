@@ -35,6 +35,8 @@ export default function BookingSummary() {
         booking.tripType ?? "One Way",
       passengers:
         booking.passengers ?? 1,
+      tourType:
+        booking.tourType,
       childSeat:
         (booking.childSeat ?? 0) > 0,
       extraStop:
