@@ -94,8 +94,7 @@ export default function RevenueTargetStrategy({
           normalizeServiceName(target.name)
       );
 
-            const averageValue =
-        matchingService?.averageValue ||
+      const averageValue =
         target.strategicAverageBookingValue;
       const bookingsNeeded =
         averageValue > 0
