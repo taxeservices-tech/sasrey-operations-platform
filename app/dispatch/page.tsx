@@ -5,7 +5,7 @@ import {
   useMemo,
   useState,
 } from "react";
-
+import RevenueTargetStrategy from "@/components/operations/RevenueTargetStrategy";
 type SheetRow = Record<
   string,
   string | number | undefined
@@ -1608,6 +1608,12 @@ const bookingsNeededAtCurrentAverage =
                   </div>
                 </div>
               </div>
+                        <RevenueTargetStrategy
+              monthlyTarget={MONTHLY_REVENUE_TARGET}
+              planningDays={planningDays}
+              bookedRevenue={revenueBooked}
+              averageBookingValue={averageBookingValue}
+            />
             </section>
           );
         })()}
