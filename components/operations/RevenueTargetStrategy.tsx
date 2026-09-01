@@ -1,5 +1,26 @@
 "use client";
-
+const SERVICE_TARGET_MIX = [
+  {
+    name: "Airport Transfers",
+    percentage: 0.15,
+  },
+  {
+    name: "Hotel Transfers",
+    percentage: 0.10,
+  },
+  {
+    name: "Private Tours",
+    percentage: 0.25,
+  },
+  {
+    name: "Full-Day Tours",
+    percentage: 0.30,
+  },
+  {
+    name: "Custom/Private Excursions",
+    percentage: 0.20,
+  },
+];
 type RevenueTargetStrategyProps = {
   monthlyTarget: number;
   planningDays: number;
@@ -51,7 +72,46 @@ export default function RevenueTargetStrategy({
       };
     })
     .sort((a, b) => b.revenue - a.revenue);
-   const currency = (value: number | undefined) =>
+     const strategicServiceTargets =
+    SERVICE_TARGET_MIX.map((target) => {
+      const targetRevenue =
+        monthlyTarget * target.percentage;
+
+            const normalizeServiceName = (value: string) =>
+        value
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, "")
+          .replace(/s$/, "");
+
+      const matchingService = serviceRows.find(
+        (row) =>
+          normalizeServiceName(row.service) ===
+          normalizeServiceName(target.name)
+      );
+
+      const averageValue =
+        matchingService?.averageValue ||
+        averageBookingValue;
+
+      const bookingsNeeded =
+        averageValue > 0
+          ? Math.ceil(
+              targetRevenue / averageValue
+            )
+          : 0;
+
+      const currentRevenue =
+        matchingService?.revenue || 0;
+
+      return {
+        ...target,
+        targetRevenue,
+        currentRevenue,
+        averageValue,
+        bookingsNeeded,
+      };
+    });
+    const currency = (value: number | undefined) =>
   `$${(value ?? 0).toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
