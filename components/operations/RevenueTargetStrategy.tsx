@@ -3,22 +3,27 @@ const SERVICE_TARGET_MIX = [
   {
     name: "Airport Transfers",
     percentage: 0.15,
+    strategicAverageBookingValue: 75,
   },
   {
     name: "Hotel Transfers",
     percentage: 0.10,
+    strategicAverageBookingValue: 100,
   },
   {
     name: "Private Tours",
     percentage: 0.25,
+    strategicAverageBookingValue: 275,
   },
   {
     name: "Full-Day Tours",
     percentage: 0.30,
+    strategicAverageBookingValue: 350,
   },
   {
     name: "Custom/Private Excursions",
     percentage: 0.20,
+    strategicAverageBookingValue: 450,
   },
 ];
 type RevenueTargetStrategyProps = {
@@ -89,10 +94,9 @@ export default function RevenueTargetStrategy({
           normalizeServiceName(target.name)
       );
 
-      const averageValue =
+            const averageValue =
         matchingService?.averageValue ||
-        averageBookingValue;
-
+        target.strategicAverageBookingValue;
       const bookingsNeeded =
         averageValue > 0
           ? Math.ceil(
