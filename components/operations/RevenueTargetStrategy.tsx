@@ -135,6 +135,83 @@ export default function RevenueTargetStrategy({
             {currency(averageBookingValue)}
           </p>
         </div>
+       </div>
+          <div className="mt-4 rounded-xl bg-white p-4 shadow-sm">
+        <div className="mb-4">
+          <p className="text-sm font-bold text-slate-900">
+            Service Performance
+          </p>
+
+          <p className="text-xs text-slate-500">
+            Current-month revenue, booking volume, and average value by service.
+          </p>
+        </div>
+
+        {serviceRows.length === 0 ? (
+          <p className="text-sm text-slate-500">
+            No service performance data is available yet.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {serviceRows.map(
+              ({
+                service,
+                revenue,
+                bookingCount,
+                averageValue,
+              }) => {
+                const revenueShare =
+                  bookedRevenue > 0
+                    ? (revenue / bookedRevenue) * 100
+                    : 0;
+
+                return (
+                  <div
+                    key={service}
+                    className="rounded-xl border border-slate-200 p-4"
+                  >
+                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                      <div>
+                        <p className="font-bold text-slate-900">
+                          {service}
+                        </p>
+
+                        <p className="mt-1 text-xs text-slate-500">
+                          {bookingCount} booking
+                          {bookingCount === 1 ? "" : "s"}
+                          {" · "}
+                          {revenueShare.toFixed(1)}% of booked revenue
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 text-right">
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                            Revenue
+                          </p>
+
+                          <p className="font-black text-slate-900">
+                            {currency(revenue)}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                            Avg. Booking
+                          </p>
+
+                          <p className="font-black text-slate-900">
+                            {currency(averageValue)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
