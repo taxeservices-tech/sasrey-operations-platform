@@ -218,30 +218,39 @@ export function validateTripDetails(
     );
   }
 
-  const matchingRoute =
-  booking.pickup &&
-  booking.destination &&
-  booking.serviceCategory &&
-  booking.passengers !== undefined
-    ? findBookingRoute({
-        service: booking.serviceCategory,
-        pickup: booking.pickup,
-        destination: booking.destination,
-        passengers: booking.passengers,
-      })
-    : null;
 
-  if (
-  booking.passengers !== undefined &&
-  booking.pickup &&
-  booking.destination &&
-  booking.serviceCategory &&
-  !matchingRoute
-) {
-  errors.push(
-    "No vehicle is available for the selected passenger count."
-  );
-}
+
+
+  if (booking.serviceCategory === "Tour") {
+    if (!booking.tourType) {
+      errors.push("Tour type is required.");
+    }
+  } else {
+    const matchingRoute =
+      booking.pickup &&
+      booking.destination &&
+      booking.serviceCategory &&
+      booking.passengers !== undefined
+        ? findBookingRoute({
+            service: booking.serviceCategory,
+            pickup: booking.pickup,
+            destination: booking.destination,
+            passengers: booking.passengers,
+          })
+        : null;
+
+    if (
+      booking.passengers !== undefined &&
+      booking.pickup &&
+      booking.destination &&
+      booking.serviceCategory &&
+      !matchingRoute
+    ) {
+      errors.push(
+        "No vehicle is available for the selected passenger count."
+      );
+    }
+  }
 
   return {
     valid: errors.length === 0,
