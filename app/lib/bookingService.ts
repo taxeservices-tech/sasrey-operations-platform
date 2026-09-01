@@ -32,6 +32,7 @@ export async function processBooking(
     destination: booking.destination,
     tripType: booking.tripType,
     passengers: booking.passengers,
+    tourType: booking.tourType,
     childSeat: booking.childSeat > 0,
     extraStop: booking.extraStop > 0,
     waitingTimeHours: booking.waitingTimeHours,
@@ -41,20 +42,28 @@ export async function processBooking(
     return {
       success: false,
       errors: [
-        `No active ${booking.serviceCategory} route found for ${booking.pickup} to ${booking.destination}.`,
+        booking.serviceCategory === "Tour"
+          ? "Unable to calculate pricing for the selected tour."
+          : `No active ${booking.serviceCategory} route found for ${booking.pickup} to ${booking.destination}.`,
       ],
     };
   }
 
-  const route = routes.find(
-    (item) =>
-      item.pickup === booking.pickup &&
-      item.destination === booking.destination &&
-      item.service === booking.serviceCategory &&
-      item.vehicle === pricing.vehicle
-  );
+  const route =
+    booking.serviceCategory === "Tour"
+      ? null
+      : routes.find(
+          (item) =>
+            item.pickup === booking.pickup &&
+            item.destination === booking.destination &&
+            item.service === booking.serviceCategory &&
+            item.vehicle === pricing.vehicle
+        );
 
-  if (!route) {
+  if (
+    booking.serviceCategory !== "Tour" &&
+    !route
+  ) {
     return {
       success: false,
       errors: [
@@ -86,7 +95,7 @@ export async function processBooking(
 
     balance: pricing.balance,
 
-    routeId: route.id,
+    routeId: route?.id,
   };
 
   await saveBooking(
