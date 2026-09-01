@@ -432,6 +432,10 @@ export default function BookingForm() {
             placeholder="Automatically selected"
           />
         </div>
+
+        {booking.serviceCategory === "Tour" && (
+          <TourBookingForm />
+        )}
       </div>
 
       {/* Optional Extras */}
