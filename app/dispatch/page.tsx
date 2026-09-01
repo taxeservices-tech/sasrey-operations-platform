@@ -1627,11 +1627,27 @@ const bookingsNeededAtCurrentAverage =
                 </div>
               </div>
                         <RevenueTargetStrategy
-              monthlyTarget={MONTHLY_REVENUE_TARGET}
-              planningDays={planningDays}
-              bookedRevenue={revenueBooked}
-              averageBookingValue={averageBookingValue}
-            />
+                monthlyTarget={MONTHLY_REVENUE_TARGET}
+                planningDays={planningDays}
+                bookedRevenue={revenueBooked}
+                averageBookingValue={averageBookingValue}
+                serviceRevenue={Object.fromEntries(
+                  Object.entries(serviceRevenue).map(
+                    ([service, value]) => [
+                      service,
+                      Number(value) || 0,
+                    ]
+                  )
+                )}
+                serviceBookingCounts={Object.fromEntries(
+                  Object.entries(serviceBookingCounts).map(
+                    ([service, value]) => [
+                      service,
+                      Number(value) || 0,
+                    ]
+                  )
+                )}
+              />
             </section>
           );
         })()}

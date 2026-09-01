@@ -5,6 +5,8 @@ type RevenueTargetStrategyProps = {
   planningDays: number;
   bookedRevenue: number;
   averageBookingValue: number;
+  serviceRevenue: Record<string, number>;
+  serviceBookingCounts: Record<string, number>;
 };
 
 export default function RevenueTargetStrategy({
@@ -12,6 +14,8 @@ export default function RevenueTargetStrategy({
   planningDays,
   bookedRevenue,
   averageBookingValue,
+  serviceRevenue,
+  serviceBookingCounts,
 }: RevenueTargetStrategyProps) {
   const requiredDailyBookedRevenue =
     planningDays > 0
