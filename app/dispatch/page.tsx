@@ -1416,7 +1416,25 @@ return (
               },
               {} as Record<string, number>
             );
+            const serviceBookingCounts =
+            currentMonthBookings.reduce(
+              (result, booking) => {
+                const service =
+                  getValue(
+                    booking,
+                    "Service Type",
+                    "Service",
+                    "Tour Type",
+                    "Booking Type"
+                  ) || "Other Services";
 
+                result[service] =
+                  Number(result[service] || 0) + 1;
+
+                return result;
+              },
+              {} as Record<string, number>
+            );
           const serviceRows = Object.entries(serviceRevenue)
   .sort((a, b) => Number(b[1]) - Number(a[1]))
   .slice(0, 6);
