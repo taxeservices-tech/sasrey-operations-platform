@@ -33,7 +33,24 @@ export default function RevenueTargetStrategy({
           remainingBookedTarget / averageBookingValue
         )
       : 0;
+   const serviceRows = Object.entries(serviceRevenue)
+    .map(([service, revenue]) => {
+      const bookingCount =
+        serviceBookingCounts[service] || 0;
 
+      const averageValue =
+        bookingCount > 0
+          ? revenue / bookingCount
+          : 0;
+
+      return {
+        service,
+        revenue,
+        bookingCount,
+        averageValue,
+      };
+    })
+    .sort((a, b) => b.revenue - a.revenue);
    const currency = (value: number | undefined) =>
   `$${(value ?? 0).toLocaleString("en-US", {
     minimumFractionDigits: 2,
