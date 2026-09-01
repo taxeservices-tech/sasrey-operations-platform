@@ -272,7 +272,107 @@ export default function RevenueTargetStrategy({
             )}
           </div>
         )}
+         <div className="mt-4 rounded-xl bg-white p-4 shadow-sm">
+        <div className="mb-4">
+          <p className="text-sm font-bold text-slate-900">
+            Target Service Mix
+          </p>
+
+          <p className="text-xs text-slate-500">
+            Recommended revenue mix to reach the monthly target.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          {strategicServiceTargets.map(
+            ({
+              name,
+              percentage,
+              targetRevenue,
+              currentRevenue,
+              averageValue,
+              bookingsNeeded,
+            }) => {
+              const revenueGap = Math.max(
+                targetRevenue - currentRevenue,
+                0
+              );
+
+              return (
+                <div
+                  key={name}
+                  className="rounded-xl border border-slate-200 p-4"
+                >
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                      <p className="font-bold text-slate-900">
+                        {name}
+                      </p>
+
+                      <p className="mt-1 text-xs text-slate-500">
+                        {(percentage * 100).toFixed(0)}% of monthly target
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 text-right sm:grid-cols-4">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                          Target
+                        </p>
+
+                        <p className="font-black text-slate-900">
+                          {currency(targetRevenue)}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                          Current
+                        </p>
+
+                        <p className="font-black text-slate-900">
+                          {currency(currentRevenue)}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                          Gap
+                        </p>
+
+                        <p className="font-black text-slate-900">
+                          {currency(revenueGap)}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                          Bookings Needed
+                        </p>
+
+                        <p className="font-black text-slate-900">
+                          {bookingsNeeded}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
+                    <span className="text-xs text-slate-500">
+                      Current average booking
+                    </span>
+
+                    <span className="text-sm font-bold text-slate-700">
+                      {currency(averageValue)}
+                    </span>
+                  </div>
+                </div>
+              );
+            }
+          )}
+        </div>
       </div>
+     </div>
     </div>
   );
 }
