@@ -111,6 +111,24 @@ export default function RevenueTargetStrategy({
         bookingsNeeded,
       };
     });
+       const salesFocusPriorities =
+      strategicServiceTargets
+        .map((service) => ({
+          ...service,
+          revenueGap: Math.max(
+            service.targetRevenue -
+              service.currentRevenue,
+            0
+          ),
+        }))
+        .filter(
+          (service) =>
+            service.revenueGap > 0
+        )
+        .sort(
+          (a, b) =>
+            b.revenueGap - a.revenueGap
+        );
     const currency = (value: number | undefined) =>
   `$${(value ?? 0).toLocaleString("en-US", {
     minimumFractionDigits: 2,
