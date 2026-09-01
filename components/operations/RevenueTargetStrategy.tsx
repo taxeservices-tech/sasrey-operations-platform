@@ -391,6 +391,105 @@ export default function RevenueTargetStrategy({
         </div>
       </div>
      </div>
+         <div className="mt-4 rounded-xl bg-white p-4 shadow-sm">
+        <div className="mb-4">
+          <p className="text-sm font-bold text-slate-900">
+            Sales Focus Priorities
+          </p>
+
+          <p className="text-xs text-slate-500">
+            Highest revenue gaps to prioritize when working toward the monthly target.
+          </p>
+        </div>
+
+        {salesFocusPriorities.length === 0 ? (
+          <p className="text-sm text-slate-500">
+            No additional sales gap is currently identified.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {salesFocusPriorities.map(
+              (
+                {
+                  name,
+                  targetRevenue,
+                  currentRevenue,
+                  revenueGap,
+                  averageValue,
+                  bookingsNeeded,
+                },
+                index
+              ) => (
+                <div
+                  key={name}
+                  className="rounded-xl border border-slate-200 p-4"
+                >
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wide text-emerald-600">
+                        Priority #{index + 1}
+                      </p>
+
+                      <p className="mt-1 font-bold text-slate-900">
+                        {name}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 text-right sm:grid-cols-4">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                          Target
+                        </p>
+
+                        <p className="font-black text-slate-900">
+                          {currency(targetRevenue)}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                          Current
+                        </p>
+
+                        <p className="font-black text-slate-900">
+                          {currency(currentRevenue)}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                          Revenue Gap
+                        </p>
+
+                        <p className="font-black text-slate-900">
+                          {currency(revenueGap)}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                          Bookings Needed
+                        </p>
+
+                        <p className="font-black text-slate-900">
+                          {bookingsNeeded}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 border-t border-slate-100 pt-3 text-xs text-slate-500">
+                    Based on an average booking value of{" "}
+                    <span className="font-bold text-slate-700">
+                      {currency(averageValue)}
+                    </span>
+                  </div>
+                </div>
+              )
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
