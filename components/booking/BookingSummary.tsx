@@ -19,8 +19,15 @@ export default function BookingSummary() {
 
   const quote = useMemo(() => {
     if (
-      !booking.pickup ||
-      !booking.destination
+      booking.serviceCategory !== "Tour" &&
+      (!booking.pickup || !booking.destination)
+    ) {
+      return null;
+    }
+
+    if (
+      booking.serviceCategory === "Tour" &&
+      !booking.tourType
     ) {
       return null;
     }
@@ -29,8 +36,8 @@ export default function BookingSummary() {
      service:
        booking.serviceCategory ??
       "Airport Transfer",
-      pickup: booking.pickup,
-      destination: booking.destination,
+       pickup: booking.pickup ?? "",
+      destination: booking.destination ?? "",
       tripType:
         booking.tripType ?? "One Way",
       passengers:

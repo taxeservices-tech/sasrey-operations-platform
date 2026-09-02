@@ -5,8 +5,12 @@ import TravelDetails from "./TravelDetails";
 import ServiceCategory from "./ServiceCategory";
 import PickupDestination from "./PickupDestination";
 import FlightDetails from "./FlightDetails";
+import TourBookingForm from "../TourBookingForm";
+import { useBooking } from "@/context/BookingContext";
 
 export default function TripDetailsStep() {
+  const { booking } = useBooking();
+
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-lg">
       {/* Section heading */}
@@ -27,7 +31,7 @@ export default function TripDetailsStep() {
       {/* Trip information */}
       <div className="mt-8 space-y-8">
         <ServiceCategory />
-
+        {booking.serviceCategory === "Tour" && <TourBookingForm />}
         <PickupDestination />
 
         <TravelDetails />

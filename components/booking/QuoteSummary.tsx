@@ -8,25 +8,40 @@ export default function QuoteSummary() {
   const { booking } = useBooking();
 
   const quote = useMemo(() => {
-    if (!booking.pickup || !booking.destination) {
+    if (
+      booking.serviceCategory !== "Tour" &&
+      (!booking.pickup || !booking.destination)
+    ) {
       return null;
     }
 
-    return calculateBookingPrice({
+    if (
+      booking.serviceCategory === "Tour" &&
+      !booking.tourType
+    ) {
+      return null;
+    }
+
+        return calculateBookingPrice({
       service:
         booking.serviceCategory ??
         "Airport Transfer",
-      pickup: booking.pickup,
-      destination: booking.destination,
-      tripType: booking.tripType ?? "One Way",
-      passengers: booking.passengers ?? 1,
-      childSeat: (booking.childSeat ?? 0) > 0,
-      extraStop: (booking.extraStop ?? 0) > 0,
+      pickup: booking.pickup ?? "",
+      destination: booking.destination ?? "",
+      tripType:
+        booking.tripType ?? "One Way",
+      passengers:
+        booking.passengers ?? 1,
+      tourType:
+        booking.tourType,
+      childSeat:
+        (booking.childSeat ?? 0) > 0,
+      extraStop:
+        (booking.extraStop ?? 0) > 0,
       waitingTimeHours:
         booking.waitingTimeHours ?? 0,
     });
   }, [booking]);
-
   return (
     <aside className="h-fit self-start rounded-3xl bg-slate-900 p-8 text-white shadow-xl lg:sticky lg:top-6">
       {/* Header */}
@@ -40,8 +55,10 @@ export default function QuoteSummary() {
         </h2>
 
         <p className="mt-2 text-sm text-slate-400">
-          Your estimated transfer cost
-        </p>
+  {booking.serviceCategory === "Tour"
+    ? "Your estimated tour cost"
+    : "Your estimated transfer cost"}
+</p>
       </div>
 
       {!quote ? (
@@ -60,29 +77,44 @@ export default function QuoteSummary() {
 
           {/* Trip */}
           <div className="rounded-2xl bg-slate-800 p-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-sky-400">
-              Your Trip
-            </p>
+           <p className="text-xs font-bold uppercase tracking-widest text-sky-400">
+  {booking.serviceCategory === "Tour"
+    ? "Your Tour"
+    : "Your Trip"}
+</p>
 
             <div className="mt-4 space-y-4">
 
-              <div>
-                <p className="text-xs text-slate-400">
-                  Pickup
-                </p>
-                <p className="mt-1 font-semibold">
-                  {booking.pickup}
-                </p>
-              </div>
+                            {booking.serviceCategory === "Tour" ? (
+                <div>
+                  <p className="text-xs text-slate-400">
+                    Tour Type
+                  </p>
+                  <p className="mt-1 font-semibold">
+                    {booking.tourType}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <p className="text-xs text-slate-400">
+                      Pickup
+                    </p>
+                    <p className="mt-1 font-semibold">
+                      {booking.pickup}
+                    </p>
+                  </div>
 
-              <div>
-                <p className="text-xs text-slate-400">
-                  Destination
-                </p>
-                <p className="mt-1 font-semibold">
-                  {booking.destination}
-                </p>
-              </div>
+                  <div>
+                    <p className="text-xs text-slate-400">
+                      Destination
+                    </p>
+                    <p className="mt-1 font-semibold">
+                      {booking.destination}
+                    </p>
+                  </div>
+                </>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -103,17 +135,16 @@ export default function QuoteSummary() {
                   </p>
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-slate-400">
-                    Passengers
-                  </p>
-                  <p className="mt-1 font-semibold">
-                    {booking.passengers ?? 1}
-                  </p>
-                </div>
-
+              <div>
+                <p className="text-xs text-slate-400">
+                  Passengers
+                </p>
+                <p className="mt-1 font-semibold">
+                  {booking.passengers ?? 1}
+                </p>
+              </div>
+              {booking.serviceCategory !== "Tour" && (
                 <div>
                   <p className="text-xs text-slate-400">
                     Trip Type
@@ -122,11 +153,10 @@ export default function QuoteSummary() {
                     {booking.tripType ?? "One Way"}
                   </p>
                 </div>
-              </div>
-
+              )}
             </div>
-          </div>
-
+            </div>
+           </div>
           {/* Vehicle */}
           <div className="flex items-center justify-between rounded-2xl border border-slate-700 px-5 py-4">
             <div>
