@@ -41,6 +41,29 @@ export default function TourBookingForm() {
       <p className="mt-2 text-xs text-slate-500">
         Select the type of private tour or excursion you would like.
       </p>
+
+      <div className="mt-6">
+        <label className="mb-2 block font-semibold text-slate-900">
+          Tour Destination / Attractions
+        </label>
+
+        <textarea
+          className="w-full rounded-xl border border-slate-300 bg-white p-4"
+          rows={3}
+          value={booking.tourDestination ?? ""}
+          onChange={(e) =>
+            updateBooking({
+              tourDestination: e.target.value,
+            })
+          }
+          placeholder="e.g. Negril, Seven Mile Beach & Rick's Café"
+        />
+
+        <p className="mt-2 text-xs text-slate-500">
+          Tell us where you would like to go or the attractions you would like
+          to visit.
+        </p>
+      </div>
     </div>
   );
 }

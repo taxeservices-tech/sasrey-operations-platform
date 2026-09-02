@@ -23,6 +23,7 @@ tourType?:
   | "Private Tour"
   | "Full-Day Tour"
   | "Custom/Private Excursion";
+tourDestination?: string;
 
   // Passenger Details
   customerName: string;

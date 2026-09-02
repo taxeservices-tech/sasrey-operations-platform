@@ -18,10 +18,26 @@ export default function PaymentStep() {
     useState(false);
 
   const quote =
-    booking.pickup &&
-    booking.destination &&
-    booking.tripType &&
-    booking.passengers
+    booking.passengers &&
+    booking.serviceCategory === "Tour"
+      ? calculateBookingPrice({
+          service: "Tour",
+          pickup: booking.pickup,
+          destination: booking.destination,
+          tripType: booking.tripType,
+          passengers: booking.passengers,
+          tourType: booking.tourType,
+          childSeat:
+            (booking.childSeat ?? 0) > 0,
+          extraStop:
+            (booking.extraStop ?? 0) > 0,
+          waitingTimeHours:
+            booking.waitingTimeHours ?? 0,
+        })
+      : booking.pickup &&
+        booking.destination &&
+        booking.tripType &&
+        booking.passengers
       ? calculateBookingPrice({
           service:
             booking.serviceCategory ??
@@ -30,6 +46,7 @@ export default function PaymentStep() {
           destination: booking.destination,
           tripType: booking.tripType,
           passengers: booking.passengers,
+          tourType: booking.tourType,
           childSeat:
             (booking.childSeat ?? 0) > 0,
           extraStop:

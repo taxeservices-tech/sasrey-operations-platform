@@ -3,10 +3,10 @@ import { findBookingRoute } from "./routeResolver";
 export interface BookingPriceInput {
   service: "Airport Transfer" | "Tour";
 
-  pickup: string;
-  destination: string;
+  pickup?: string;
+  destination?: string;
 
-  tripType: "One Way" | "Round Trip";
+  tripType?: "One Way" | "Round Trip";
 
   passengers: number;
 
@@ -119,6 +119,14 @@ export function calculateBookingPrice(
    *
    * Existing route-based pricing remains unchanged.
    */
+  if (
+    !booking.pickup ||
+    !booking.destination ||
+    !booking.tripType
+  ) {
+    return null;
+  }
+
   const route = findBookingRoute({
     service: booking.service,
     pickup: booking.pickup,

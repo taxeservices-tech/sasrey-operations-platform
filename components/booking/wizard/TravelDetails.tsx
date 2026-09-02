@@ -111,31 +111,33 @@ export default function TravelDetails() {
       </div>
 
       {/* Trip Type */}
-      <div>
-        <label className="mb-2 block font-semibold">
-          Trip Type
-        </label>
+      {booking.serviceCategory !== "Tour" && (
+        <div>
+          <label className="mb-2 block font-semibold">
+            Trip Type
+          </label>
 
-        <select
-          className="w-full rounded-xl border border-slate-300 p-4"
-          value={booking.tripType ?? "One Way"}
-          onChange={(e) =>
-            updateBooking({
-              tripType: e.target.value as
-                | "One Way"
-                | "Round Trip",
-            })
-          }
-        >
-          <option value="One Way">
-            One Way
-          </option>
+          <select
+            className="w-full rounded-xl border border-slate-300 p-4"
+            value={booking.tripType ?? "One Way"}
+            onChange={(e) =>
+              updateBooking({
+                tripType: e.target.value as
+                  | "One Way"
+                  | "Round Trip",
+              })
+            }
+          >
+            <option value="One Way">
+              One Way
+            </option>
 
-          <option value="Round Trip">
-            Round Trip
-          </option>
-        </select>
-      </div>
+            <option value="Round Trip">
+              Round Trip
+            </option>
+          </select>
+        </div>
+      )}
 
       {/* Waiting Time */}
       <div>

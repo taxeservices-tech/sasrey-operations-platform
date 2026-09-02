@@ -96,26 +96,35 @@ export function validateTripDetails(
 ): ValidationResult {
   const errors: string[] = [];
 
-  if (!booking.pickup) {
-    errors.push("Pickup location is required.");
-  }
+  if (booking.serviceCategory !== "Tour") {
+    if (!booking.pickup) {
+      errors.push("Pickup location is required.");
+    }
 
-  if (!booking.destination) {
-    errors.push("Destination is required.");
+    if (!booking.destination) {
+      errors.push("Destination is required.");
+    }
+
+    if (
+      booking.pickup &&
+      booking.destination &&
+      booking.pickup === booking.destination
+    ) {
+      errors.push(
+        "Pickup and destination cannot be the same."
+      );
+    }
+
+    if (!booking.tripType) {
+      errors.push("Trip type is required.");
+    }
   }
 
   if (
-    booking.pickup &&
-    booking.destination &&
-    booking.pickup === booking.destination
+    booking.serviceCategory === "Tour" &&
+    !booking.tourDestination?.trim()
   ) {
-    errors.push(
-      "Pickup and destination cannot be the same."
-    );
-  }
-
-  if (!booking.tripType) {
-    errors.push("Trip type is required.");
+    errors.push("Tour destination or attractions are required.");
   }
 
   if (!booking.pickupDate) {

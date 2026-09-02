@@ -31,8 +31,11 @@ export default function TripDetailsStep() {
       {/* Trip information */}
       <div className="mt-8 space-y-8">
         <ServiceCategory />
-        {booking.serviceCategory === "Tour" && <TourBookingForm />}
-        <PickupDestination />
+        {booking.serviceCategory === "Tour" ? (
+          <TourBookingForm />
+        ) : (
+          <PickupDestination />
+        )}
 
         <TravelDetails />
 
