@@ -43,3 +43,8 @@ next-env.d.ts
 # local test/export data
 /accounting.json
 /bookings.json
+
+# local SQLite database
+/data/*.db
+/data/*.db-shm
+/data/*.db-wal
