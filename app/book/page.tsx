@@ -11,7 +11,9 @@ export default function BookPage() {
 
       <BookingBenefits />
 
-      <BookingWizard />
+      <section className="mx-auto mt-8 max-w-7xl px-6">
+        <BookingWizard />
+      </section>
     </main>
   );
 }

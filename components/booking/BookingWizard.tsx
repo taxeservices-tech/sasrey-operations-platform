@@ -187,12 +187,11 @@ export default function BookingWizard() {
 
       <div className="mb-10">
         <h2 className="text-4xl font-black text-slate-900">
-          Booking Wizard
+          Book Your Ride
         </h2>
 
         <p className="mt-3 text-slate-600">
-          Book your airport transfer in a few simple
-          steps.
+          Complete your booking in just a few easy steps.
         </p>
       </div>
 
