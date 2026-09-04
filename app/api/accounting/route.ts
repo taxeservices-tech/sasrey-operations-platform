@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireRole } from "@/app/lib/auth/authorization";
 
 interface PaymentRecord {
   "Booking ID"?: string;
@@ -206,9 +207,18 @@ function buildAccountingSummary(
     unpaidBookingCount,
   };
 }
-
 export async function GET() {
+  const authorization = await requireRole([
+    "ADMIN",
+    "MANAGER",
+  ]);
+
+  if (!authorization.authorized) {
+    return authorization.response;
+  }
+
   try {
+
     const appsScriptUrl =
       process.env.GOOGLE_APPS_SCRIPT_URL;
 
