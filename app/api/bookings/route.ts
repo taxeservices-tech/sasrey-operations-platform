@@ -23,6 +23,23 @@ export async function POST(request: NextRequest) {
 
     const booking = await request.json();
 
+    const action = String(
+      booking?.action ?? ""
+    ).trim();
+
+    if (action === "updateStatus") {
+      const authorization =
+        await requireRole([
+          "ADMIN",
+          "MANAGER",
+          "SALES",
+          "DISPATCHER",
+        ]);
+
+      if (!authorization.authorized) {
+        return authorization.response;
+      }
+    }
     if (!appsScriptUrl) {
       return NextResponse.json(
         {
