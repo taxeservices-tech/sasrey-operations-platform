@@ -1,4 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  requireRole,
+  type UserRole,
+} from "@/app/lib/auth/authorization";
+import {
+  dispatchActionPermissions,
+} from "@/app/lib/auth/dispatchPermissions";
 
 interface AppsScriptResponse {
   success?: boolean;
@@ -18,6 +25,25 @@ interface AppsScriptResponse {
   vehicles?: unknown[];
 }
 
+type DispatchAction =
+  keyof typeof dispatchActionPermissions;
+
+function getAllowedRoles(
+  action: string
+): readonly UserRole[] | null {
+  if (
+    !Object.prototype.hasOwnProperty.call(
+      dispatchActionPermissions,
+      action
+    )
+  ) {
+    return null;
+  }
+
+  return dispatchActionPermissions[
+    action as DispatchAction
+  ];
+}
 function getAppsScriptUrl(): string {
   const appsScriptUrl =
     process.env.GOOGLE_APPS_SCRIPT_URL;
@@ -61,18 +87,39 @@ async function parseAppsScriptResponse(
 export async function GET(
   request: NextRequest
 ) {
+const requestedAction =
+    request.nextUrl.searchParams.get(
+      "action"
+    ) ?? "listDispatch";
+
+  const action =
+    requestedAction.trim() ||
+    "listDispatch";
+
+  const allowedRoles =
+    getAllowedRoles(action);
+
+  if (!allowedRoles) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Invalid dispatch action.",
+      },
+      { status: 400 }
+    );
+  }
+
+  const authorization =
+    await requireRole([
+      ...allowedRoles,
+    ]);
+
+  if (!authorization.authorized) {
+    return authorization.response;
+  }
   try {
     const appsScriptUrl =
       getAppsScriptUrl();
-
-    const requestedAction =
-      request.nextUrl.searchParams.get(
-        "action"
-      ) ?? "listDispatch";
-
-    const action =
-      requestedAction.trim() ||
-      "listDispatch";
 
     console.log(
       "Dispatch GET action:",
