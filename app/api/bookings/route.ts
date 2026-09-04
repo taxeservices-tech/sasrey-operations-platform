@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireRole } from "@/app/lib/auth/authorization";
 
 interface AppsScriptResponse {
   success?: boolean;
@@ -122,7 +123,19 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
+  const authorization = await requireRole([
+    "ADMIN",
+    "MANAGER",
+    "SALES",
+    "DISPATCHER",
+  ]);
+
+  if (!authorization.authorized) {
+    return authorization.response;
+  }
+
   try {
+
     const appsScriptUrl =
       process.env.GOOGLE_APPS_SCRIPT_URL;
 
