@@ -4,6 +4,7 @@ import DispatchStatusBadge from "@/components/operations/DispatchStatusBadge";
 import PaymentRecorder from "@/components/operations/PaymentRecorder";
 import PaymentsLedger from "@/components/accounting/PaymentsLedger";
 import AccountingSummary from "@/components/accounting/AccountingSummary";
+import SignOutButton from "@/components/auth/SignOutButton";
 
 interface BookingRecord {
   "Booking ID": string;
@@ -723,14 +724,20 @@ if (
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-12">
       <div className="mx-auto max-w-[1800px]">
-        <div className="mb-10">
-  <p className="text-sm font-semibold uppercase tracking-[0.3em] text-sky-600">
-    SASREY Operations
-  </p>
+      <div className="mb-10">
+  <div className="flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <p className="text-sm font-semibold uppercase tracking-[0.3em] text-sky-600">
+        SASREY Operations
+      </p>
 
-  <h1 className="mt-2 text-4xl font-black text-slate-900">
-    Booking Records
-  </h1>
+      <h1 className="mt-2 text-4xl font-black text-slate-900">
+        Booking Records
+      </h1>
+    </div>
+
+    <SignOutButton />
+  </div>
 
   <p className="mt-3 text-slate-600">
     View current booking records and
