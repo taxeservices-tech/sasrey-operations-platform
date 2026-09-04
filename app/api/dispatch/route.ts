@@ -203,7 +203,31 @@ export async function POST(
 
     const dispatchRequest =
       await request.json();
+    const action = String(
+      dispatchRequest?.action ?? ""
+    ).trim();
 
+    const allowedRoles =
+      getAllowedRoles(action);
+
+    if (!allowedRoles) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid dispatch action.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const authorization =
+      await requireRole([
+        ...allowedRoles,
+      ]);
+
+    if (!authorization.authorized) {
+      return authorization.response;
+    }
     console.log(
       "Dispatch POST Request:",
       JSON.stringify(
