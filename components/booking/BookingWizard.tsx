@@ -128,8 +128,7 @@ export default function BookingWizard() {
         `Booking confirmed! Reference: ${result.bookingReference}`
       );
 
-      resetBooking();
-      setCurrentStep(1);
+      setCurrentStep(5);
     } catch (error) {
       console.error(
         "Booking submission error:",
