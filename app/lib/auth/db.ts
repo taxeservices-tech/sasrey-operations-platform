@@ -33,6 +33,14 @@ db.exec(`
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS payment_authorizations (
+    id TEXT PRIMARY KEY,
+    booking_reference TEXT NOT NULL,
+    token_hash TEXT NOT NULL UNIQUE,
+    expires_at TEXT NOT NULL,
+    used_at TEXT,
+    created_at TEXT NOT NULL
+  );
 
   CREATE TABLE IF NOT EXISTS audit_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -55,6 +63,16 @@ db.exec(`
 
   CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at
     ON audit_logs(created_at);
+
+
+    CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at
+    ON audit_logs(created_at);
+
+  CREATE INDEX IF NOT EXISTS idx_payment_authorizations_booking
+    ON payment_authorizations(booking_reference);
+
+  CREATE INDEX IF NOT EXISTS idx_payment_authorizations_expires
+    ON payment_authorizations(expires_at);
 `);
 
 export default db;
