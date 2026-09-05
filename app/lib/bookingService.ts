@@ -9,6 +9,7 @@ import { routes } from "./routes";
 export interface BookingServiceResult {
   success: boolean;
   bookingReference?: string;
+  paymentAuthorizationToken?: string;
   errors: string[];
   booking?: Booking;
 }
@@ -98,14 +99,25 @@ export async function processBooking(
     routeId: route?.id,
   };
 
-  await saveBooking(
+  const saveResult = await saveBooking(
     completedBooking,
     bookingReference
   );
 
+  if (!saveResult.success) {
+    return {
+      success: false,
+      errors: [
+        saveResult.message ?? "Unable to save booking.",
+      ],
+    };
+  }
+
   return {
     success: true,
     bookingReference,
+    paymentAuthorizationToken:
+      saveResult.paymentAuthorizationToken,
     booking: completedBooking,
     errors: [],
   };

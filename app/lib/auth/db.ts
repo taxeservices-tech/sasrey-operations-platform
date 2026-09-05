@@ -19,6 +19,22 @@ const databasePath = path.join(
 );
 
 const db = new Database(databasePath);
+const paymentAuthorizationColumns = db
+  .prepare(
+    `PRAGMA table_info(payment_authorizations)`
+  )
+  .all() as { name: string }[];
+
+const hasProcessingAt = paymentAuthorizationColumns.some(
+  (column) => column.name === "processing_at"
+);
+
+if (!hasProcessingAt) {
+  db.exec(`
+    ALTER TABLE payment_authorizations
+    ADD COLUMN processing_at TEXT;
+  `);
+}
 
 db.pragma("foreign_keys = ON");
 
@@ -38,7 +54,8 @@ db.exec(`
     booking_reference TEXT NOT NULL,
     token_hash TEXT NOT NULL UNIQUE,
     expires_at TEXT NOT NULL,
-    used_at TEXT,
+        used_at TEXT,
+    processing_at TEXT,
     created_at TEXT NOT NULL
   );
 

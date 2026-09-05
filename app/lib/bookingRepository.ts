@@ -3,6 +3,7 @@ import type { Booking } from "@/types/booking";
 export interface SaveBookingResponse {
   success: boolean;
   bookingReference?: string;
+  paymentAuthorizationToken?: string;
   message?: string;
 }
 

@@ -3,10 +3,17 @@
 import { useState } from "react";
 
 import { calculateBookingPrice } from "@/app/lib/pricing";
+import { processBooking } from "@/app/lib/bookingService";
+import type { Booking } from "@/types/booking";
 import { useBooking } from "@/context/BookingContext";
 
 export default function PaymentStep() {
-  const { booking, updateBooking } = useBooking();
+  const {
+    booking,
+    updateBooking,
+    paymentAuthorizationToken,
+    setPaymentAuthorizationToken,
+  } = useBooking();
 
   const [paymentReference, setPaymentReference] =
     useState("");
@@ -74,13 +81,6 @@ export default function PaymentStep() {
   async function handlePayment() {
     setPaymentError(null);
 
-    if (!booking.bookingReference) {
-      setPaymentError(
-        "Booking reference is required before payment can be recorded."
-      );
-      return;
-    }
-
     if (!booking.paymentMethod) {
       setPaymentError(
         "Please select a payment method."
@@ -105,6 +105,63 @@ export default function PaymentStep() {
     setIsSubmitting(true);
 
     try {
+      let bookingReference =
+        booking.bookingReference;
+
+      let authorizationToken =
+        paymentAuthorizationToken;
+
+      if (!bookingReference) {
+        const result = await processBooking(
+          booking as Booking
+        );
+
+        if (!result.success) {
+          throw new Error(
+            result.errors.join(" ") ||
+              "Unable to create booking."
+          );
+        }
+
+        bookingReference =
+          result.bookingReference;
+
+        authorizationToken =
+          result.paymentAuthorizationToken ?? null;
+
+        if (!result.bookingReference) {
+          throw new Error(
+            "Booking reference was not returned."
+          );
+        }
+
+        if (!result.paymentAuthorizationToken) {
+          throw new Error(
+            "Payment authorization was not issued."
+          );
+        }
+
+        if (result.booking) {
+          updateBooking(result.booking);
+        }
+
+        setPaymentAuthorizationToken(
+          result.paymentAuthorizationToken
+        );
+      }
+
+      if (!bookingReference) {
+        throw new Error(
+          "Booking reference is required before payment can be recorded."
+        );
+      }
+
+      if (!authorizationToken) {
+        throw new Error(
+          "Payment authorization is required before payment can be recorded."
+        );
+      }
+
       const response = await fetch(
         "/api/bookings",
         {
@@ -113,19 +170,20 @@ export default function PaymentStep() {
             "Content-Type":
               "application/json",
           },
-        body: JSON.stringify({
-  action: "recordPayment",
-  bookingReference:
-    booking.bookingReference,
-  amountPaid: deposit,
-  paymentMethod:
-    booking.paymentMethod,
-  paymentDate:
-    new Date().toISOString(),
-  paymentReference:
-    paymentReference.trim(),
-  paymentType: "Deposit",
-}),
+          body: JSON.stringify({
+            action: "recordPayment",
+            bookingReference,
+            paymentAuthorizationToken:
+              authorizationToken,
+            amountPaid: deposit,
+            paymentMethod:
+              booking.paymentMethod,
+            paymentDate:
+              new Date().toISOString(),
+            paymentReference:
+              paymentReference.trim(),
+            paymentType: "Deposit",
+          }),
         }
       );
 
@@ -331,7 +389,7 @@ export default function PaymentStep() {
               className="mt-8 w-full rounded-full bg-sky-500 py-4 text-lg font-bold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-300"
             >
               {isSubmitting
-                ? "Recording Payment..."
+                ? "Preparing Booking / Recording Payment..."
                 : `Pay Deposit — USD ${deposit.toFixed(2)}`}
             </button>
           )}
