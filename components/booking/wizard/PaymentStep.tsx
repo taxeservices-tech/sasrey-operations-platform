@@ -13,6 +13,7 @@ export default function PaymentStep() {
     updateBooking,
     paymentAuthorizationToken,
     setPaymentAuthorizationToken,
+    setCurrentStep,
   } = useBooking();
 
   const [paymentReference, setPaymentReference] =
@@ -201,6 +202,7 @@ export default function PaymentStep() {
       }
 
       setPaymentSuccess(true);
+      setCurrentStep(5);
     } catch (error) {
       setPaymentError(
         error instanceof Error
