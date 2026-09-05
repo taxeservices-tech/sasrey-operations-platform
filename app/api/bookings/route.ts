@@ -296,6 +296,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (data.action === "createBooking") {
+      const bookingReference = String(
+        data.bookingReference ??
+        booking?.bookingReference ??
+        ""
+      ).trim();
+
+      if (bookingReference) {
+        const authorization =
+          createPaymentAuthorizationToken(30);
+
+        db.prepare(`
+          INSERT INTO payment_authorizations (
+            id,
+            booking_reference,
+            token_hash,
+            expires_at,
+            created_at
+          )
+          VALUES (?, ?, ?, ?, ?)
+        `).run(
+          crypto.randomUUID(),
+          bookingReference,
+          authorization.tokenHash,
+          authorization.expiresAt,
+          new Date().toISOString()
+        );
+
+        data.paymentAuthorizationToken =
+          authorization.token;
+      }
+    }
+
     return NextResponse.json(data);
   } catch (error) {
     if (
