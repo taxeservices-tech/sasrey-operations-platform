@@ -1,8 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 
-import { processBooking } from "@/app/lib/bookingService";
 import {
   validatePassengerDetails,
   validatePayment,
@@ -10,7 +9,6 @@ import {
 } from "@/app/lib/validation";
 
 import { useBooking } from "@/context/BookingContext";
-import type { Booking } from "@/types/booking";
 
 import ConfirmationStep from "./wizard/ConfirmationStep";
 import PassengerDetailsStep from "./wizard/PassengerDetailsStep";
@@ -32,7 +30,6 @@ export default function BookingWizard() {
   const [successMessage, setSuccessMessage] = useState("");
 
   // Prevent duplicate submissions caused by rapid multiple clicks.
-  const submissionLock = useRef(false);
 
   function handleContinue() {
     let result: {
@@ -98,58 +95,6 @@ export default function BookingWizard() {
     }
   }
 
-  async function handleSubmit() {
-    // Immediate lock prevents two rapid clicks from creating
-    // two separate booking requests before React updates state.
-    if (submissionLock.current) {
-      console.log(
-        "Duplicate booking submission prevented."
-      );
-      return;
-    }
-
-    submissionLock.current = true;
-
-    try {
-      setSubmitting(true);
-      setErrors([]);
-      setSuccessMessage("");
-
-      const result = await processBooking(
-        booking as Booking
-      );
-
-      if (!result.success) {
-        setErrors(result.errors);
-        return;
-      }
-
-      setSuccessMessage(
-        `Booking confirmed! Reference: ${result.bookingReference}`
-      );
-
-      setCurrentStep(5);
-    } catch (error) {
-      console.error(
-        "Booking submission error:",
-        error
-      );
-
-      if (error instanceof Error) {
-        setErrors([
-          error.message ||
-            "Unable to save booking.",
-        ]);
-      } else {
-        setErrors([
-          "Unable to save booking.",
-        ]);
-      }
-    } finally {
-      submissionLock.current = false;
-      setSubmitting(false);
-    }
-  }
 
   return (
     <section>
@@ -264,7 +209,7 @@ export default function BookingWizard() {
           type="button"
           onClick={
             currentStep === 5
-              ? handleSubmit
+              ? resetBooking
               : handleContinue
           }
           disabled={submitting}
