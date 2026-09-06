@@ -19,22 +19,6 @@ const databasePath = path.join(
 );
 
 const db = new Database(databasePath);
-const paymentAuthorizationColumns = db
-  .prepare(
-    `PRAGMA table_info(payment_authorizations)`
-  )
-  .all() as { name: string }[];
-
-const hasProcessingAt = paymentAuthorizationColumns.some(
-  (column) => column.name === "processing_at"
-);
-
-if (!hasProcessingAt) {
-  db.exec(`
-    ALTER TABLE payment_authorizations
-    ADD COLUMN processing_at TEXT;
-  `);
-}
 
 db.pragma("foreign_keys = ON");
 
@@ -48,15 +32,6 @@ db.exec(`
     active INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
-  );
-  CREATE TABLE IF NOT EXISTS payment_authorizations (
-    id TEXT PRIMARY KEY,
-    booking_reference TEXT NOT NULL,
-    token_hash TEXT NOT NULL UNIQUE,
-    expires_at TEXT NOT NULL,
-        used_at TEXT,
-    processing_at TEXT,
-    created_at TEXT NOT NULL
   );
 
   CREATE TABLE IF NOT EXISTS audit_logs (
@@ -82,14 +57,6 @@ db.exec(`
     ON audit_logs(created_at);
 
 
-    CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at
-    ON audit_logs(created_at);
-
-  CREATE INDEX IF NOT EXISTS idx_payment_authorizations_booking
-    ON payment_authorizations(booking_reference);
-
-  CREATE INDEX IF NOT EXISTS idx_payment_authorizations_expires
-    ON payment_authorizations(expires_at);
 `);
 
 export default db;

@@ -9,7 +9,6 @@ import { routes } from "./routes";
 export interface BookingServiceResult {
   success: boolean;
   bookingReference?: string;
-  paymentAuthorizationToken?: string;
   errors: string[];
   booking?: Booking;
 }
@@ -116,8 +115,6 @@ export async function processBooking(
   return {
     success: true,
     bookingReference,
-    paymentAuthorizationToken:
-      saveResult.paymentAuthorizationToken,
     booking: completedBooking,
     errors: [],
   };

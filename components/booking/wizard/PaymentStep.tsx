@@ -11,13 +11,9 @@ export default function PaymentStep() {
   const {
     booking,
     updateBooking,
-    paymentAuthorizationToken,
-    setPaymentAuthorizationToken,
     setCurrentStep,
   } = useBooking();
 
-  const [paymentReference, setPaymentReference] =
-    useState("");
   const [isSubmitting, setIsSubmitting] =
     useState(false);
   const [paymentError, setPaymentError] =
@@ -89,116 +85,22 @@ export default function PaymentStep() {
       return;
     }
 
-    if (!paymentReference.trim()) {
-      setPaymentError(
-        "Payment reference is required."
-      );
-      return;
-    }
-
-    if (deposit <= 0) {
-      setPaymentError(
-        "A valid deposit amount could not be calculated."
-      );
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
-      let bookingReference =
-        booking.bookingReference;
-
-      let authorizationToken =
-        paymentAuthorizationToken;
-
-      if (!bookingReference) {
-        const result = await processBooking(
-          booking as Booking
-        );
-
-        if (!result.success) {
-          throw new Error(
-            result.errors.join(" ") ||
-              "Unable to create booking."
-          );
-        }
-
-        bookingReference =
-          result.bookingReference;
-
-        authorizationToken =
-          result.paymentAuthorizationToken ?? null;
-
-        if (!result.bookingReference) {
-          throw new Error(
-            "Booking reference was not returned."
-          );
-        }
-
-        if (!result.paymentAuthorizationToken) {
-          throw new Error(
-            "Payment authorization was not issued."
-          );
-        }
-
-        if (result.booking) {
-          updateBooking(result.booking);
-        }
-
-        setPaymentAuthorizationToken(
-          result.paymentAuthorizationToken
-        );
-      }
-
-      if (!bookingReference) {
-        throw new Error(
-          "Booking reference is required before payment can be recorded."
-        );
-      }
-
-      if (!authorizationToken) {
-        throw new Error(
-          "Payment authorization is required before payment can be recorded."
-        );
-      }
-
-      const response = await fetch(
-        "/api/bookings",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            action: "recordPayment",
-            bookingReference,
-            paymentAuthorizationToken:
-              authorizationToken,
-            amountPaid: deposit,
-            paymentMethod:
-              booking.paymentMethod,
-            paymentDate:
-              new Date().toISOString(),
-            paymentReference:
-              paymentReference.trim(),
-            paymentType: "Deposit",
-          }),
-        }
+      const result = await processBooking(
+        booking as Booking
       );
 
-      const data = await response.json();
-
-      if (
-        !response.ok ||
-        data.success === false
-      ) {
+      if (!result.success) {
         throw new Error(
-          data.message ??
-            data.error ??
-            "Unable to record payment."
+          result.errors.join(" ") ||
+            "Unable to create booking."
         );
+      }
+
+      if (result.booking) {
+        updateBooking(result.booking);
       }
 
       setPaymentSuccess(true);
@@ -207,7 +109,7 @@ export default function PaymentStep() {
       setPaymentError(
         error instanceof Error
           ? error.message
-          : "Unable to record payment."
+          : "Unable to submit booking."
       );
     } finally {
       setIsSubmitting(false);
@@ -312,37 +214,6 @@ export default function PaymentStep() {
             </label>
           </div>
 
-          <div className="mt-8">
-            <label
-              htmlFor="paymentReference"
-              className="mb-2 block font-semibold text-slate-900"
-            >
-              Payment Reference
-            </label>
-
-            <input
-              id="paymentReference"
-              type="text"
-              value={paymentReference}
-              disabled={
-                isSubmitting ||
-                paymentSuccess
-              }
-              onChange={(e) =>
-                setPaymentReference(
-                  e.target.value
-                )
-              }
-              placeholder="Enter payment confirmation/reference"
-              className="w-full rounded-xl border border-slate-300 p-4 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200"
-            />
-
-            <p className="mt-2 text-sm text-slate-500">
-              Enter the confirmation or transaction
-              reference provided by your payment
-              provider.
-            </p>
-          </div>
 
           {paymentError && (
             <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -352,9 +223,8 @@ export default function PaymentStep() {
 
           {paymentSuccess && (
             <div className="mt-6 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-              Deposit payment recorded successfully.
-              Amount paid: USD{" "}
-              {deposit.toFixed(2)}.
+              Booking submitted successfully. Our team will confirm your payment in Operations.
+
             </div>
           )}
 
@@ -384,15 +254,14 @@ export default function PaymentStep() {
               type="button"
               disabled={
                 isSubmitting ||
-                !booking.paymentMethod ||
-                !paymentReference.trim()
+                !booking.paymentMethod
               }
               onClick={handlePayment}
               className="mt-8 w-full rounded-full bg-sky-500 py-4 text-lg font-bold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-300"
             >
               {isSubmitting
-                ? "Preparing Booking / Recording Payment..."
-                : `Pay Deposit — USD ${deposit.toFixed(2)}`}
+                ? "Submitting Booking..."
+                : "Submit Booking"}
             </button>
           )}
         </>

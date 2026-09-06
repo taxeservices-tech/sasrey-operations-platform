@@ -15,10 +15,6 @@ interface BookingContextType {
   setCurrentStep: (step: number) => void;
   updateBooking: (values: Partial<Booking>) => void;
 
-  paymentAuthorizationToken: string | null;
-  setPaymentAuthorizationToken: (
-    token: string | null
-  ) => void;
 
   resetBooking: () => void;
 }
@@ -40,10 +36,6 @@ export function BookingProvider({
       childSeat: 0,
       extraStop: 0,
     });
-  const [
-    paymentAuthorizationToken,
-    setPaymentAuthorizationToken,
-  ] = useState<string | null>(null);
   const [currentStep, setCurrentStep] =
     useState(1);
 
@@ -72,7 +64,6 @@ export function BookingProvider({
 
   function resetBooking() {
     setBooking({});
-    setPaymentAuthorizationToken(null);
     setCurrentStep(1);
   }
 
@@ -84,8 +75,6 @@ export function BookingProvider({
         setCurrentStep,
         updateBooking,
         resetBooking,
-        paymentAuthorizationToken,
-        setPaymentAuthorizationToken,
       }}
     >
       {children}
