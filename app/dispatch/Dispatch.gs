@@ -1521,6 +1521,151 @@ if (
 
     /*
      * ------------------------------------------
+     * SCHEDULING VALUES
+     * ------------------------------------------
+     *
+     * Determine the service duration from the
+     * existing booking service model.
+     *
+     * Airport Transfer:
+     *   route-based duration.
+     *
+     * Tour:
+     *   tour-type duration.
+     *
+     * Custom/Private Excursion:
+     *   requires an explicit duration because
+     *   there is no fixed default duration.
+     */
+
+    const serviceType =
+      String(
+        booking["Service Type"] ??
+        booking["Service Category"] ??
+        ""
+      ).trim();
+
+    const tourType =
+      String(
+        booking["Tour Type"] ??
+        ""
+      ).trim();
+
+    const tourDestination =
+      String(
+        booking["Tour Destination / Attractions"] ??
+        booking["Tour Destination"] ??
+        ""
+      ).trim();
+
+    const turnaroundBufferMinutes =
+      AVAILABILITY_DEFAULT_BUFFER_MINUTES;
+
+    let serviceDurationMinutes = null;
+
+    if (
+      serviceType ===
+      "Airport Transfer"
+    ) {
+      const transferKey =
+        `${pickup}::${destination}`;
+
+      const transferDurations = {
+        "MBJ Airport::Montego Bay Hotels": 30,
+        "MBJ Airport::Rose Hall": 45,
+        "MBJ Airport::Falmouth": 60,
+        "MBJ Airport::Runaway Bay": 90,
+        "MBJ Airport::Negril": 120,
+        "MBJ Airport::Ocho Rios": 150,
+        "MBJ Airport::Kingston": 240
+      };
+
+      serviceDurationMinutes =
+        transferDurations[
+          transferKey
+        ] ?? null;
+
+    } else if (
+      serviceType === "Tour"
+    ) {
+      const tourDurations = {
+        "Private Tour": 360,
+        "Full-Day Tour": 480
+      };
+
+      serviceDurationMinutes =
+        tourDurations[
+          tourType
+        ] ?? null;
+
+      if (
+        serviceDurationMinutes === null
+      ) {
+        const customDurationRaw =
+          String(
+            booking[
+              "Service Duration Minutes"
+            ] ?? ""
+          ).trim();
+
+        if (customDurationRaw) {
+          const customDuration =
+            Number(
+              customDurationRaw
+            );
+
+          if (
+            Number.isFinite(
+              customDuration
+            ) &&
+            customDuration > 0
+          ) {
+            serviceDurationMinutes =
+              customDuration;
+          }
+        }
+      }
+    }
+
+    if (
+      serviceDurationMinutes ===
+      null
+    ) {
+      throw new Error(
+        `Booking ${bookingReference} does not have a supported service duration. Service Type: ${serviceType || "Unknown"}. Tour Type: ${tourType || "Unknown"}. For Custom/Private Excursion, an explicit duration must be provided before dispatch can be created.`
+      );
+    }
+
+    const availabilityWindow =
+      buildAvailabilityWindow_(
+        pickupDate,
+        pickupTime,
+        serviceDurationMinutes,
+        turnaroundBufferMinutes
+      );
+
+    if (!availabilityWindow) {
+      throw new Error(
+        `Booking ${bookingReference} has an invalid Pickup Date or Pickup Time and cannot be scheduled.`
+      );
+    }
+
+    const serviceEndTime =
+      Utilities.formatDate(
+        availabilityWindow.serviceEnd,
+        AVAILABILITY_TIMEZONE,
+        "yyyy-MM-dd HH:mm"
+      );
+
+    const occupiedUntil =
+      Utilities.formatDate(
+        availabilityWindow.occupiedEnd,
+        AVAILABILITY_TIMEZONE,
+        "yyyy-MM-dd HH:mm"
+      );
+
+    /*
+     * ------------------------------------------
      * WRITE DISPATCH
      * ------------------------------------------
      */
@@ -1598,6 +1743,34 @@ if (
     dispatchRecord[
       "Passengers"
     ] = passengers;
+
+    dispatchRecord[
+      "Service Type"
+    ] = serviceType;
+
+    dispatchRecord[
+      "Tour Type"
+    ] = tourType;
+
+    dispatchRecord[
+      "Tour Destination"
+    ] = tourDestination;
+
+    dispatchRecord[
+      "Service Duration Minutes"
+    ] = serviceDurationMinutes;
+
+    dispatchRecord[
+      "Turnaround Buffer Minutes"
+    ] = turnaroundBufferMinutes;
+
+    dispatchRecord[
+      "Service End Time"
+    ] = serviceEndTime;
+
+    dispatchRecord[
+      "Occupied Until"
+    ] = occupiedUntil;
 
     dispatchRecord[
       "Assigned At"
