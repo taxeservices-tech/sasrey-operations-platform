@@ -332,3 +332,65 @@ function findDispatchResourceWindowConflicts_(
 
   return conflicts;
 }
+/**
+ * Reconstruct the reservation window stored on a Dispatch record.
+ *
+ * Returns null when the dispatch does not contain enough valid
+ * scheduling data to participate in time-window conflict checks.
+ */
+function getDispatchReservationWindow_(dispatch) {
+  dispatch = dispatch || {};
+
+  var pickupDate = String(
+    dispatch["Pickup Date"] || ""
+  ).trim();
+
+  var pickupTime = String(
+    dispatch["Pickup Time"] || ""
+  ).trim();
+
+  var durationRaw = String(
+    dispatch["Service Duration Minutes"] || ""
+  ).trim();
+
+  var bufferRaw = String(
+    dispatch["Turnaround Buffer Minutes"] || ""
+  ).trim();
+
+  if (
+    !pickupDate ||
+    !pickupTime ||
+    !durationRaw
+  ) {
+    return null;
+  }
+
+  var durationMinutes =
+    Number(durationRaw);
+
+  if (
+    !isFinite(durationMinutes) ||
+    durationMinutes <= 0
+  ) {
+    return null;
+  }
+
+  var bufferMinutes =
+    bufferRaw === ""
+      ? AVAILABILITY_DEFAULT_BUFFER_MINUTES
+      : Number(bufferRaw);
+
+  if (
+    !isFinite(bufferMinutes) ||
+    bufferMinutes < 0
+  ) {
+    return null;
+  }
+
+  return buildAvailabilityWindow_(
+    pickupDate,
+    pickupTime,
+    durationMinutes,
+    bufferMinutes
+  );
+}
