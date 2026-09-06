@@ -1664,14 +1664,115 @@ if (
         "yyyy-MM-dd HH:mm"
       );
 
-    /*
-     * ------------------------------------------
-     * WRITE DISPATCH
-     * ------------------------------------------
-     */
+      /*
+       * ------------------------------------------
+       * TIME-WINDOW AVAILABILITY VALIDATION
+       * ------------------------------------------
+       *
+       * Prevent the selected driver or vehicle
+       * from being assigned to an overlapping
+       * active dispatch reservation.
+       */
 
-    const dispatchHeaders =
-      dispatchSheet
+      const existingDispatchRecords = [];
+
+      if (
+        dispatchValues.length >= 2
+      ) {
+        const existingDispatchHeaders =
+          dispatchValues[0].map(
+            function (header) {
+              return String(
+                header ?? ""
+              ).trim();
+            }
+          );
+
+        for (
+          let i = 1;
+          i < dispatchValues.length;
+          i++
+        ) {
+          const record = {};
+
+          existingDispatchHeaders.forEach(
+            function (
+              header,
+              index
+            ) {
+              if (header) {
+                record[header] =
+                  dispatchValues[i][
+                    index
+                  ] ?? "";
+              }
+            }
+          );
+
+          existingDispatchRecords.push(
+            record
+          );
+        }
+      }
+
+      const driverConflicts =
+        findDispatchResourceWindowConflicts_(
+          driverId,
+          "driver",
+          availabilityWindow,
+          existingDispatchRecords,
+          getDispatchReservationWindow_
+        );
+
+      if (
+        driverConflicts.length > 0
+      ) {
+        const conflict =
+          driverConflicts[0];
+
+        const conflictDispatchId =
+          String(
+            conflict["Dispatch ID"] || ""
+          ).trim();
+
+        throw new Error(
+          `Driver ${driverId} is already reserved during this time window${conflictDispatchId ? " by dispatch " + conflictDispatchId : ""}.`
+        );
+      }
+
+      const vehicleConflicts =
+        findDispatchResourceWindowConflicts_(
+          vehicleId,
+          "vehicle",
+          availabilityWindow,
+          existingDispatchRecords,
+          getDispatchReservationWindow_
+        );
+
+      if (
+        vehicleConflicts.length > 0
+      ) {
+        const conflict =
+          vehicleConflicts[0];
+
+        const conflictDispatchId =
+          String(
+            conflict["Dispatch ID"] || ""
+          ).trim();
+
+        throw new Error(
+          `Vehicle ${vehicleId} is already reserved during this time window${conflictDispatchId ? " by dispatch " + conflictDispatchId : ""}.`
+        );
+      }
+
+      /*
+       * ------------------------------------------
+       * WRITE DISPATCH
+       * ------------------------------------------
+       */
+
+      const dispatchHeaders =
+          dispatchSheet
         .getRange(
           1,
           1,
