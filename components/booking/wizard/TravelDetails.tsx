@@ -7,6 +7,10 @@ import { useBooking } from "@/context/BookingContext";
 export default function TravelDetails() {
   const { booking, updateBooking } = useBooking();
 
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Jamaica",
+  }).format(new Date());
+
   const availableRoutes =
     booking.pickup &&
     booking.destination &&
@@ -39,11 +43,14 @@ export default function TravelDetails() {
       <div>
         <label className="mb-2 block font-semibold">
           Pickup Date
+
         </label>
 
         <input
           type="date"
           className="w-full rounded-xl border border-slate-300 p-4"
+          min={today}
+
           value={booking.pickupDate ?? ""}
           onChange={(e) =>
             updateBooking({

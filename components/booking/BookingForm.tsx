@@ -12,6 +12,10 @@ export default function BookingForm() {
     booking,
     updateBooking,
   } = useBooking();
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Jamaica",
+  }).format(new Date());
+
 
   const pickupLocations = [
     ...new Set(
@@ -273,10 +277,13 @@ export default function BookingForm() {
         <div>
           <label className="mb-2 block font-semibold">
             Pickup Date
+
           </label>
 
           <input
             type="date"
+            min={today}
+
             className="w-full rounded-xl border border-slate-300 p-4"
             value={booking.pickupDate ?? ""}
             onChange={(e) =>
