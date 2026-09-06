@@ -741,6 +741,13 @@ function ensureDispatchHeaders_(sheet) {
     "Pickup",
     "Destination",
     "Passengers",
+    "Service Type",
+    "Tour Type",
+    "Tour Destination",
+    "Service Duration Minutes",
+    "Turnaround Buffer Minutes",
+    "Service End Time",
+    "Occupied Until",
     "Assigned At",
     "En Route At",
     "Passenger Onboard At",
@@ -752,8 +759,11 @@ function ensureDispatchHeaders_(sheet) {
   const currentLastColumn =
     sheet.getLastColumn();
 
+  const currentLastRow =
+    sheet.getLastRow();
+
   if (
-    sheet.getLastRow() === 0 ||
+    currentLastRow === 0 ||
     currentLastColumn === 0
   ) {
     sheet
@@ -774,19 +784,19 @@ function ensureDispatchHeaders_(sheet) {
         1,
         1,
         1,
-        Math.max(
-          currentLastColumn,
-          headers.length
-        )
+        currentLastColumn
       )
-      .getDisplayValues()[0];
+      .getDisplayValues()[0]
+      .map(function (header) {
+        return String(
+          header ?? ""
+        ).trim();
+      });
 
   const hasHeaders =
     existingHeaders.some(
       function (header) {
-        return String(
-          header ?? ""
-        ).trim() !== "";
+        return header !== "";
       }
     );
 
@@ -799,8 +809,42 @@ function ensureDispatchHeaders_(sheet) {
         headers.length
       )
       .setValues([headers]);
+
+    return;
   }
-}/**
+
+  const missingHeaders =
+    headers.filter(
+      function (header) {
+        return (
+          existingHeaders.indexOf(
+            header
+          ) === -1
+        );
+      }
+    );
+
+  if (
+    missingHeaders.length === 0
+  ) {
+    return;
+  }
+
+  const startColumn =
+    sheet.getLastColumn() + 1;
+
+  sheet
+    .getRange(
+      1,
+      startColumn,
+      1,
+      missingHeaders.length
+    )
+    .setValues([
+      missingHeaders
+    ]);
+}
+ /**
  * Create a dispatch for a confirmed booking.
  *
  * Required data:
