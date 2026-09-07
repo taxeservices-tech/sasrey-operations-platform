@@ -174,6 +174,38 @@ function doPost(e) {
             data.replacementVehicleId ?? ""
           ).trim();
 
+        const resolutionType =
+          String(
+            data.resolutionType ?? ""
+          ).trim();
+
+        const validResolutionTypes = [
+          "Continue Trip",
+          "Rerouted",
+          "No Replacement Required",
+          "Driver Replaced",
+          "Vehicle Replaced",
+          "Driver & Vehicle Replaced"
+        ];
+
+        if (
+          !validResolutionTypes.includes(
+            resolutionType
+          )
+        ) {
+          throw new Error(
+            `Invalid incident resolution type: ${resolutionType || "Missing"}.`
+          );
+        }
+
+        const requiresDriverReplacement =
+          resolutionType === "Driver Replaced" ||
+          resolutionType === "Driver & Vehicle Replaced";
+
+        const requiresVehicleReplacement =
+          resolutionType === "Vehicle Replaced" ||
+          resolutionType === "Driver & Vehicle Replaced";
+
         const notes =
           String(
             data.notes ?? ""
@@ -185,17 +217,24 @@ function doPost(e) {
           );
         }
 
-        if (!replacementDriverId) {
+        if (
+          requiresDriverReplacement &&
+          !replacementDriverId
+        ) {
           throw new Error(
-            "Replacement Driver ID is required."
+            "Replacement Driver ID is required for this resolution type."
           );
         }
 
-        if (!replacementVehicleId) {
+        if (
+          requiresVehicleReplacement &&
+          !replacementVehicleId
+        ) {
           throw new Error(
-            "Replacement Vehicle ID is required."
+            "Replacement Vehicle ID is required for this resolution type."
           );
         }
+
 
         const spreadsheet =
           getDispatchSpreadsheet_();
@@ -629,6 +668,7 @@ function doPost(e) {
          */
 
         if (
+          requiresDriverReplacement &&
           replacementDriverId ===
           originalDriverId
         ) {
@@ -638,6 +678,7 @@ function doPost(e) {
         }
 
         if (
+          requiresVehicleReplacement &&
           replacementVehicleId ===
           originalVehicleId
         ) {
@@ -652,53 +693,6 @@ function doPost(e) {
          * ==========================================
          */
 
-        const driverValues =
-          driversSheet
-            .getDataRange()
-            .getDisplayValues();
-
-        if (
-          driverValues.length < 2
-        ) {
-          throw new Error(
-            "No driver records were found."
-          );
-        }
-
-        const driverHeaders =
-          driverValues[0].map(
-            function (header) {
-              return String(
-                header ?? ""
-              ).trim();
-            }
-          );
-
-        const driverIdColumn =
-          driverHeaders.indexOf(
-            "Driver ID"
-          );
-
-        const driverNameColumn =
-          driverHeaders.indexOf(
-            "Driver Name"
-          );
-
-        const driverStatusColumn =
-          driverHeaders.indexOf(
-            "Driver Status"
-          );
-
-        if (
-          driverIdColumn === -1 ||
-          driverNameColumn === -1 ||
-          driverStatusColumn === -1
-        ) {
-          throw new Error(
-            "Required Drivers columns are missing."
-          );
-        }
-
         let replacementDriverRowNumber =
           null;
 
@@ -708,61 +702,116 @@ function doPost(e) {
         let replacementDriverStatus =
           "";
 
-        for (
-          let i = 1;
-          i < driverValues.length;
-          i++
-        ) {
+        if (requiresDriverReplacement) {
 
-          const existingDriverId =
-            String(
-              driverValues[i][
-              driverIdColumn
-              ] ?? ""
-            ).trim();
+
+          const driverValues =
+            driversSheet
+              .getDataRange()
+              .getDisplayValues();
 
           if (
-            existingDriverId ===
-            replacementDriverId
+            driverValues.length < 2
+          ) {
+            throw new Error(
+              "No driver records were found."
+            );
+          }
+
+          const driverHeaders =
+            driverValues[0].map(
+              function (header) {
+                return String(
+                  header ?? ""
+                ).trim();
+              }
+            );
+
+          const driverIdColumn =
+            driverHeaders.indexOf(
+              "Driver ID"
+            );
+
+          const driverNameColumn =
+            driverHeaders.indexOf(
+              "Driver Name"
+            );
+
+          const driverStatusColumn =
+            driverHeaders.indexOf(
+              "Driver Status"
+            );
+
+          if (
+            driverIdColumn === -1 ||
+            driverNameColumn === -1 ||
+            driverStatusColumn === -1
+          ) {
+            throw new Error(
+              "Required Drivers columns are missing."
+            );
+          }
+
+
+
+          for (
+            let i = 1;
+            i < driverValues.length;
+            i++
           ) {
 
-            replacementDriverRowNumber =
-              i + 1;
-
-            replacementDriverName =
+            const existingDriverId =
               String(
                 driverValues[i][
-                driverNameColumn
+                driverIdColumn
                 ] ?? ""
               ).trim();
 
-            replacementDriverStatus =
-              String(
-                driverValues[i][
-                driverStatusColumn
-                ] ?? ""
-              ).trim();
+            if (
+              existingDriverId ===
+              replacementDriverId
+            ) {
 
-            break;
+              replacementDriverRowNumber =
+                i + 1;
+
+              replacementDriverName =
+                String(
+                  driverValues[i][
+                  driverNameColumn
+                  ] ?? ""
+                ).trim();
+
+              replacementDriverStatus =
+                String(
+                  driverValues[i][
+                  driverStatusColumn
+                  ] ?? ""
+                ).trim();
+
+              break;
+            }
           }
-        }
 
-        if (
-          replacementDriverRowNumber ===
-          null
-        ) {
-          throw new Error(
-            `Replacement Driver ${replacementDriverId} was not found.`
-          );
-        }
+          if (
+            replacementDriverRowNumber ===
+            null
+          ) {
+            throw new Error(
+              `Replacement Driver ${replacementDriverId} was not found.`
+            );
+          }
 
-        if (
-          replacementDriverStatus !==
-          "Available"
-        ) {
-          throw new Error(
-            `Replacement Driver ${replacementDriverId} is not Available. Current status: ${replacementDriverStatus || "Unknown"}.`
-          );
+          if (
+            replacementDriverStatus !==
+            "Available"
+          ) {
+            throw new Error(
+              `Replacement Driver ${replacementDriverId} is not Available. Current status: ${replacementDriverStatus || "Unknown"}.`
+            );
+          }
+
+
         }
 
         /*
@@ -770,65 +819,6 @@ function doPost(e) {
          * FIND REPLACEMENT VEHICLE
          * ==========================================
          */
-
-        const vehicleValues =
-          vehiclesSheet
-            .getDataRange()
-            .getDisplayValues();
-
-        if (
-          vehicleValues.length < 2
-        ) {
-          throw new Error(
-            "No vehicle records were found."
-          );
-        }
-
-        const vehicleHeaders =
-          vehicleValues[0].map(
-            function (header) {
-              return String(
-                header ?? ""
-              ).trim();
-            }
-          );
-
-        const vehicleIdColumn =
-          vehicleHeaders.indexOf(
-            "Vehicle ID"
-          );
-
-        const vehicleMakeColumn =
-          vehicleHeaders.indexOf(
-            "Make"
-          );
-
-        const vehicleModelColumn =
-          vehicleHeaders.indexOf(
-            "Model"
-          );
-
-        const vehicleDriverIdColumn =
-          vehicleHeaders.indexOf(
-            "Driver ID"
-          );
-
-        const vehicleStatusColumn =
-          vehicleHeaders.indexOf(
-            "Status"
-          );
-
-        if (
-          vehicleIdColumn === -1 ||
-          vehicleMakeColumn === -1 ||
-          vehicleModelColumn === -1 ||
-          vehicleDriverIdColumn === -1 ||
-          vehicleStatusColumn === -1
-        ) {
-          throw new Error(
-            "Required Vehicles columns are missing."
-          );
-        }
 
         let replacementVehicleRowNumber =
           null;
@@ -842,82 +832,150 @@ function doPost(e) {
         const replacementVehicleDriverIdValues =
           [];
 
-        for (
-          let i = 1;
-          i < vehicleValues.length;
-          i++
-        ) {
+        if (requiresVehicleReplacement) {
 
-          const existingVehicleId =
-            String(
-              vehicleValues[i][
-              vehicleIdColumn
-              ] ?? ""
-            ).trim();
+
+          const vehicleValues =
+            vehiclesSheet
+              .getDataRange()
+              .getDisplayValues();
 
           if (
-            existingVehicleId ===
-            replacementVehicleId
+            vehicleValues.length < 2
           ) {
+            throw new Error(
+              "No vehicle records were found."
+            );
+          }
 
-            replacementVehicleRowNumber =
-              i + 1;
-
-            const make =
-              String(
-                vehicleValues[i][
-                vehicleMakeColumn
-                ] ?? ""
-              ).trim();
-
-            const model =
-              String(
-                vehicleValues[i][
-                vehicleModelColumn
-                ] ?? ""
-              ).trim();
-
-            replacementVehicleName =
-              [make, model]
-                .filter(Boolean)
-                .join(" ")
-                .trim();
-
-            replacementVehicleStatus =
-              String(
-                vehicleValues[i][
-                vehicleStatusColumn
-                ] ?? ""
-              ).trim();
-
-            replacementVehicleDriverIdValues.push(
-              String(
-                vehicleValues[i][
-                vehicleDriverIdColumn
-                ] ?? ""
-              ).trim()
+          const vehicleHeaders =
+            vehicleValues[0].map(
+              function (header) {
+                return String(
+                  header ?? ""
+                ).trim();
+              }
             );
 
-            break;
+          const vehicleIdColumn =
+            vehicleHeaders.indexOf(
+              "Vehicle ID"
+            );
+
+          const vehicleMakeColumn =
+            vehicleHeaders.indexOf(
+              "Make"
+            );
+
+          const vehicleModelColumn =
+            vehicleHeaders.indexOf(
+              "Model"
+            );
+
+          const vehicleDriverIdColumn =
+            vehicleHeaders.indexOf(
+              "Driver ID"
+            );
+
+          const vehicleStatusColumn =
+            vehicleHeaders.indexOf(
+              "Status"
+            );
+
+          if (
+            vehicleIdColumn === -1 ||
+            vehicleMakeColumn === -1 ||
+            vehicleModelColumn === -1 ||
+            vehicleDriverIdColumn === -1 ||
+            vehicleStatusColumn === -1
+          ) {
+            throw new Error(
+              "Required Vehicles columns are missing."
+            );
           }
-        }
 
-        if (
-          replacementVehicleRowNumber ===
-          null
-        ) {
-          throw new Error(
-            `Replacement Vehicle ${replacementVehicleId} was not found.`
-          );
-        }
 
-        if (
-          replacementVehicleStatus !==
-          "Available"
-        ) {
-          throw new Error(
-            `Replacement Vehicle ${replacementVehicleId} is not Available. Current status: ${replacementVehicleStatus || "Unknown"}.`
-          );
+
+          for (
+            let i = 1;
+            i < vehicleValues.length;
+            i++
+          ) {
+
+            const existingVehicleId =
+              String(
+                vehicleValues[i][
+                vehicleIdColumn
+                ] ?? ""
+              ).trim();
+
+            if (
+              existingVehicleId ===
+              replacementVehicleId
+            ) {
+
+              replacementVehicleRowNumber =
+                i + 1;
+
+              const make =
+                String(
+                  vehicleValues[i][
+                  vehicleMakeColumn
+                  ] ?? ""
+                ).trim();
+
+              const model =
+                String(
+                  vehicleValues[i][
+                  vehicleModelColumn
+                  ] ?? ""
+                ).trim();
+
+              replacementVehicleName =
+                [make, model]
+                  .filter(Boolean)
+                  .join(" ")
+                  .trim();
+
+              replacementVehicleStatus =
+                String(
+                  vehicleValues[i][
+                  vehicleStatusColumn
+                  ] ?? ""
+                ).trim();
+
+              replacementVehicleDriverIdValues.push(
+                String(
+                  vehicleValues[i][
+                  vehicleDriverIdColumn
+                  ] ?? ""
+                ).trim()
+              );
+
+              break;
+            }
+          }
+
+          if (
+            replacementVehicleRowNumber ===
+            null
+          ) {
+            throw new Error(
+              `Replacement Vehicle ${replacementVehicleId} was not found.`
+            );
+          }
+
+          if (
+            replacementVehicleStatus !==
+            "Available"
+          ) {
+            throw new Error(
+              `Replacement Vehicle ${replacementVehicleId} is not Available. Current status: ${replacementVehicleStatus || "Unknown"}.`
+            );
+          }
+
+
+
         }
 
         /*
@@ -925,23 +983,31 @@ function doPost(e) {
          * DRIVER / VEHICLE COMPATIBILITY
          * ==========================================
          *
-         * If the vehicle already belongs to a
-         * different driver, do not silently
-         * reassign it.
+         * A replacement vehicle may be unassigned,
+         * or already assigned to the driver who will
+         * operate the resolved dispatch.
          */
 
-        const assignedVehicleDriverId =
-          replacementVehicleDriverIdValues[0] ??
-          "";
+        if (requiresVehicleReplacement) {
 
-        if (
-          assignedVehicleDriverId &&
-          assignedVehicleDriverId !==
-          replacementDriverId
-        ) {
-          throw new Error(
-            `Replacement Vehicle ${replacementVehicleId} is assigned to Driver ${assignedVehicleDriverId}, not Driver ${replacementDriverId}.`
-          );
+          const assignedVehicleDriverId =
+            replacementVehicleDriverIdValues[0] ??
+            "";
+
+          const effectiveDriverId =
+            requiresDriverReplacement
+              ? replacementDriverId
+              : originalDriverId;
+
+          if (
+            assignedVehicleDriverId &&
+            assignedVehicleDriverId !==
+            effectiveDriverId
+          ) {
+            throw new Error(
+              `Replacement Vehicle ${replacementVehicleId} is assigned to Driver ${assignedVehicleDriverId}, not Driver ${effectiveDriverId}.`
+            );
+          }
         }
 
         /*
@@ -964,17 +1030,21 @@ function doPost(e) {
          * ==========================================
          */
 
-        synchronizeDriverStatusForDispatch_(
-          spreadsheet,
-          replacementDriverId,
-          "Assigned"
-        );
+        if (requiresDriverReplacement) {
+          synchronizeDriverStatusForDispatch_(
+            spreadsheet,
+            replacementDriverId,
+            "En Route"
+          );
+        }
 
-        synchronizeVehicleStatusForDispatch_(
-          spreadsheet,
-          replacementVehicleId,
-          "Assigned"
-        );
+        if (requiresVehicleReplacement) {
+          synchronizeVehicleStatusForDispatch_(
+            spreadsheet,
+            replacementVehicleId,
+            "En Route"
+          );
+        }
 
         /*
          * ==========================================
@@ -982,13 +1052,33 @@ function doPost(e) {
          * ==========================================
          */
 
+        const effectiveDriverId =
+          requiresDriverReplacement
+            ? replacementDriverId
+            : originalDriverId;
+
+        const effectiveDriverName =
+          requiresDriverReplacement
+            ? replacementDriverName
+            : originalDriverName;
+
+        const effectiveVehicleId =
+          requiresVehicleReplacement
+            ? replacementVehicleId
+            : originalVehicleId;
+
+        const effectiveVehicleName =
+          requiresVehicleReplacement
+            ? replacementVehicleName
+            : originalVehicleName;
+
         dispatchSheet
           .getRange(
             dispatchRowNumber,
             dispatchDriverIdColumn + 1
           )
           .setValue(
-            replacementDriverId
+            effectiveDriverId
           );
 
         dispatchSheet
@@ -997,7 +1087,7 @@ function doPost(e) {
             dispatchDriverNameColumn + 1
           )
           .setValue(
-            replacementDriverName
+            effectiveDriverName
           );
 
         dispatchSheet
@@ -1006,7 +1096,7 @@ function doPost(e) {
             dispatchVehicleIdColumn + 1
           )
           .setValue(
-            replacementVehicleId
+            effectiveVehicleId
           );
 
         dispatchSheet
@@ -1015,7 +1105,7 @@ function doPost(e) {
             dispatchVehicleColumn + 1
           )
           .setValue(
-            replacementVehicleName
+            effectiveVehicleName
           );
 
         /*
@@ -1065,17 +1155,21 @@ function doPost(e) {
          * ==========================================
          */
 
-        synchronizeDriverStatusForDispatch_(
-          spreadsheet,
-          originalDriverId,
-          "Completed"
-        );
+        if (requiresDriverReplacement) {
+          synchronizeDriverStatusForDispatch_(
+            spreadsheet,
+            originalDriverId,
+            "Completed"
+          );
+        }
 
-        synchronizeVehicleStatusForDispatch_(
-          spreadsheet,
-          originalVehicleId,
-          "Completed"
-        );
+        if (requiresVehicleReplacement) {
+          synchronizeVehicleStatusForDispatch_(
+            spreadsheet,
+            originalVehicleId,
+            "Completed"
+          );
+        }
         /*
          * ==========================================
          * UPDATE INCIDENT
@@ -1091,7 +1185,9 @@ function doPost(e) {
             replacementDriverIdColumn + 1
           )
           .setValue(
-            replacementDriverId
+            requiresDriverReplacement
+              ? replacementDriverId
+              : ""
           );
 
         incidentsSheet
@@ -1100,7 +1196,9 @@ function doPost(e) {
             replacementDriverNameColumn + 1
           )
           .setValue(
-            replacementDriverName
+            requiresDriverReplacement
+              ? replacementDriverName
+              : ""
           );
 
         incidentsSheet
@@ -1109,7 +1207,9 @@ function doPost(e) {
             replacementVehicleIdColumn + 1
           )
           .setValue(
-            replacementVehicleId
+            requiresVehicleReplacement
+              ? replacementVehicleId
+              : ""
           );
 
         incidentsSheet
@@ -1118,7 +1218,9 @@ function doPost(e) {
             replacementVehicleColumn + 1
           )
           .setValue(
-            replacementVehicleName
+            requiresVehicleReplacement
+              ? replacementVehicleName
+              : ""
           );
 
         incidentsSheet
@@ -1199,7 +1301,10 @@ function doPost(e) {
           resolvedAt:
             resolvedAt,
           message:
-            "Incident resolved and replacement resources assigned successfully."
+            requiresDriverReplacement ||
+            requiresVehicleReplacement
+              ? "Incident resolved and replacement resources assigned successfully."
+              : "Incident resolved successfully and dispatch resumed."
         };
 
       } catch (error) {
@@ -2807,7 +2912,9 @@ function checkDispatchResourceAvailability(data) {
         "checkDispatchResourceAvailability",
       error:
         error.toString()
-    }
+    };
+
+  }
 
 }
 
