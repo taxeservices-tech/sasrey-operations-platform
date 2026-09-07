@@ -1040,61 +1040,103 @@ if (bookingStatus !== "Confirmed") {
  * A booking must be FULLY PAID before
  * a dispatch can be created.
  *
- * Deposit Paid is NOT sufficient.
- * Outstanding balance must be $0.00.
+ * Payment reconciliation is based on the
+ * Payments ledger, not a stored Outstanding
+ * field in Booking Records.
  */
 
-const paymentStatus =
+const paymentsSheet =
+  getRequiredSheet_(
+    spreadsheet,
+    "Payments"
+  );
+
+const totalRaw =
   String(
-    booking["Payment Status"] ?? ""
+    booking["Price USD"] ??
+    ""
   ).trim();
 
-const outstandingRaw =
-  String(
-    booking["Outstanding"] ?? ""
-  ).trim();
+const total =
+  Number(
+    totalRaw.replace(/[^0-9.-]+/g, "")
+  );
 
-if (!outstandingRaw) {
+if (!Number.isFinite(total) || total < 0) {
   throw new Error(
-    `Booking ${bookingReference} cannot be dispatched because the Outstanding balance is missing.`
+    `Booking ${bookingReference} has an invalid total: ${totalRaw || "Missing"}.`
   );
 }
 
-/*
- * Convert values such as:
- *
- * $26.25
- * USD $26.25
- * 26.25
- * $1,250.00
- *
- * into a number.
- */
+const paymentValues =
+  paymentsSheet
+    .getDataRange()
+    .getDisplayValues();
+
+let totalPaidAlready = 0;
+
+if (paymentValues.length >= 2) {
+  for (
+    let i = 1;
+    i < paymentValues.length;
+    i++
+  ) {
+    const existingBookingId =
+      String(
+        paymentValues[i][0] ?? ""
+      ).trim();
+
+    if (
+      existingBookingId !==
+      bookingReference
+    ) {
+      continue;
+    }
+
+    const existingAmount =
+      Number(
+        String(
+          paymentValues[i][5] ?? ""
+        ).replace(/[^0-9.-]+/g, "")
+      );
+
+    if (
+      !Number.isFinite(existingAmount) ||
+      existingAmount <= 0
+    ) {
+      continue;
+    }
+
+    totalPaidAlready += existingAmount;
+  }
+}
 
 const outstanding =
-  Number(
-    outstandingRaw
-      .replace(/[^0-9.-]+/g, "")
+  Math.max(
+    total - totalPaidAlready,
+    0
   );
 
-if (!Number.isFinite(outstanding)) {
+const roundedOutstanding =
+  Math.round(
+    (outstanding + Number.EPSILON) * 100
+  ) / 100;
+
+const paymentStatus =
+  roundedOutstanding <= 0.009
+    ? "Paid"
+    : totalPaidAlready > 0
+      ? "Partially Paid"
+      : "Unpaid";
+
+if (roundedOutstanding > 0.009) {
   throw new Error(
-    `Booking ${bookingReference} has an invalid Outstanding balance: ${outstandingRaw}.`
+    `Booking ${bookingReference} cannot be dispatched because it is not fully paid. Payment status: ${paymentStatus}. Outstanding balance: USD $${roundedOutstanding.toFixed(2)}.`
   );
 }
 
 /*
- * Allow a very small floating-point tolerance.
- */
-
-if (outstanding > 0.009) {
-  throw new Error(
-    `Booking ${bookingReference} cannot be dispatched because it is not fully paid. Payment status: ${paymentStatus || "Unknown"}. Outstanding balance: ${outstandingRaw}.`
-  );
-}
-
-/*
- * Outstanding is effectively $0.00.
+ * Payment reconciliation passed.
  * The booking is fully paid and may proceed.
  */
 
