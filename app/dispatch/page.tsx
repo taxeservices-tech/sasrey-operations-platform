@@ -153,10 +153,10 @@ function getStatusClasses(status: string) {
 function getNextStatuses(status: string) {
   switch (status) {
     case "Assigned":
-      return ["En Route"];
+      return ["En Route", "Incident"];
 
     case "En Route":
-      return ["Passenger Onboard"];
+      return ["Passenger Onboard", "Incident"];
 
     case "Passenger Onboard":
       return [
