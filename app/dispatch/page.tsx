@@ -6,6 +6,10 @@ import {
   useState,
 } from "react";
 import RevenueTargetStrategy from "@/components/operations/RevenueTargetStrategy";
+import {
+  getBookingReservationWindow,
+  getDispatchReservationWindow,
+} from "@/app/lib/dispatchAvailability";
 type SheetRow = Record<
   string,
   string | number | undefined
@@ -45,36 +49,51 @@ const ACTIVE_DISPATCH_STATUSES = [
 function isDispatchResourceBusy(
   resourceId: string,
   key: string,
-  pickupDate: string,
+  booking: SheetRow | undefined,
   dispatches: SheetRow[]
 ): boolean {
+  const requestedWindow =
+    getBookingReservationWindow(booking);
+
+  if (!requestedWindow) {
+    return false;
+  }
+
   return dispatches.some((dispatch) => {
-    const dispatchResourceId = getValue(
-      dispatch,
-      key
-    );
+    const dispatchResourceId =
+      getValue(dispatch, key);
 
-    const dispatchStatus = getValue(
-      dispatch,
-      "Dispatch Status",
-      "status"
-    );
+    const dispatchStatus =
+      getValue(
+        dispatch,
+        "Dispatch Status",
+        "status"
+      );
 
-    const dispatchPickupDate = getValue(
-      dispatch,
-      "Pickup Date"
-    );
-
-    return (
-      dispatchResourceId === resourceId &&
-      dispatchPickupDate === pickupDate &&
-      ACTIVE_DISPATCH_STATUSES.includes(
+    if (
+      dispatchResourceId !== resourceId ||
+      !ACTIVE_DISPATCH_STATUSES.includes(
         dispatchStatus
       )
+    ) {
+      return false;
+    }
+
+    const existingWindow =
+      getDispatchReservationWindow(dispatch);
+
+    if (!existingWindow) {
+      return false;
+    }
+
+    return (
+      requestedWindow.start <
+        existingWindow.occupiedEnd &&
+      existingWindow.start <
+        requestedWindow.occupiedEnd
     );
   });
 }
-
 function getValue(
   row: SheetRow | undefined,
   ...keys: string[]
@@ -1784,10 +1803,7 @@ const bookingsNeededAtCurrentAverage =
                       isDispatchResourceBusy(
                         driverId,
                         "Driver ID",
-                        getValue(
-                          selectedBooking,
-                          "Pickup Date"
-                        ),
+                        selectedBooking,
                         dispatches
                       );
 const driverStatus =
@@ -1874,10 +1890,7 @@ const unavailable =
                       isDispatchResourceBusy(
                         vehicleId,
                         "Vehicle ID",
-                        getValue(
-                          selectedBooking,
-                          "Pickup Date"
-                        ),
+                        selectedBooking,
                         dispatches
                       );
                       const vehicleStatus =
@@ -1951,19 +1964,13 @@ const unavailable =
                   isDispatchResourceBusy(
                     selectedDriverId,
                     "Driver ID",
-                    getValue(
-                      selectedBooking,
-                      "Pickup Date"
-                    ),
+                    selectedBooking,
                     dispatches
                   ) ||
                   isDispatchResourceBusy(
                     selectedVehicleId,
                     "Vehicle ID",
-                    getValue(
-                      selectedBooking,
-                      "Pickup Date"
-                    ),
+                    selectedBooking,
                     dispatches
                   )
                 }
@@ -2447,7 +2454,7 @@ const unavailable =
                 isDispatchResourceBusy(
                   id,
                   "Driver ID",
-                  pickupDate,
+                  resolveIncidentDispatch,
                   dispatches
                 );
 
@@ -2546,7 +2553,7 @@ const unavailable =
                 isDispatchResourceBusy(
                   id,
                   "Vehicle ID",
-                  pickupDate,
+                  resolveIncidentDispatch,
                   dispatches
                 );
 
