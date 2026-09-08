@@ -88,9 +88,9 @@ function isDispatchResourceBusy(
 
     return (
       requestedWindow.start <
-        existingWindow.occupiedEnd &&
+      existingWindow.occupiedEnd &&
       existingWindow.start <
-        requestedWindow.occupiedEnd
+      requestedWindow.occupiedEnd
     );
   });
 }
@@ -178,8 +178,8 @@ export default function DispatchPage() {
   const bookingId =
     typeof window !== "undefined"
       ? new URLSearchParams(
-          window.location.search
-        ).get("bookingId") ?? ""
+        window.location.search
+      ).get("bookingId") ?? ""
       : "";
 
   const [bookings, setBookings] =
@@ -193,18 +193,18 @@ export default function DispatchPage() {
 
   const [vehicles, setVehicles] =
     useState<SheetRow[]>([]);
-      const [monthlyRevenueTarget, setMonthlyRevenueTarget] =
+  const [monthlyRevenueTarget, setMonthlyRevenueTarget] =
     useState(40000);
 
   const [targetCurrency, setTargetCurrency] =
     useState("USD");
 
-const [
-  financialByBookingId,
-  setFinancialByBookingId,
-] = useState<
-  Map<string, BookingFinancial>
->(new Map());
+  const [
+    financialByBookingId,
+    setFinancialByBookingId,
+  ] = useState<
+    Map<string, BookingFinancial>
+  >(new Map());
   const [accountingRecordsForKpi, setAccountingRecordsForKpi] =
     useState<SheetRow[]>([]);
 
@@ -219,39 +219,39 @@ const [
 
   const [notes, setNotes] =
     useState("");
-const [incidentDispatch, setIncidentDispatch] =
-  useState<SheetRow | null>(null);
+  const [incidentDispatch, setIncidentDispatch] =
+    useState<SheetRow | null>(null);
 
-const [incidentType, setIncidentType] =
-  useState("");
+  const [incidentType, setIncidentType] =
+    useState("");
 
-const [incidentLocation, setIncidentLocation] =
-  useState("");
+  const [incidentLocation, setIncidentLocation] =
+    useState("");
 
-const [incidentDescription, setIncidentDescription] =
-  useState("");
+  const [incidentDescription, setIncidentDescription] =
+    useState("");
 
-const [incidentActionTaken, setIncidentActionTaken] =
-  useState("");
+  const [incidentActionTaken, setIncidentActionTaken] =
+    useState("");
 
-const [incidentNotes, setIncidentNotes] =
-  useState("");
- const [resolveIncidentDispatch, setResolveIncidentDispatch] =
-  useState<SheetRow | null>(null);
+  const [incidentNotes, setIncidentNotes] =
+    useState("");
+  const [resolveIncidentDispatch, setResolveIncidentDispatch] =
+    useState<SheetRow | null>(null);
 
-const [activeIncidentId, setActiveIncidentId] =
-  useState("");
+  const [activeIncidentId, setActiveIncidentId] =
+    useState("");
 
-const [replacementDriverId, setReplacementDriverId] =
-  useState("");
+  const [replacementDriverId, setReplacementDriverId] =
+    useState("");
 
-const [replacementVehicleId, setReplacementVehicleId] =
-  useState("");
+  const [replacementVehicleId, setReplacementVehicleId] =
+    useState("");
 
-const [resolveIncidentNotes, setResolveIncidentNotes] =
-  useState("");
+  const [resolveIncidentNotes, setResolveIncidentNotes] =
+    useState("");
   const [incidentResolutionType, setIncidentResolutionType] =
-  useState("Continue Trip");
+    useState("Continue Trip");
   const [loading, setLoading] =
     useState(true);
 
@@ -275,20 +275,20 @@ const [resolveIncidentNotes, setResolveIncidentNotes] =
         setLoading(true);
         setError("");
 
-          const [
-           bookingsResponse,
-           accountingResponse,
-           dispatchResponse,
-           resourcesResponse,
-           settingsResponse,
-            ] = await Promise.all([
-         fetch("/api/bookings", {
+        const [
+          bookingsResponse,
+          accountingResponse,
+          dispatchResponse,
+          resourcesResponse,
+          settingsResponse,
+        ] = await Promise.all([
+          fetch("/api/bookings", {
             cache: "no-store",
           }),
-        fetch("/api/accounting", {
-        method: "GET",
-        cache: "no-store",
-        }),
+          fetch("/api/accounting", {
+            method: "GET",
+            cache: "no-store",
+          }),
           fetch(
             "/api/dispatch?action=listDispatch",
             {
@@ -302,7 +302,7 @@ const [resolveIncidentNotes, setResolveIncidentNotes] =
               cache: "no-store",
             }
           ),
-                       fetch(
+          fetch(
             "/api/dispatch?action=getSettings",
             {
               cache: "no-store",
@@ -313,7 +313,7 @@ const [resolveIncidentNotes, setResolveIncidentNotes] =
         const bookingsData: ApiResponse =
           await bookingsResponse.json();
         const accountingData =
-        await accountingResponse.json();
+          await accountingResponse.json();
         const dispatchData: ApiResponse =
           await dispatchResponse.json();
 
@@ -328,28 +328,28 @@ const [resolveIncidentNotes, setResolveIncidentNotes] =
         ) {
           throw new Error(
             bookingsData.message ??
-              bookingsData.error ??
-              "Unable to retrieve bookings."
+            bookingsData.error ??
+            "Unable to retrieve bookings."
           );
         }
-             if (
-  !accountingResponse.ok ||
-  accountingData.success === false
-) {
-  throw new Error(
-    accountingData.message ??
-      accountingData.error ??
-      "Unable to retrieve accounting data."
-  );
-}
+        if (
+          !accountingResponse.ok ||
+          accountingData.success === false
+        ) {
+          throw new Error(
+            accountingData.message ??
+            accountingData.error ??
+            "Unable to retrieve accounting data."
+          );
+        }
         if (
           !dispatchResponse.ok ||
           dispatchData.success === false
         ) {
           throw new Error(
             dispatchData.message ??
-              dispatchData.error ??
-              "Unable to retrieve dispatch records."
+            dispatchData.error ??
+            "Unable to retrieve dispatch records."
           );
         }
 
@@ -359,87 +359,116 @@ const [resolveIncidentNotes, setResolveIncidentNotes] =
         ) {
           throw new Error(
             resourcesData.message ??
-              resourcesData.error ??
-              "Unable to retrieve drivers and vehicles."
+            resourcesData.error ??
+            "Unable to retrieve drivers and vehicles."
           );
         }
-           if (
-  !settingsResponse.ok ||
-  settingsData.success === false
-) {
-  throw new Error(
-    settingsData.message ??
-      settingsData.error ??
-      "Unable to retrieve application settings."
-  );
-}
+        if (
+          !settingsResponse.ok ||
+          settingsData.success === false
+        ) {
+          throw new Error(
+            settingsData.message ??
+            settingsData.error ??
+            "Unable to retrieve application settings."
+          );
+        }
         if (!cancelled) {
           const accountingRecords =
-  accountingData.payments ??
-  accountingData.records ??
-  accountingData.accounting ??
-  [];
+            accountingData.payments ??
+            accountingData.records ??
+            accountingData.accounting ??
+            [];
 
-            setAccountingRecordsForKpi(accountingRecords);
+          setAccountingRecordsForKpi(accountingRecords);
 
-const financialMap =
-  new Map<string, BookingFinancial>();
+          const financialMap =
+            new Map<string, BookingFinancial>();
 
-for (const payment of accountingRecords) {
-  const id = getValue(
-    payment,
-    "Booking ID",
-    "bookingReference"
-  );
+          for (const payment of accountingRecords) {
+            const id = getValue(
+              payment,
+              "Booking ID",
+              "bookingReference"
+            );
 
-  if (!id) {
-    continue;
-  }
+            if (!id) {
+              continue;
+            }
 
-  const total = getNumber(
-    payment,
-    "Total",
-    "total"
-  );
+            const total = getNumber(
+              payment,
+              "Total",
+              "total"
+            );
 
-  const amountPaid = getNumber(
-    payment,
-    "Amount Paid",
-    "amountPaid"
-  );
+            const amountPaid = getNumber(
+              payment,
+              "Amount Paid",
+              "amountPaid"
+            );
 
-  const existing =
-    financialMap.get(id);
+            const existing =
+              financialMap.get(id);
 
-  if (!existing) {
-    financialMap.set(id, {
-      total,
-      paid: amountPaid,
-      outstanding: Math.max(
-        total - amountPaid,
-        0
-      ),
-    });
-  } else {
-    const paid =
-      existing.paid + amountPaid;
+            if (!existing) {
+              financialMap.set(id, {
+                total,
+                paid: amountPaid,
+                outstanding: Math.max(
+                  total - amountPaid,
+                  0
+                ),
+              });
+            } else {
+              const paid =
+                existing.paid + amountPaid;
 
-    financialMap.set(id, {
-      total:
-        existing.total || total,
-      paid,
-      outstanding: Math.max(
-        (existing.total || total) - paid,
-        0
-      ),
-    });
-  }
-}
+              financialMap.set(id, {
+                total:
+                  existing.total || total,
+                paid,
+                outstanding: Math.max(
+                  (existing.total || total) - paid,
+                  0
+                ),
+              });
+            }
+          }
 
-setFinancialByBookingId(
-  financialMap
-);
-          setBookings(
+          setFinancialByBookingId(
+            financialMap
+          );
+
+          const settings =
+            settingsData.settings ?? {};
+
+          const configuredMonthlyRevenueTarget =
+            Number(
+              settings["Monthly Revenue Target"]
+            );
+
+          if (
+            Number.isFinite(
+              configuredMonthlyRevenueTarget
+            ) &&
+            configuredMonthlyRevenueTarget > 0
+          ) {
+            setMonthlyRevenueTarget(
+              configuredMonthlyRevenueTarget
+            );
+          }
+
+          const configuredTargetCurrency =
+            String(
+              settings["Target Currency"] ?? ""
+            ).trim();
+
+          if (configuredTargetCurrency) {
+            setTargetCurrency(
+              configuredTargetCurrency
+            );
+          } setBookings(
             bookingsData.bookings ?? []
           );
 
@@ -505,7 +534,7 @@ setFinancialByBookingId(
             if (
               requestedBooking &&
               requestedBookingStatus ===
-                "Confirmed" &&
+              "Confirmed" &&
               !alreadyDispatched
             ) {
               setSelectedBookingId(
@@ -567,46 +596,46 @@ setFinancialByBookingId(
               "Status",
               "Booking Status"
             );
-         const financial =
-  financialByBookingId.get(
-    bookingId
-  );
+          const financial =
+            financialByBookingId.get(
+              bookingId
+            );
 
-const outstanding =
-  financial?.outstanding ?? 0;
-if (
-  bookingId ===
-  "SAS-20260820-772529299561"
-) {
-  console.log(
-    "DISPATCH TEST BOOKING:",
-    {
-      bookingId,
-      status,
-      financial,
-      outstanding,
-      alreadyDispatched:
-        dispatchedBookingIds.has(
-          bookingId
-        ),
-    }
-  );
-}
-return (
-  bookingId &&
-  status === "Confirmed" &&
-  outstanding <= 0.009 &&
-  !dispatchedBookingIds.has(
-    bookingId
-  )
-);
+          const outstanding =
+            financial?.outstanding ?? 0;
+          if (
+            bookingId ===
+            "SAS-20260820-772529299561"
+          ) {
+            console.log(
+              "DISPATCH TEST BOOKING:",
+              {
+                bookingId,
+                status,
+                financial,
+                outstanding,
+                alreadyDispatched:
+                  dispatchedBookingIds.has(
+                    bookingId
+                  ),
+              }
+            );
+          }
+          return (
+            bookingId &&
+            status === "Confirmed" &&
+            outstanding <= 0.009 &&
+            !dispatchedBookingIds.has(
+              bookingId
+            )
+          );
         }
       );
-   }, [
-  bookings,
-  dispatchedBookingIds,
-  financialByBookingId,
-]);
+    }, [
+      bookings,
+      dispatchedBookingIds,
+      financialByBookingId,
+    ]);
 
   const selectedBooking =
     useMemo(() => {
@@ -685,8 +714,8 @@ return (
       if (!response.ok || data.success === false) {
         throw new Error(
           data.message ??
-            data.error ??
-            "Unable to update dispatch status."
+          data.error ??
+          "Unable to update dispatch status."
         );
       }
 
@@ -745,8 +774,8 @@ return (
       if (!response.ok || data.success === false) {
         throw new Error(
           data.message ??
-            data.error ??
-            "Unable to retrieve the active incident."
+          data.error ??
+          "Unable to retrieve the active incident."
         );
       }
 
@@ -758,10 +787,10 @@ return (
 
       setResolveIncidentDispatch(dispatch);
       setActiveIncidentId(data.incidentId);
-     setReplacementDriverId("");
-    setReplacementVehicleId("");
-    setResolveIncidentNotes("");
-    setIncidentResolutionType("Continue Trip");
+      setReplacementDriverId("");
+      setReplacementVehicleId("");
+      setResolveIncidentNotes("");
+      setIncidentResolutionType("Continue Trip");
     } catch (err) {
       setError(
         err instanceof Error
@@ -774,208 +803,208 @@ return (
   }
 
   async function handleResolveIncident() {
-  setMessage("");
-  setError("");
+    setMessage("");
+    setError("");
 
-  if (!resolveIncidentDispatch) {
-    setError("No incident dispatch selected.");
-    return;
-  }
+    if (!resolveIncidentDispatch) {
+      setError("No incident dispatch selected.");
+      return;
+    }
 
-  if (!activeIncidentId) {
-    setError("Incident ID is missing.");
-    return;
-  }
-
-  /*
-   * ==========================================
-   * DETERMINE REQUIRED REPLACEMENT RESOURCES
-   * ==========================================
-   */
-
-  const requiresDriver =
-    incidentResolutionType === "Driver Replaced" ||
-    incidentResolutionType ===
-      "Driver & Vehicle Replaced";
-
-  const requiresVehicle =
-    incidentResolutionType === "Vehicle Replaced" ||
-    incidentResolutionType ===
-      "Driver & Vehicle Replaced";
-
-  /*
-   * ==========================================
-   * VALIDATE DRIVER
-   * ==========================================
-   */
-
-  if (
-    requiresDriver &&
-    !replacementDriverId
-  ) {
-    setError(
-      "Select a replacement driver."
-    );
-    return;
-  }
-
-  /*
-   * ==========================================
-   * VALIDATE VEHICLE
-   * ==========================================
-   */
-
-  if (
-    requiresVehicle &&
-    !replacementVehicleId
-  ) {
-    setError(
-      "Select a replacement vehicle."
-    );
-    return;
-  }
-
-  /*
-   * ==========================================
-   * CLEAR RESOURCES THAT ARE NOT REQUIRED
-   * ==========================================
-   *
-   * This is important.
-   *
-   * Driver-only replacement:
-   *   vehicle = ""
-   *
-   * Vehicle-only replacement:
-   *   driver = ""
-   *
-   * Continue Trip / Rerouted / No Replacement:
-   *   both = ""
-   */
-
-  const finalReplacementDriverId =
-    requiresDriver
-      ? replacementDriverId
-      : "";
-
-  const finalReplacementVehicleId =
-    requiresVehicle
-      ? replacementVehicleId
-      : "";
-
-  try {
-    setSaving(true);
-
-    const response = await fetch(
-      "/api/dispatch",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
-
-        body: JSON.stringify({
-          action:
-            "resolveIncident",
-
-          incidentId:
-            activeIncidentId,
-
-          dispatchId:
-            getValue(
-              resolveIncidentDispatch,
-              "Dispatch ID",
-              "dispatchId"
-            ),
-
-          bookingReference:
-            getValue(
-              resolveIncidentDispatch,
-              "Booking ID",
-              "bookingReference"
-            ),
-
-          /*
-           * IMPORTANT:
-           * Send the actual resolution type.
-           */
-
-          resolutionType:
-            incidentResolutionType,
-
-          /*
-           * Only send a driver when
-           * this resolution requires one.
-           */
-
-          replacementDriverId:
-            finalReplacementDriverId,
-
-          /*
-           * Only send a vehicle when
-           * this resolution requires one.
-           */
-
-          replacementVehicleId:
-            finalReplacementVehicleId,
-
-          notes:
-            resolveIncidentNotes.trim(),
-        }),
-      }
-    );
-
-    const data: ApiResponse =
-      await response.json();
-
-    if (
-      !response.ok ||
-      data.success === false
-    ) {
-      throw new Error(
-        data.message ??
-          data.error ??
-          "Unable to resolve incident."
-      );
+    if (!activeIncidentId) {
+      setError("Incident ID is missing.");
+      return;
     }
 
     /*
      * ==========================================
-     * SUCCESS
+     * DETERMINE REQUIRED REPLACEMENT RESOURCES
      * ==========================================
      */
 
-    setMessage(
-      `Incident ${activeIncidentId} resolved successfully. Dispatch ${data.dispatchId ?? ""} is now En Route.`
-    );
+    const requiresDriver =
+      incidentResolutionType === "Driver Replaced" ||
+      incidentResolutionType ===
+      "Driver & Vehicle Replaced";
 
-    setResolveIncidentDispatch(null);
-    setActiveIncidentId("");
+    const requiresVehicle =
+      incidentResolutionType === "Vehicle Replaced" ||
+      incidentResolutionType ===
+      "Driver & Vehicle Replaced";
 
-    setReplacementDriverId("");
-    setReplacementVehicleId("");
+    /*
+     * ==========================================
+     * VALIDATE DRIVER
+     * ==========================================
+     */
 
-    setIncidentResolutionType(
-      "Continue Trip"
-    );
+    if (
+      requiresDriver &&
+      !replacementDriverId
+    ) {
+      setError(
+        "Select a replacement driver."
+      );
+      return;
+    }
 
-    setResolveIncidentNotes("");
+    /*
+     * ==========================================
+     * VALIDATE VEHICLE
+     * ==========================================
+     */
 
-    setRefreshKey(
-      (current) => current + 1
-    );
+    if (
+      requiresVehicle &&
+      !replacementVehicleId
+    ) {
+      setError(
+        "Select a replacement vehicle."
+      );
+      return;
+    }
 
-  } catch (err) {
-    setError(
-      err instanceof Error
-        ? err.message
-        : "Unable to resolve incident."
-    );
+    /*
+     * ==========================================
+     * CLEAR RESOURCES THAT ARE NOT REQUIRED
+     * ==========================================
+     *
+     * This is important.
+     *
+     * Driver-only replacement:
+     *   vehicle = ""
+     *
+     * Vehicle-only replacement:
+     *   driver = ""
+     *
+     * Continue Trip / Rerouted / No Replacement:
+     *   both = ""
+     */
 
-  } finally {
-    setSaving(false);
+    const finalReplacementDriverId =
+      requiresDriver
+        ? replacementDriverId
+        : "";
+
+    const finalReplacementVehicleId =
+      requiresVehicle
+        ? replacementVehicleId
+        : "";
+
+    try {
+      setSaving(true);
+
+      const response = await fetch(
+        "/api/dispatch",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            action:
+              "resolveIncident",
+
+            incidentId:
+              activeIncidentId,
+
+            dispatchId:
+              getValue(
+                resolveIncidentDispatch,
+                "Dispatch ID",
+                "dispatchId"
+              ),
+
+            bookingReference:
+              getValue(
+                resolveIncidentDispatch,
+                "Booking ID",
+                "bookingReference"
+              ),
+
+            /*
+             * IMPORTANT:
+             * Send the actual resolution type.
+             */
+
+            resolutionType:
+              incidentResolutionType,
+
+            /*
+             * Only send a driver when
+             * this resolution requires one.
+             */
+
+            replacementDriverId:
+              finalReplacementDriverId,
+
+            /*
+             * Only send a vehicle when
+             * this resolution requires one.
+             */
+
+            replacementVehicleId:
+              finalReplacementVehicleId,
+
+            notes:
+              resolveIncidentNotes.trim(),
+          }),
+        }
+      );
+
+      const data: ApiResponse =
+        await response.json();
+
+      if (
+        !response.ok ||
+        data.success === false
+      ) {
+        throw new Error(
+          data.message ??
+          data.error ??
+          "Unable to resolve incident."
+        );
+      }
+
+      /*
+       * ==========================================
+       * SUCCESS
+       * ==========================================
+       */
+
+      setMessage(
+        `Incident ${activeIncidentId} resolved successfully. Dispatch ${data.dispatchId ?? ""} is now En Route.`
+      );
+
+      setResolveIncidentDispatch(null);
+      setActiveIncidentId("");
+
+      setReplacementDriverId("");
+      setReplacementVehicleId("");
+
+      setIncidentResolutionType(
+        "Continue Trip"
+      );
+
+      setResolveIncidentNotes("");
+
+      setRefreshKey(
+        (current) => current + 1
+      );
+
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to resolve incident."
+      );
+
+    } finally {
+      setSaving(false);
+    }
   }
-}
 
   async function handleCreateIncident() {
     setMessage("");
@@ -1057,8 +1086,8 @@ return (
       if (!response.ok || data.success === false) {
         throw new Error(
           data.message ??
-            data.error ??
-            "Unable to create incident."
+          data.error ??
+          "Unable to create incident."
         );
       }
 
@@ -1158,8 +1187,8 @@ return (
       if (!response.ok || data.success === false) {
         throw new Error(
           data.message ??
-            data.error ??
-            "Unable to create dispatch."
+          data.error ??
+          "Unable to create dispatch."
         );
       }
 
@@ -1210,7 +1239,7 @@ return (
         ============================================================ */}
         {(() => {
           const MONTHLY_REVENUE_TARGET =
-          monthlyRevenueTarget;
+            monthlyRevenueTarget;
           const now = new Date();
           const currentMonth = now.getMonth();
           const currentYear = now.getFullYear();
@@ -1323,9 +1352,9 @@ return (
           const targetPercentage =
             MONTHLY_REVENUE_TARGET > 0
               ? Math.min(
-                  (revenueCollected / MONTHLY_REVENUE_TARGET) * 100,
-                  100
-                )
+                (revenueCollected / MONTHLY_REVENUE_TARGET) * 100,
+                100
+              )
               : 0;
 
           const remainingTarget = Math.max(
@@ -1412,13 +1441,13 @@ return (
                   );
 
                 result[service] =
-  Number(result[service] || 0) + Number(value);
+                  Number(result[service] || 0) + Number(value);
 
                 return result;
               },
               {} as Record<string, number>
             );
-            const serviceBookingCounts =
+          const serviceBookingCounts =
             currentMonthBookings.reduce(
               (result, booking) => {
                 const service =
@@ -1438,26 +1467,26 @@ return (
               {} as Record<string, number>
             );
           const serviceRows = Object.entries(serviceRevenue)
-  .sort((a, b) => Number(b[1]) - Number(a[1]))
-  .slice(0, 6);
-const planningDays = 26;
+            .sort((a, b) => Number(b[1]) - Number(a[1]))
+            .slice(0, 6);
+          const planningDays = 26;
 
-const requiredDailyBookedRevenue =
-  planningDays > 0
-    ? MONTHLY_REVENUE_TARGET / planningDays
-    : 0;
+          const requiredDailyBookedRevenue =
+            planningDays > 0
+              ? MONTHLY_REVENUE_TARGET / planningDays
+              : 0;
 
-const remainingBookedTarget = Math.max(
-  MONTHLY_REVENUE_TARGET - revenueBooked,
-  0
-);
+          const remainingBookedTarget = Math.max(
+            MONTHLY_REVENUE_TARGET - revenueBooked,
+            0
+          );
 
-const bookingsNeededAtCurrentAverage =
-  averageBookingValue > 0
-    ? Math.ceil(
-        remainingBookedTarget / averageBookingValue
-      )
-    : 0;
+          const bookingsNeededAtCurrentAverage =
+            averageBookingValue > 0
+              ? Math.ceil(
+                remainingBookedTarget / averageBookingValue
+              )
+              : 0;
           const currency = (value: number) =>
             `$${value.toLocaleString("en-US", {
               minimumFractionDigits: 2,
@@ -1628,7 +1657,7 @@ const bookingsNeededAtCurrentAverage =
                   </div>
                 </div>
               </div>
-                        <RevenueTargetStrategy
+              <RevenueTargetStrategy
                 monthlyTarget={MONTHLY_REVENUE_TARGET}
                 planningDays={planningDays}
                 bookedRevenue={revenueBooked}
@@ -1687,8 +1716,8 @@ const bookingsNeededAtCurrentAverage =
           >
             <div>
               <label className="text-sm font-bold text-slate-700">
-  Dispatch-Eligible Booking
-</label>
+                Dispatch-Eligible Booking
+              </label>
 
               <select
                 value={
@@ -1789,28 +1818,28 @@ const bookingsNeededAtCurrentAverage =
                         selectedBooking,
                         dispatches
                       );
-const driverStatus =
-  getValue(
-    driver,
-    "Driver Status"
-  );
+                    const driverStatus =
+                      getValue(
+                        driver,
+                        "Driver Status"
+                      );
 
-const unavailable =
-  driverStatus !== "Available";
+                    const unavailable =
+                      driverStatus !== "Available";
                     return (
-                      
+
                       <option
-  key={driverId}
-  value={driverId}
-  disabled={unavailable}
->
+                        key={driverId}
+                        value={driverId}
+                        disabled={unavailable}
+                      >
                         {driverName} (
                         {driverId}){" "}
                         {unavailable
-                        ? `— ${driverStatus || "Unavailable"}`
-                        : busy
-                        ? "— Busy"
-                        : "— Available"}
+                          ? `— ${driverStatus || "Unavailable"}`
+                          : busy
+                            ? "— Busy"
+                            : "— Available"}
                       </option>
                     );
                   }
@@ -1876,28 +1905,28 @@ const unavailable =
                         selectedBooking,
                         dispatches
                       );
-                      const vehicleStatus =
-                     getValue(
-                     vehicle,
-                    "Status"
-                     );
+                    const vehicleStatus =
+                      getValue(
+                        vehicle,
+                        "Status"
+                      );
 
                     const unavailable =
-                    vehicleStatus !== "Available";
+                      vehicleStatus !== "Available";
                     return (
                       <option
-                     key={vehicleId}
-                     value={vehicleId}
-                     disabled={unavailable}
-                     >
+                        key={vehicleId}
+                        value={vehicleId}
+                        disabled={unavailable}
+                      >
                         {make} {model} —{" "}
                         {seats} seats (
                         {vehicleId}){" "}
                         {unavailable
-                        ? `— ${vehicleStatus || "Unavailable"}`
-                        : busy
-                        ? "— Busy"
-                        : "— Available"}
+                          ? `— ${vehicleStatus || "Unavailable"}`
+                          : busy
+                            ? "— Busy"
+                            : "— Available"}
                       </option>
                     );
                   }
@@ -1907,7 +1936,7 @@ const unavailable =
               {selectedDriver &&
                 selectedDriverId &&
                 availableVehicles.length ===
-                  0 && (
+                0 && (
                   <p className="mt-2 text-xs text-amber-600">
                     No vehicle is currently
                     assigned to this driver.
@@ -2022,7 +2051,7 @@ const unavailable =
                     {getNumber(
                       selectedBooking,
                       "Passengers"
-                    )}  
+                    )}
                   </p>
                 </div>
 
@@ -2032,661 +2061,661 @@ const unavailable =
         </section>
 
 
-   {incidentDispatch && (
-  <section className="mb-8 rounded-2xl bg-white p-6 shadow-sm">
-    <div className="mb-6">
-      <p className="text-sm font-bold uppercase tracking-widest text-orange-600">
-        Incident Management
-      </p>
+        {incidentDispatch && (
+          <section className="mb-8 rounded-2xl bg-white p-6 shadow-sm">
+            <div className="mb-6">
+              <p className="text-sm font-bold uppercase tracking-widest text-orange-600">
+                Incident Management
+              </p>
 
-      <h2 className="mt-1 text-2xl font-black text-slate-900">
-        Report Incident
-      </h2>
+              <h2 className="mt-1 text-2xl font-black text-slate-900">
+                Report Incident
+              </h2>
 
-      <p className="mt-1 text-sm text-slate-500">
-        Record the incident before changing the
-        dispatch status.
-      </p>
-    </div>
+              <p className="mt-1 text-sm text-slate-500">
+                Record the incident before changing the
+                dispatch status.
+              </p>
+            </div>
 
-    <div className="mb-6 rounded-xl bg-slate-50 p-4">
-      <div className="grid gap-4 md:grid-cols-4">
-        <div>
-          <p className="text-xs font-bold uppercase text-slate-500">
-            Dispatch ID
-          </p>
+            <div className="mb-6 rounded-xl bg-slate-50 p-4">
+              <div className="grid gap-4 md:grid-cols-4">
+                <div>
+                  <p className="text-xs font-bold uppercase text-slate-500">
+                    Dispatch ID
+                  </p>
 
-          <p className="mt-1 text-sm font-bold text-slate-900">
-            {String(
-              getValue(
-                incidentDispatch,
-                "Dispatch ID",
-                "dispatchId"
-              ) ?? ""
-            )}
-          </p>
-        </div>
+                  <p className="mt-1 text-sm font-bold text-slate-900">
+                    {String(
+                      getValue(
+                        incidentDispatch,
+                        "Dispatch ID",
+                        "dispatchId"
+                      ) ?? ""
+                    )}
+                  </p>
+                </div>
 
-        <div>
-          <p className="text-xs font-bold uppercase text-slate-500">
-            Booking ID
-          </p>
+                <div>
+                  <p className="text-xs font-bold uppercase text-slate-500">
+                    Booking ID
+                  </p>
 
-          <p className="mt-1 text-sm font-bold text-slate-900">
-            {String(
-              getValue(
-                incidentDispatch,
-                "Booking ID",
-                "bookingId"
-              ) ?? ""
-            )}
-          </p>
-        </div>
+                  <p className="mt-1 text-sm font-bold text-slate-900">
+                    {String(
+                      getValue(
+                        incidentDispatch,
+                        "Booking ID",
+                        "bookingId"
+                      ) ?? ""
+                    )}
+                  </p>
+                </div>
 
-        <div>
-          <p className="text-xs font-bold uppercase text-slate-500">
-            Driver
-          </p>
+                <div>
+                  <p className="text-xs font-bold uppercase text-slate-500">
+                    Driver
+                  </p>
 
-          <p className="mt-1 text-sm font-bold text-slate-900">
-            {String(
-              getValue(
-                incidentDispatch,
-                "Driver Name",
-                "driverName"
-              ) ?? ""
-            )}
-          </p>
-        </div>
+                  <p className="mt-1 text-sm font-bold text-slate-900">
+                    {String(
+                      getValue(
+                        incidentDispatch,
+                        "Driver Name",
+                        "driverName"
+                      ) ?? ""
+                    )}
+                  </p>
+                </div>
 
-        <div>
-          <p className="text-xs font-bold uppercase text-slate-500">
-            Vehicle
-          </p>
+                <div>
+                  <p className="text-xs font-bold uppercase text-slate-500">
+                    Vehicle
+                  </p>
 
-          <p className="mt-1 text-sm font-bold text-slate-900">
-            {String(
-              getValue(
-                incidentDispatch,
-                "Vehicle",
-                "vehicle"
-              ) ?? ""
-            )}
-          </p>
-        </div>
-      </div>
-    </div>
+                  <p className="mt-1 text-sm font-bold text-slate-900">
+                    {String(
+                      getValue(
+                        incidentDispatch,
+                        "Vehicle",
+                        "vehicle"
+                      ) ?? ""
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
 
-    <div className="grid gap-5 md:grid-cols-2">
-      <div>
-        <label className="mb-2 block text-sm font-bold text-slate-700">
-          Incident Type
-        </label>
+            <div className="grid gap-5 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-sm font-bold text-slate-700">
+                  Incident Type
+                </label>
 
-        <select
-          value={incidentType}
-          onChange={(event) =>
-            setIncidentType(event.target.value)
-          }
-          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-        >
-          <option value="">
-            Select incident type
-          </option>
-          <option value="Mechanical">
-            Mechanical
-          </option>
-          <option value="Accident">
-            Accident
-          </option>
-          <option value="Passenger Issue">
-            Passenger Issue
-          </option>
-          <option value="Traffic">
-            Traffic
-          </option>
-          <option value="Medical">
-            Medical
-          </option>
-          <option value="Other">
-            Other
-          </option>
-        </select>
-      </div>
+                <select
+                  value={incidentType}
+                  onChange={(event) =>
+                    setIncidentType(event.target.value)
+                  }
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                >
+                  <option value="">
+                    Select incident type
+                  </option>
+                  <option value="Mechanical">
+                    Mechanical
+                  </option>
+                  <option value="Accident">
+                    Accident
+                  </option>
+                  <option value="Passenger Issue">
+                    Passenger Issue
+                  </option>
+                  <option value="Traffic">
+                    Traffic
+                  </option>
+                  <option value="Medical">
+                    Medical
+                  </option>
+                  <option value="Other">
+                    Other
+                  </option>
+                </select>
+              </div>
 
-      <div>
-        <label className="mb-2 block text-sm font-bold text-slate-700">
-          Location
-        </label>
+              <div>
+                <label className="mb-2 block text-sm font-bold text-slate-700">
+                  Location
+                </label>
 
-        <input
-          type="text"
-          value={incidentLocation}
-          onChange={(event) =>
-            setIncidentLocation(event.target.value)
-          }
-          placeholder="Where did the incident occur?"
-          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-        />
-      </div>
+                <input
+                  type="text"
+                  value={incidentLocation}
+                  onChange={(event) =>
+                    setIncidentLocation(event.target.value)
+                  }
+                  placeholder="Where did the incident occur?"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+              </div>
 
-      <div className="md:col-span-2">
-        <label className="mb-2 block text-sm font-bold text-slate-700">
-          Description
-        </label>
+              <div className="md:col-span-2">
+                <label className="mb-2 block text-sm font-bold text-slate-700">
+                  Description
+                </label>
 
-        <textarea
-          value={incidentDescription}
-          onChange={(event) =>
-            setIncidentDescription(event.target.value)
-          }
-          rows={4}
-          placeholder="Describe what happened..."
-          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-        />
-      </div>
+                <textarea
+                  value={incidentDescription}
+                  onChange={(event) =>
+                    setIncidentDescription(event.target.value)
+                  }
+                  rows={4}
+                  placeholder="Describe what happened..."
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+              </div>
 
-      <div className="md:col-span-2">
-        <label className="mb-2 block text-sm font-bold text-slate-700">
-          Action Taken
-        </label>
+              <div className="md:col-span-2">
+                <label className="mb-2 block text-sm font-bold text-slate-700">
+                  Action Taken
+                </label>
 
-        <textarea
-          value={incidentActionTaken}
-          onChange={(event) =>
-            setIncidentActionTaken(event.target.value)
-          }
-          rows={3}
-          placeholder="Describe the action taken..."
-          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-        />
-      </div>
+                <textarea
+                  value={incidentActionTaken}
+                  onChange={(event) =>
+                    setIncidentActionTaken(event.target.value)
+                  }
+                  rows={3}
+                  placeholder="Describe the action taken..."
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+              </div>
 
-      <div className="md:col-span-2">
-        <label className="mb-2 block text-sm font-bold text-slate-700">
-          Notes
-        </label>
+              <div className="md:col-span-2">
+                <label className="mb-2 block text-sm font-bold text-slate-700">
+                  Notes
+                </label>
 
-        <textarea
-          value={incidentNotes}
-          onChange={(event) =>
-            setIncidentNotes(event.target.value)
-          }
-          rows={3}
-          placeholder="Optional additional notes..."
-          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-        />
-      </div>
-    </div>
+                <textarea
+                  value={incidentNotes}
+                  onChange={(event) =>
+                    setIncidentNotes(event.target.value)
+                  }
+                  rows={3}
+                  placeholder="Optional additional notes..."
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+              </div>
+            </div>
 
-    <div className="mt-6 flex justify-end gap-3">
-      <button
-        type="button"
-        onClick={() => {
-          setIncidentDispatch(null);
-          setIncidentType("");
-          setIncidentLocation("");
-          setIncidentDescription("");
-          setIncidentActionTaken("");
-          setIncidentNotes("");
-          setError("");
-          setMessage("");
-        }}
-        disabled={saving}
-        className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-      >
-        Cancel
-      </button>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setIncidentDispatch(null);
+                  setIncidentType("");
+                  setIncidentLocation("");
+                  setIncidentDescription("");
+                  setIncidentActionTaken("");
+                  setIncidentNotes("");
+                  setError("");
+                  setMessage("");
+                }}
+                disabled={saving}
+                className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
 
-      <button
-        type="button"
-        onClick={handleCreateIncident}
-        disabled={saving}
-        className="rounded-full bg-orange-500 px-5 py-2 text-sm font-bold text-white hover:bg-orange-600 disabled:opacity-50"
-      >
-        {saving
-          ? "Reporting..."
-          : "Report Incident"}
-      </button>
-    </div>
-  </section>
-)}
+              <button
+                type="button"
+                onClick={handleCreateIncident}
+                disabled={saving}
+                className="rounded-full bg-orange-500 px-5 py-2 text-sm font-bold text-white hover:bg-orange-600 disabled:opacity-50"
+              >
+                {saving
+                  ? "Reporting..."
+                  : "Report Incident"}
+              </button>
+            </div>
+          </section>
+        )}
 
         {resolveIncidentDispatch && (
-  <section className="mb-8 rounded-2xl bg-white p-6 shadow-sm">
-    <div className="mb-6">
-      <p className="text-sm font-bold uppercase tracking-widest text-sky-600">
-        Incident Management
-      </p>
+          <section className="mb-8 rounded-2xl bg-white p-6 shadow-sm">
+            <div className="mb-6">
+              <p className="text-sm font-bold uppercase tracking-widest text-sky-600">
+                Incident Management
+              </p>
 
-      <h2 className="mt-1 text-2xl font-black text-slate-900">
-        Resolve Incident
-      </h2>
+              <h2 className="mt-1 text-2xl font-black text-slate-900">
+                Resolve Incident
+              </h2>
 
-      <p className="mt-1 text-sm text-slate-500">
-        Select how the incident was resolved. Replacement resources are only required when the selected resolution requires them.
-      </p>
-    </div>
+              <p className="mt-1 text-sm text-slate-500">
+                Select how the incident was resolved. Replacement resources are only required when the selected resolution requires them.
+              </p>
+            </div>
 
-    {/* INCIDENT DETAILS */}
-    <div className="mb-6 rounded-xl bg-slate-50 p-4">
-      <div className="grid gap-4 md:grid-cols-5">
+            {/* INCIDENT DETAILS */}
+            <div className="mb-6 rounded-xl bg-slate-50 p-4">
+              <div className="grid gap-4 md:grid-cols-5">
 
-        <div>
-          <p className="text-xs font-bold uppercase text-slate-500">
-            Incident ID
-          </p>
+                <div>
+                  <p className="text-xs font-bold uppercase text-slate-500">
+                    Incident ID
+                  </p>
 
-          <p className="mt-1 text-sm font-bold text-slate-900">
-            {activeIncidentId}
-          </p>
-        </div>
+                  <p className="mt-1 text-sm font-bold text-slate-900">
+                    {activeIncidentId}
+                  </p>
+                </div>
 
-        <div>
-          <p className="text-xs font-bold uppercase text-slate-500">
-            Dispatch ID
-          </p>
+                <div>
+                  <p className="text-xs font-bold uppercase text-slate-500">
+                    Dispatch ID
+                  </p>
 
-          <p className="mt-1 text-sm font-bold text-slate-900">
-            {getValue(
-              resolveIncidentDispatch,
-              "Dispatch ID",
-              "dispatchId"
-            )}
-          </p>
-        </div>
+                  <p className="mt-1 text-sm font-bold text-slate-900">
+                    {getValue(
+                      resolveIncidentDispatch,
+                      "Dispatch ID",
+                      "dispatchId"
+                    )}
+                  </p>
+                </div>
 
-        <div>
-          <p className="text-xs font-bold uppercase text-slate-500">
-            Booking ID
-          </p>
+                <div>
+                  <p className="text-xs font-bold uppercase text-slate-500">
+                    Booking ID
+                  </p>
 
-          <p className="mt-1 text-sm font-bold text-slate-900">
-            {getValue(
-              resolveIncidentDispatch,
-              "Booking ID",
-              "bookingReference"
-            )}
-          </p>
-        </div>
+                  <p className="mt-1 text-sm font-bold text-slate-900">
+                    {getValue(
+                      resolveIncidentDispatch,
+                      "Booking ID",
+                      "bookingReference"
+                    )}
+                  </p>
+                </div>
 
-        <div>
-          <p className="text-xs font-bold uppercase text-slate-500">
-            Current Driver
-          </p>
+                <div>
+                  <p className="text-xs font-bold uppercase text-slate-500">
+                    Current Driver
+                  </p>
 
-          <p className="mt-1 text-sm font-bold text-slate-900">
-            {getValue(
-              resolveIncidentDispatch,
-              "Driver Name",
-              "driverName"
-            )}
-          </p>
-        </div>
+                  <p className="mt-1 text-sm font-bold text-slate-900">
+                    {getValue(
+                      resolveIncidentDispatch,
+                      "Driver Name",
+                      "driverName"
+                    )}
+                  </p>
+                </div>
 
-        <div>
-          <p className="text-xs font-bold uppercase text-slate-500">
-            Current Vehicle
-          </p>
+                <div>
+                  <p className="text-xs font-bold uppercase text-slate-500">
+                    Current Vehicle
+                  </p>
 
-          <p className="mt-1 text-sm font-bold text-slate-900">
-            {getValue(
-              resolveIncidentDispatch,
-              "Vehicle",
-              "vehicle"
-            )}
-          </p>
-        </div>
+                  <p className="mt-1 text-sm font-bold text-slate-900">
+                    {getValue(
+                      resolveIncidentDispatch,
+                      "Vehicle",
+                      "vehicle"
+                    )}
+                  </p>
+                </div>
 
-      </div>
-    </div>
+              </div>
+            </div>
 
-    {/* RESOLUTION TYPE */}
-    <div className="mb-5">
-      <label className="mb-2 block text-sm font-bold text-slate-700">
-        Resolution Type
-      </label>
+            {/* RESOLUTION TYPE */}
+            <div className="mb-5">
+              <label className="mb-2 block text-sm font-bold text-slate-700">
+                Resolution Type
+              </label>
 
-      <select
-        value={incidentResolutionType}
-        onChange={(event) => {
-          setIncidentResolutionType(
-            event.target.value
-          );
+              <select
+                value={incidentResolutionType}
+                onChange={(event) => {
+                  setIncidentResolutionType(
+                    event.target.value
+                  );
 
-          setReplacementDriverId("");
-          setReplacementVehicleId("");
-        }}
-        disabled={saving}
-        className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-      >
-        <option value="Continue Trip">
-          Continue Trip
-        </option>
-
-        <option value="Rerouted">
-          Rerouted
-        </option>
-
-        <option value="No Replacement Required">
-          No Replacement Required
-        </option>
-
-        <option value="Driver Replaced">
-          Driver Replaced
-        </option>
-
-        <option value="Vehicle Replaced">
-          Vehicle Replaced
-        </option>
-
-        <option value="Driver & Vehicle Replaced">
-          Driver &amp; Vehicle Replaced
-        </option>
-      </select>
-    </div>
-
-    {/* REPLACEMENT RESOURCES */}
-    <div className="grid gap-5 md:grid-cols-2">
-
-           {/* DRIVER REPLACEMENT */}
-      {(incidentResolutionType === "Driver Replaced" ||
-        incidentResolutionType ===
-          "Driver & Vehicle Replaced") && (
-        <div>
-          <label className="mb-2 block text-sm font-bold text-slate-700">
-            Replacement Driver
-          </label>
-
-          <select
-            value={replacementDriverId}
-            onChange={(event) => {
-              setReplacementDriverId(
-                event.target.value
-              );
-            }}
-            disabled={saving}
-            className="w-full rounded-xl border border-slate-300 bg-white p-3"
-          >
-            <option value="">
-              Select replacement driver
-            </option>
-
-            {drivers.map((driver) => {
-              const id = getValue(
-                driver,
-                "Driver ID"
-              );
-
-              const name = getValue(
-                driver,
-                "Driver Name"
-              );
-
-              const status = getValue(
-                driver,
-                "Driver Status"
-              );
-
-              const pickupDate = getValue(
-                resolveIncidentDispatch,
-                "Pickup Date"
-              );
-
-              const busy =
-                isDispatchResourceBusy(
-                  id,
-                  "Driver ID",
-                  resolveIncidentDispatch,
-                  dispatches
-                );
-
-              const currentDriver =
-                id ===
-                getValue(
-                  resolveIncidentDispatch,
-                  "Driver ID",
-                  "driverId"
-                );
-
-              const unavailable =
-                status !== "Available";
-
-              return (
-                <option
-                  key={id}
-                  value={id}
-                  disabled={
-                    unavailable ||
-                    busy ||
-                    currentDriver
-                  }
-                >
-                  {name} ({id}) —{" "}
-                  {currentDriver
-                    ? "Current Driver"
-                    : unavailable
-                    ? status ||
-                      "Unavailable"
-                    : busy
-                    ? "Busy"
-                    : "Available"}
+                  setReplacementDriverId("");
+                  setReplacementVehicleId("");
+                }}
+                disabled={saving}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+              >
+                <option value="Continue Trip">
+                  Continue Trip
                 </option>
-              );
-            })}
-          </select>
 
-          <p className="mt-2 text-xs text-slate-500">
-            Select an available driver who is
-            not assigned to another active
-            dispatch.
-          </p>
-        </div>
-      )}
-            {/* VEHICLE REPLACEMENT */}
-      {(incidentResolutionType === "Vehicle Replaced" ||
-        incidentResolutionType ===
-          "Driver & Vehicle Replaced") && (
-        <div>
-          <label className="mb-2 block text-sm font-bold text-slate-700">
-            Replacement Vehicle
-          </label>
-
-          <select
-            value={replacementVehicleId}
-            onChange={(event) => {
-              setReplacementVehicleId(
-                event.target.value
-              );
-            }}
-            disabled={saving}
-            className="w-full rounded-xl border border-slate-300 bg-white p-3"
-          >
-            <option value="">
-              Select replacement vehicle
-            </option>
-
-            {vehicles.map((vehicle) => {
-              const id = getValue(
-                vehicle,
-                "Vehicle ID"
-              );
-
-              const make = getValue(
-                vehicle,
-                "Make"
-              );
-
-              const model = getValue(
-                vehicle,
-                "Model"
-              );
-
-              const status = getValue(
-                vehicle,
-                "Status"
-              );
-
-              const pickupDate = getValue(
-                resolveIncidentDispatch,
-                "Pickup Date"
-              );
-
-              const busy =
-                isDispatchResourceBusy(
-                  id,
-                  "Vehicle ID",
-                  resolveIncidentDispatch,
-                  dispatches
-                );
-
-              const currentVehicle =
-                id ===
-                getValue(
-                  resolveIncidentDispatch,
-                  "Vehicle ID",
-                  "vehicleId"
-                );
-
-              const unavailable =
-                status !== "Available";
-
-              return (
-                <option
-                  key={id}
-                  value={id}
-                  disabled={
-                    unavailable ||
-                    busy ||
-                    currentVehicle
-                  }
-                >
-                  {make} {model} ({id}) —{" "}
-                  {currentVehicle
-                    ? "Current Vehicle"
-                    : unavailable
-                    ? status ||
-                      "Unavailable"
-                    : busy
-                    ? "Busy"
-                    : "Available"}
+                <option value="Rerouted">
+                  Rerouted
                 </option>
-              );
-            })}
-          </select>
 
-          <p className="mt-2 text-xs text-slate-500">
-            Select any available fleet vehicle
-            that is not assigned to another
-            active dispatch.
-          </p>
-        </div>
-      )}
-      {/* RESOLUTION NOTES */}
-      <div
-        className={
-          incidentResolutionType ===
-            "Driver Replaced" ||
-          incidentResolutionType ===
-            "Vehicle Replaced" ||
-          incidentResolutionType ===
-            "Driver & Vehicle Replaced"
-            ? "md:col-span-2"
-            : "md:col-span-2"
-        }
-      >
-        <label className="mb-2 block text-sm font-bold text-slate-700">
-          Resolution Notes
-        </label>
+                <option value="No Replacement Required">
+                  No Replacement Required
+                </option>
 
-        <textarea
-          value={resolveIncidentNotes}
-          onChange={(event) =>
-            setResolveIncidentNotes(
-              event.target.value
-            )
-          }
-          rows={3}
-          placeholder="Optional notes about the incident resolution..."
-          disabled={saving}
-          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-        />
-      </div>
+                <option value="Driver Replaced">
+                  Driver Replaced
+                </option>
 
-    </div>
+                <option value="Vehicle Replaced">
+                  Vehicle Replaced
+                </option>
 
-    {/* ACTION BUTTONS */}
-    <div className="mt-6 flex justify-end gap-3">
+                <option value="Driver & Vehicle Replaced">
+                  Driver &amp; Vehicle Replaced
+                </option>
+              </select>
+            </div>
 
-      <button
-        type="button"
-        onClick={() => {
-          setResolveIncidentDispatch(null);
-          setActiveIncidentId("");
-          setReplacementDriverId("");
-          setReplacementVehicleId("");
-          setIncidentResolutionType(
-            "Continue Trip"
-          );
-          setResolveIncidentNotes("");
-          setError("");
-          setMessage("");
-        }}
-        disabled={saving}
-        className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-      >
-        Cancel
-      </button>
+            {/* REPLACEMENT RESOURCES */}
+            <div className="grid gap-5 md:grid-cols-2">
 
-      <button
-        type="button"
-        onClick={handleResolveIncident}
-        disabled={saving}
-        className="rounded-full bg-sky-600 px-5 py-2 text-sm font-bold text-white hover:bg-sky-700 disabled:opacity-50"
-      >
-        {saving
-          ? "Resolving..."
-          : "Resolve Incident"}
-      </button>
+              {/* DRIVER REPLACEMENT */}
+              {(incidentResolutionType === "Driver Replaced" ||
+                incidentResolutionType ===
+                "Driver & Vehicle Replaced") && (
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-slate-700">
+                      Replacement Driver
+                    </label>
 
-    </div>
-  </section>
-)}
-<section className="rounded-2xl bg-white p-6 shadow-sm">
-  <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-    <div>
-      <h2 className="text-2xl font-black text-slate-900">
-        Dispatch Board
-      </h2>
+                    <select
+                      value={replacementDriverId}
+                      onChange={(event) => {
+                        setReplacementDriverId(
+                          event.target.value
+                        );
+                      }}
+                      disabled={saving}
+                      className="w-full rounded-xl border border-slate-300 bg-white p-3"
+                    >
+                      <option value="">
+                        Select replacement driver
+                      </option>
 
-      <p className="mt-1 text-sm text-slate-500">
-  Only fully paid, confirmed bookings without an existing dispatch are available.
-</p>
-    </div>
+                      {drivers.map((driver) => {
+                        const id = getValue(
+                          driver,
+                          "Driver ID"
+                        );
 
-    <button
-      type="button"
-      onClick={() =>
-        setRefreshKey(
-          (current) => current + 1
-        )
-      }
-      disabled={loading || saving}
-      className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-    >
-      Refresh
-    </button>
-  </div>
+                        const name = getValue(
+                          driver,
+                          "Driver Name"
+                        );
 
-  {loading ? (
-    <div className="rounded-2xl bg-slate-50 p-8 text-center text-slate-500">
-      Loading dispatch records...
-    </div>
-  ) : dispatches.length === 0 ? (
-    <div className="rounded-2xl bg-slate-50 p-8 text-center text-slate-500">
-      No dispatch records found.
-    </div>
-  ) : (
+                        const status = getValue(
+                          driver,
+                          "Driver Status"
+                        );
+
+                        const pickupDate = getValue(
+                          resolveIncidentDispatch,
+                          "Pickup Date"
+                        );
+
+                        const busy =
+                          isDispatchResourceBusy(
+                            id,
+                            "Driver ID",
+                            resolveIncidentDispatch,
+                            dispatches
+                          );
+
+                        const currentDriver =
+                          id ===
+                          getValue(
+                            resolveIncidentDispatch,
+                            "Driver ID",
+                            "driverId"
+                          );
+
+                        const unavailable =
+                          status !== "Available";
+
+                        return (
+                          <option
+                            key={id}
+                            value={id}
+                            disabled={
+                              unavailable ||
+                              busy ||
+                              currentDriver
+                            }
+                          >
+                            {name} ({id}) —{" "}
+                            {currentDriver
+                              ? "Current Driver"
+                              : unavailable
+                                ? status ||
+                                "Unavailable"
+                                : busy
+                                  ? "Busy"
+                                  : "Available"}
+                          </option>
+                        );
+                      })}
+                    </select>
+
+                    <p className="mt-2 text-xs text-slate-500">
+                      Select an available driver who is
+                      not assigned to another active
+                      dispatch.
+                    </p>
+                  </div>
+                )}
+              {/* VEHICLE REPLACEMENT */}
+              {(incidentResolutionType === "Vehicle Replaced" ||
+                incidentResolutionType ===
+                "Driver & Vehicle Replaced") && (
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-slate-700">
+                      Replacement Vehicle
+                    </label>
+
+                    <select
+                      value={replacementVehicleId}
+                      onChange={(event) => {
+                        setReplacementVehicleId(
+                          event.target.value
+                        );
+                      }}
+                      disabled={saving}
+                      className="w-full rounded-xl border border-slate-300 bg-white p-3"
+                    >
+                      <option value="">
+                        Select replacement vehicle
+                      </option>
+
+                      {vehicles.map((vehicle) => {
+                        const id = getValue(
+                          vehicle,
+                          "Vehicle ID"
+                        );
+
+                        const make = getValue(
+                          vehicle,
+                          "Make"
+                        );
+
+                        const model = getValue(
+                          vehicle,
+                          "Model"
+                        );
+
+                        const status = getValue(
+                          vehicle,
+                          "Status"
+                        );
+
+                        const pickupDate = getValue(
+                          resolveIncidentDispatch,
+                          "Pickup Date"
+                        );
+
+                        const busy =
+                          isDispatchResourceBusy(
+                            id,
+                            "Vehicle ID",
+                            resolveIncidentDispatch,
+                            dispatches
+                          );
+
+                        const currentVehicle =
+                          id ===
+                          getValue(
+                            resolveIncidentDispatch,
+                            "Vehicle ID",
+                            "vehicleId"
+                          );
+
+                        const unavailable =
+                          status !== "Available";
+
+                        return (
+                          <option
+                            key={id}
+                            value={id}
+                            disabled={
+                              unavailable ||
+                              busy ||
+                              currentVehicle
+                            }
+                          >
+                            {make} {model} ({id}) —{" "}
+                            {currentVehicle
+                              ? "Current Vehicle"
+                              : unavailable
+                                ? status ||
+                                "Unavailable"
+                                : busy
+                                  ? "Busy"
+                                  : "Available"}
+                          </option>
+                        );
+                      })}
+                    </select>
+
+                    <p className="mt-2 text-xs text-slate-500">
+                      Select any available fleet vehicle
+                      that is not assigned to another
+                      active dispatch.
+                    </p>
+                  </div>
+                )}
+              {/* RESOLUTION NOTES */}
+              <div
+                className={
+                  incidentResolutionType ===
+                    "Driver Replaced" ||
+                    incidentResolutionType ===
+                    "Vehicle Replaced" ||
+                    incidentResolutionType ===
+                    "Driver & Vehicle Replaced"
+                    ? "md:col-span-2"
+                    : "md:col-span-2"
+                }
+              >
+                <label className="mb-2 block text-sm font-bold text-slate-700">
+                  Resolution Notes
+                </label>
+
+                <textarea
+                  value={resolveIncidentNotes}
+                  onChange={(event) =>
+                    setResolveIncidentNotes(
+                      event.target.value
+                    )
+                  }
+                  rows={3}
+                  placeholder="Optional notes about the incident resolution..."
+                  disabled={saving}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+              </div>
+
+            </div>
+
+            {/* ACTION BUTTONS */}
+            <div className="mt-6 flex justify-end gap-3">
+
+              <button
+                type="button"
+                onClick={() => {
+                  setResolveIncidentDispatch(null);
+                  setActiveIncidentId("");
+                  setReplacementDriverId("");
+                  setReplacementVehicleId("");
+                  setIncidentResolutionType(
+                    "Continue Trip"
+                  );
+                  setResolveIncidentNotes("");
+                  setError("");
+                  setMessage("");
+                }}
+                disabled={saving}
+                className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResolveIncident}
+                disabled={saving}
+                className="rounded-full bg-sky-600 px-5 py-2 text-sm font-bold text-white hover:bg-sky-700 disabled:opacity-50"
+              >
+                {saving
+                  ? "Resolving..."
+                  : "Resolve Incident"}
+              </button>
+
+            </div>
+          </section>
+        )}
+        <section className="rounded-2xl bg-white p-6 shadow-sm">
+          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="text-2xl font-black text-slate-900">
+                Dispatch Board
+              </h2>
+
+              <p className="mt-1 text-sm text-slate-500">
+                Only fully paid, confirmed bookings without an existing dispatch are available.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                setRefreshKey(
+                  (current) => current + 1
+                )
+              }
+              disabled={loading || saving}
+              className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            >
+              Refresh
+            </button>
+          </div>
+
+          {loading ? (
+            <div className="rounded-2xl bg-slate-50 p-8 text-center text-slate-500">
+              Loading dispatch records...
+            </div>
+          ) : dispatches.length === 0 ? (
+            <div className="rounded-2xl bg-slate-50 p-8 text-center text-slate-500">
+              No dispatch records found.
+            </div>
+          ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[1100px] border-collapse text-left">
 
