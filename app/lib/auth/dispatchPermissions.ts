@@ -43,6 +43,12 @@ export const dispatchActionPermissions = {
     "DISPATCHER",
   ],
 
+getActiveIncident: [
+  "ADMIN",
+  "MANAGER",
+  "DISPATCHER",
+],
+
   resolveIncident: [
     "ADMIN",
     "MANAGER",

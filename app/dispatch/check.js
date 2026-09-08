@@ -112,7 +112,9 @@ function doPost(e) {
         .setMimeType(
           ContentService.MimeType.JSON
         );
-    } if (data.action === "resolveIncident") {
+    }
+
+    if (data.action === "resolveIncident") {
       const result = resolveIncident(data);
 
       return ContentService
@@ -123,6 +125,19 @@ function doPost(e) {
           ContentService.MimeType.JSON
         );
     }
+
+    if (data.action === "getActiveIncident") {
+      const result = getActiveIncident(data);
+
+      return ContentService
+        .createTextOutput(
+          JSON.stringify(result)
+        )
+        .setMimeType(
+          ContentService.MimeType.JSON
+        );
+    }
+
     /*
    * ==========================================
    * RESOLVE INCIDENT
@@ -1302,7 +1317,7 @@ function doPost(e) {
             resolvedAt,
           message:
             requiresDriverReplacement ||
-            requiresVehicleReplacement
+              requiresVehicleReplacement
               ? "Incident resolved and replacement resources assigned successfully."
               : "Incident resolved successfully and dispatch resumed."
         };
@@ -1950,7 +1965,7 @@ function doPost(e) {
         // R - Deposit
         data.deposit ?? "",
 
-                // S - Balance
+        // S - Balance
         data.balance ?? "",
 
         // T - Customer Reference
@@ -2036,6 +2051,142 @@ function doPost(e) {
  * Replacement driver/vehicle fields are left
  * blank until a replacement is actually made.
  */
+function getActiveIncident(data) {
+  try {
+    const spreadsheet =
+      getDispatchSpreadsheet_();
+
+    const incidentsSheet =
+      getRequiredSheet_(
+        spreadsheet,
+        "Incidents"
+      );
+
+    const dispatchId =
+      String(
+        data.dispatchId ?? ""
+      ).trim();
+
+    if (!dispatchId) {
+      throw new Error(
+        "Dispatch ID is required."
+      );
+    }
+
+    const incidentValues =
+      incidentsSheet
+        .getDataRange()
+        .getDisplayValues();
+
+    if (
+      incidentValues.length < 2
+    ) {
+      return {
+        success: true,
+        action: "getActiveIncident",
+        found: false,
+        incidentId: "",
+        dispatchId: dispatchId
+      };
+    }
+
+    const incidentHeaders =
+      incidentValues[0].map(
+        function (header) {
+          return String(
+            header ?? ""
+          ).trim();
+        }
+      );
+
+    const incidentIdColumn =
+      incidentHeaders.indexOf(
+        "Incident ID"
+      );
+
+    const incidentDispatchColumn =
+      incidentHeaders.indexOf(
+        "Dispatch ID"
+      );
+
+    const resolvedAtColumn =
+      incidentHeaders.indexOf(
+        "Resolved At"
+      );
+
+    if (
+      incidentIdColumn === -1 ||
+      incidentDispatchColumn === -1 ||
+      resolvedAtColumn === -1
+    ) {
+      throw new Error(
+        "Required Incidents columns are missing."
+      );
+    }
+
+    for (
+      let i = 1;
+      i < incidentValues.length;
+      i++
+    ) {
+      const existingDispatchId =
+        String(
+          incidentValues[i][
+            incidentDispatchColumn
+          ] ?? ""
+        ).trim();
+
+      const resolvedAt =
+        String(
+          incidentValues[i][
+            resolvedAtColumn
+          ] ?? ""
+        ).trim();
+
+      if (
+        existingDispatchId ===
+          dispatchId &&
+        !resolvedAt
+      ) {
+        return {
+          success: true,
+          action: "getActiveIncident",
+          found: true,
+          incidentId:
+            String(
+              incidentValues[i][
+                incidentIdColumn
+              ] ?? ""
+            ).trim(),
+          dispatchId: dispatchId
+        };
+      }
+    }
+
+    return {
+      success: true,
+      action: "getActiveIncident",
+      found: false,
+      incidentId: "",
+      dispatchId: dispatchId
+    };
+
+  } catch (error) {
+    Logger.log(
+      "GET ACTIVE INCIDENT ERROR: " +
+      error.toString()
+    );
+
+    return {
+      success: false,
+      action: "getActiveIncident",
+      error:
+        error instanceof Error
+          ? error.message
+          : String(error)
+    };
+  }
+}
 function createIncident(data) {
   try {
     const spreadsheet =
@@ -2919,43 +3070,43 @@ function checkDispatchResourceAvailability(data) {
 }
 
 function recordPayment(data) {
-    data = data || {};
+  data = data || {};
 
-    const bookingReference =
-      String(
-        data.bookingReference ?? ""
-      ).trim();
+  const bookingReference =
+    String(
+      data.bookingReference ?? ""
+    ).trim();
 
-    const amountPaid =
-      Number(
-        data.amountPaid
-      );
+  const amountPaid =
+    Number(
+      data.amountPaid
+    );
 
-    const paymentMethod =
-      String(
-        data.paymentMethod ?? ""
-      ).trim();
+  const paymentMethod =
+    String(
+      data.paymentMethod ?? ""
+    ).trim();
 
-    const paymentDate =
-      String(
-        data.paymentDate ?? ""
-      ).trim();
+  const paymentDate =
+    String(
+      data.paymentDate ?? ""
+    ).trim();
 
-    const paymentReference =
-      String(
-        data.paymentReference ?? ""
-      ).trim();
+  const paymentReference =
+    String(
+      data.paymentReference ?? ""
+    ).trim();
 
-    const paymentType =
-      String(
-        data.paymentType ?? ""
-      ).trim();
+  const paymentType =
+    String(
+      data.paymentType ?? ""
+    ).trim();
 
-    if (!bookingReference) {
-      throw new Error(
-        "Booking reference is required."
-      );
-    }
+  if (!bookingReference) {
+    throw new Error(
+      "Booking reference is required."
+    );
+  }
   if (
     !Number.isFinite(amountPaid) ||
     amountPaid <= 0
@@ -2967,511 +3118,511 @@ function recordPayment(data) {
 
   const lock =
     LockService.getScriptLock();
-      const spreadsheet =
-        SpreadsheetApp.openById(
-          "1YRM_PENzcd_7B2_oHmwR5TkbDeE78ZhNGGg94JQY7Fc"
-        );
+  const spreadsheet =
+    SpreadsheetApp.openById(
+      "1YRM_PENzcd_7B2_oHmwR5TkbDeE78ZhNGGg94JQY7Fc"
+    );
 
-      const sheet =
-        spreadsheet.getSheetByName(
-          "Booking Records"
-        );
+  const sheet =
+    spreadsheet.getSheetByName(
+      "Booking Records"
+    );
 
-      if (!sheet) {
-        throw new Error(
-          'Booking sheet "Booking Records" was not found.'
-        );
-      }
+  if (!sheet) {
+    throw new Error(
+      'Booking sheet "Booking Records" was not found.'
+    );
+  }
 
-      const paymentsSheet =
-        spreadsheet.getSheetByName(
-          "Payments"
-        );
+  const paymentsSheet =
+    spreadsheet.getSheetByName(
+      "Payments"
+    );
 
-      if (!paymentsSheet) {
-        throw new Error(
-          'Sheet "Payments" was not found.'
-        );
-      } const allowedPaymentMethods = [
-        "Credit Card",
-        "Bank Transfer"
-      ];
+  if (!paymentsSheet) {
+    throw new Error(
+      'Sheet "Payments" was not found.'
+    );
+  } const allowedPaymentMethods = [
+    "Credit Card",
+    "Bank Transfer"
+  ];
+
+  if (
+    !allowedPaymentMethods.includes(
+      paymentMethod
+    )
+  ) {
+    throw new Error(
+      "Invalid payment method."
+    );
+  }
+
+  const allowedPaymentTypes = [
+    "Deposit",
+    "Balance",
+    "Other"
+  ];
+
+  if (
+    !allowedPaymentTypes.includes(
+      paymentType
+    )
+  ) {
+    throw new Error(
+      "Invalid payment type."
+    );
+  }
+
+  if (!paymentReference) {
+    throw new Error(
+      "Payment reference is required."
+    );
+  } lock.waitLock(30000);
+
+  try {
+    const bookingLastRow =
+      sheet.getLastRow();
+
+    if (bookingLastRow < 2) {
+      throw new Error(
+        "No booking records were found."
+      );
+    }
+
+    const bookingRows =
+      sheet
+        .getRange(
+          2,
+          1,
+          bookingLastRow - 1,
+          19
+        )
+        .getDisplayValues();
+
+    let bookingRecord = null;
+
+    for (
+      let i = 0;
+      i < bookingRows.length;
+      i++
+    ) {
+      const existingBookingId =
+        String(
+          bookingRows[i][0] ?? ""
+        ).trim();
 
       if (
-        !allowedPaymentMethods.includes(
-          paymentMethod
-        )
+        existingBookingId ===
+        bookingReference
       ) {
-        throw new Error(
-          "Invalid payment method."
-        );
+        bookingRecord =
+          bookingRows[i];
+
+        break;
       }
+    }
 
-      const allowedPaymentTypes = [
-        "Deposit",
-        "Balance",
-        "Other"
-      ];
+    if (!bookingRecord) {
+      throw new Error(
+        `Booking ${bookingReference} was not found.`
+      );
+    } const paymentsLastRow =
+      paymentsSheet.getLastRow();
 
-      if (
-        !allowedPaymentTypes.includes(
-          paymentType
-        )
+    if (paymentsLastRow >= 2) {
+      const existingPaymentReferences =
+        paymentsSheet
+          .getRange(
+            2,
+            9,
+            paymentsLastRow - 1,
+            1
+          )
+          .getDisplayValues();
+
+      for (
+        let i = 0;
+        i < existingPaymentReferences.length;
+        i++
       ) {
-        throw new Error(
-          "Invalid payment type."
-        );
+        const existingReference =
+          String(
+            existingPaymentReferences[i][0] ?? ""
+          ).trim();
+
+        if (
+          existingReference ===
+          paymentReference
+        ) {
+          throw new Error(
+            `Payment reference ${paymentReference} already exists.`
+          );
+        }
       }
+    }
 
-      if (!paymentReference) {
-        throw new Error(
-          "Payment reference is required."
-        );
-      } lock.waitLock(30000);
+    const total =
+      Number(
+        bookingRecord[16]
+      );
 
-      try {
-        const bookingLastRow =
-          sheet.getLastRow();
+    const deposit =
+      Number(
+        bookingRecord[17]
+      );
 
-        if (bookingLastRow < 2) {
-          throw new Error(
-            "No booking records were found."
-          );
-        }
+    const balance =
+      Number(
+        bookingRecord[18]
+      );
 
-        const bookingRows =
-          sheet
-            .getRange(
-              2,
-              1,
-              bookingLastRow - 1,
-              19
-            )
-            .getDisplayValues();
+    if (
+      !Number.isFinite(total) ||
+      total < 0
+    ) {
+      throw new Error(
+        "Invalid booking total."
+      );
+    }
 
-        let bookingRecord = null;
+    if (
+      !Number.isFinite(deposit) ||
+      deposit < 0
+    ) {
+      throw new Error(
+        "Invalid booking deposit."
+      );
+    }
 
-        for (
-          let i = 0;
-          i < bookingRows.length;
-          i++
+    if (
+      !Number.isFinite(balance) ||
+      balance < 0
+    ) {
+      throw new Error(
+        "Invalid booking balance."
+      );
+    }
+    let totalPaidAlready = 0;
+    let depositPaidAlready = 0;
+    let balancePaidAlready = 0;
+    let otherPaidAlready = 0;
+
+    if (paymentsLastRow >= 2) {
+      const existingPayments =
+        paymentsSheet
+          .getRange(
+            2,
+            1,
+            paymentsLastRow - 1,
+            10
+          )
+          .getDisplayValues();
+
+      for (
+        let i = 0;
+        i < existingPayments.length;
+        i++
+      ) {
+        const existingBookingId =
+          String(
+            existingPayments[i][0] ?? ""
+          ).trim();
+
+        if (
+          existingBookingId !==
+          bookingReference
         ) {
-          const existingBookingId =
-            String(
-              bookingRows[i][0] ?? ""
-            ).trim();
-
-          if (
-            existingBookingId ===
-            bookingReference
-          ) {
-            bookingRecord =
-              bookingRows[i];
-
-            break;
-          }
+          continue;
         }
 
-        if (!bookingRecord) {
-          throw new Error(
-            `Booking ${bookingReference} was not found.`
-          );
-        } const paymentsLastRow =
-          paymentsSheet.getLastRow();
-
-        if (paymentsLastRow >= 2) {
-          const existingPaymentReferences =
-            paymentsSheet
-              .getRange(
-                2,
-                9,
-                paymentsLastRow - 1,
-                1
-              )
-              .getDisplayValues();
-
-          for (
-            let i = 0;
-            i < existingPaymentReferences.length;
-            i++
-          ) {
-            const existingReference =
-              String(
-                existingPaymentReferences[i][0] ?? ""
-              ).trim();
-
-            if (
-              existingReference ===
-              paymentReference
-            ) {
-              throw new Error(
-                `Payment reference ${paymentReference} already exists.`
-              );
-            }
-          }
-        }
-
-        const total =
+        const existingAmount =
           Number(
-            bookingRecord[16]
-          );
-
-        const deposit =
-          Number(
-            bookingRecord[17]
-          );
-
-        const balance =
-          Number(
-            bookingRecord[18]
+            existingPayments[i][5]
           );
 
         if (
-          !Number.isFinite(total) ||
-          total < 0
+          !Number.isFinite(existingAmount) ||
+          existingAmount <= 0
         ) {
-          throw new Error(
-            "Invalid booking total."
-          );
+          continue;
         }
 
+        totalPaidAlready +=
+          existingAmount;
+
+        const existingPaymentType =
+          String(
+            existingPayments[i][9] ?? ""
+          )
+            .trim()
+            .toLowerCase();
+
         if (
-          !Number.isFinite(deposit) ||
-          deposit < 0
+          existingPaymentType ===
+          "deposit"
         ) {
-          throw new Error(
-            "Invalid booking deposit."
-          );
+          depositPaidAlready +=
+            existingAmount;
+        } else if (
+          existingPaymentType ===
+          "balance"
+        ) {
+          balancePaidAlready +=
+            existingAmount;
+        } else {
+          otherPaidAlready +=
+            existingAmount;
         }
+      }
+    } const outstandingAmount =
+      Math.max(
+        total -
+        totalPaidAlready,
+        0
+      );
 
-        if (
-          !Number.isFinite(balance) ||
-          balance < 0
-        ) {
-          throw new Error(
-            "Invalid booking balance."
-          );
-        }
-        let totalPaidAlready = 0;
-        let depositPaidAlready = 0;
-        let balancePaidAlready = 0;
-        let otherPaidAlready = 0;
+    const remainingDeposit =
+      Math.max(
+        deposit -
+        depositPaidAlready,
+        0
+      );
 
-        if (paymentsLastRow >= 2) {
-          const existingPayments =
-            paymentsSheet
-              .getRange(
-                2,
-                1,
-                paymentsLastRow - 1,
-                10
-              )
-              .getDisplayValues();
+    const remainingBalance =
+      Math.max(
+        balance -
+        balancePaidAlready,
+        0
+      );
 
-          for (
-            let i = 0;
-            i < existingPayments.length;
-            i++
-          ) {
-            const existingBookingId =
-              String(
-                existingPayments[i][0] ?? ""
-              ).trim();
+    const roundedOutstanding =
+      Math.round(
+        (
+          outstandingAmount +
+          Number.EPSILON
+        ) * 100
+      ) / 100;
 
-            if (
-              existingBookingId !==
-              bookingReference
-            ) {
-              continue;
-            }
+    const roundedDepositRemaining =
+      Math.round(
+        (
+          remainingDeposit +
+          Number.EPSILON
+        ) * 100
+      ) / 100;
 
-            const existingAmount =
-              Number(
-                existingPayments[i][5]
-              );
+    const roundedBalanceRemaining =
+      Math.round(
+        (
+          remainingBalance +
+          Number.EPSILON
+        ) * 100
+      ) / 100;
 
-            if (
-              !Number.isFinite(existingAmount) ||
-              existingAmount <= 0
-            ) {
-              continue;
-            }
+    const roundedAmountPaid =
+      Math.round(
+        (
+          amountPaid +
+          Number.EPSILON
+        ) * 100
+      ) / 100;
+    /*
+* ==========================================
+* OVERALL OUTSTANDING VALIDATION
+* ==========================================
+*/
 
-            totalPaidAlready +=
-              existingAmount;
+    if (
+      roundedAmountPaid >
+      roundedOutstanding
+    ) {
+      throw new Error(
+        `Payment amount USD $${roundedAmountPaid.toFixed(
+          2
+        )} exceeds the outstanding balance of USD $${roundedOutstanding.toFixed(
+          2
+        )}.`
+      );
+    }
 
-            const existingPaymentType =
-              String(
-                existingPayments[i][9] ?? ""
-              )
-                .trim()
-                .toLowerCase();
+    /*
+     * ==========================================
+     * PAYMENT TYPE VALIDATION
+     * ==========================================
+     */
 
-            if (
-              existingPaymentType ===
-              "deposit"
-            ) {
-              depositPaidAlready +=
-                existingAmount;
-            } else if (
-              existingPaymentType ===
-              "balance"
-            ) {
-              balancePaidAlready +=
-                existingAmount;
-            } else {
-              otherPaidAlready +=
-                existingAmount;
-            }
-          }
-        } const outstandingAmount =
-          Math.max(
-            total -
-            totalPaidAlready,
-            0
-          );
+    if (
+      paymentType === "Deposit" &&
+      roundedAmountPaid >
+      roundedDepositRemaining
+    ) {
+      throw new Error(
+        `Deposit payment USD $${roundedAmountPaid.toFixed(
+          2
+        )} exceeds the remaining deposit due of USD $${roundedDepositRemaining.toFixed(
+          2
+        )}.`
+      );
+    }
 
-        const remainingDeposit =
-          Math.max(
-            deposit -
-            depositPaidAlready,
-            0
-          );
+    if (
+      paymentType === "Balance" &&
+      roundedAmountPaid >
+      roundedBalanceRemaining
+    ) {
+      throw new Error(
+        `Balance payment USD $${roundedAmountPaid.toFixed(
+          2
+        )} exceeds the remaining balance due of USD $${roundedBalanceRemaining.toFixed(
+          2
+        )}.`
+      );
+    }
 
-        const remainingBalance =
-          Math.max(
-            balance -
-            balancePaidAlready,
-            0
-          );
-
-        const roundedOutstanding =
-          Math.round(
-            (
-              outstandingAmount +
-              Number.EPSILON
-            ) * 100
-          ) / 100;
-
-        const roundedDepositRemaining =
-          Math.round(
-            (
-              remainingDeposit +
-              Number.EPSILON
-            ) * 100
-          ) / 100;
-
-        const roundedBalanceRemaining =
-          Math.round(
-            (
-              remainingBalance +
-              Number.EPSILON
-            ) * 100
-          ) / 100;
-
-        const roundedAmountPaid =
-          Math.round(
-            (
-              amountPaid +
-              Number.EPSILON
-            ) * 100
-          ) / 100;
-        /*
-   * ==========================================
-   * OVERALL OUTSTANDING VALIDATION
-   * ==========================================
-   */
-
-        if (
-          roundedAmountPaid >
-          roundedOutstanding
-        ) {
-          throw new Error(
-            `Payment amount USD $${roundedAmountPaid.toFixed(
-              2
-            )} exceeds the outstanding balance of USD $${roundedOutstanding.toFixed(
-              2
-            )}.`
-          );
-        }
-
-        /*
-         * ==========================================
-         * PAYMENT TYPE VALIDATION
-         * ==========================================
-         */
-
-        if (
-          paymentType === "Deposit" &&
-          roundedAmountPaid >
-          roundedDepositRemaining
-        ) {
-          throw new Error(
-            `Deposit payment USD $${roundedAmountPaid.toFixed(
-              2
-            )} exceeds the remaining deposit due of USD $${roundedDepositRemaining.toFixed(
-              2
-            )}.`
-          );
-        }
-
-        if (
-          paymentType === "Balance" &&
-          roundedAmountPaid >
-          roundedBalanceRemaining
-        ) {
-          throw new Error(
-            `Balance payment USD $${roundedAmountPaid.toFixed(
-              2
-            )} exceeds the remaining balance due of USD $${roundedBalanceRemaining.toFixed(
-              2
-            )}.`
-          );
-        }
-
-        if (
-          paymentType === "Other" &&
-          roundedAmountPaid >
-          roundedOutstanding
-        ) {
-          throw new Error(
-            `Other payment USD $${roundedAmountPaid.toFixed(
-              2
-            )} exceeds the outstanding balance of USD $${roundedOutstanding.toFixed(
-              2
-            )}.`
-          );
-        }    /*
+    if (
+      paymentType === "Other" &&
+      roundedAmountPaid >
+      roundedOutstanding
+    ) {
+      throw new Error(
+        `Other payment USD $${roundedAmountPaid.toFixed(
+          2
+        )} exceeds the outstanding balance of USD $${roundedOutstanding.toFixed(
+          2
+        )}.`
+      );
+    }    /*
      * ==========================================
      * CALCULATE PAYMENT STATUS
      * ==========================================
      */
 
-        const totalPaidAfterPayment =
-          totalPaidAlready +
-          roundedAmountPaid;
+    const totalPaidAfterPayment =
+      totalPaidAlready +
+      roundedAmountPaid;
 
-        const paymentStatus =
-          totalPaidAfterPayment >= total
-            ? "Paid"
-            : "Partially Paid";
+    const paymentStatus =
+      totalPaidAfterPayment >= total
+        ? "Paid"
+        : "Partially Paid";
 
-        /*
-         * ==========================================
-         * WRITE PAYMENT TO PAYMENTS SHEET
-         * ==========================================
-         */
+    /*
+     * ==========================================
+     * WRITE PAYMENT TO PAYMENTS SHEET
+     * ==========================================
+     */
 
-        const recordedPaymentDate =
-          paymentDate ||
-          new Date();
+    const recordedPaymentDate =
+      paymentDate ||
+      new Date();
 
-        paymentsSheet.appendRow([
-          bookingReference,
-          total,
-          deposit,
-          balance,
-          paymentStatus,
-          roundedAmountPaid,
-          paymentMethod,
-          recordedPaymentDate,
-          paymentReference,
-          paymentType
-        ]);
+    paymentsSheet.appendRow([
+      bookingReference,
+      total,
+      deposit,
+      balance,
+      paymentStatus,
+      roundedAmountPaid,
+      paymentMethod,
+      recordedPaymentDate,
+      paymentReference,
+      paymentType
+    ]);
 
-        /*
-         * ==========================================
-         * UPDATE BOOKING STATUS
-         * ==========================================
-         *
-         * The booking becomes Confirmed once
-         * cumulative payments reach the required
-         * deposit.
-         *
-         * Dispatch is NOT called here.
-         */
+    /*
+     * ==========================================
+     * UPDATE BOOKING STATUS
+     * ==========================================
+     *
+     * The booking becomes Confirmed once
+     * cumulative payments reach the required
+     * deposit.
+     *
+     * Dispatch is NOT called here.
+     */
 
-        const bookingStatus =
-          totalPaidAfterPayment >= deposit
-            ? "Confirmed"
-            : "Pending";
+    const bookingStatus =
+      totalPaidAfterPayment >= deposit
+        ? "Confirmed"
+        : "Pending";
 
 
-        const currentBookingStatus =
-          String(
-            bookingRecord[1] ?? ""
-          ).trim();
+    const currentBookingStatus =
+      String(
+        bookingRecord[1] ?? ""
+      ).trim();
 
-        if (
-          currentBookingStatus !==
-          "Cancelled" &&
-          currentBookingStatus !==
-          "Completed"
-        ) {
-          sheet
-            .getRange(
+    if (
+      currentBookingStatus !==
+      "Cancelled" &&
+      currentBookingStatus !==
+      "Completed"
+    ) {
+      sheet
+        .getRange(
+          bookingRecord
+            ? bookingRows.indexOf(
               bookingRecord
-                ? bookingRows.indexOf(
-                  bookingRecord
-                ) + 2
-                : 0,
-              2
-            )
-            .setValue(
-              bookingStatus
-            );
-        }
-
-        SpreadsheetApp.flush();
-
-        Logger.log(
-          `Payment ${paymentReference} recorded for ${bookingReference}.`
+            ) + 2
+            : 0,
+          2
+        )
+        .setValue(
+          bookingStatus
         );
+    }
 
-        Logger.log(
-          `Total paid after payment: ${totalPaidAfterPayment}`
-        );
+    SpreadsheetApp.flush();
 
-        Logger.log(
-          `Booking status: ${bookingStatus}`
-        );
+    Logger.log(
+      `Payment ${paymentReference} recorded for ${bookingReference}.`
+    );
 
-        return {
-          success: true,
-          action:
-            "recordPayment",
-          bookingReference:
-            bookingReference,
-          amountPaid:
-            roundedAmountPaid,
-          paymentMethod:
-            paymentMethod,
-          paymentType:
-            paymentType,
-          paymentReference:
-            paymentReference,
-          totalPaid:
-            totalPaidAfterPayment,
-          outstandingBalance:
-            Math.max(
-              total -
-              totalPaidAfterPayment,
-              0
-            ),
-          bookingStatus:
-            bookingStatus,
-          paymentStatus:
-            paymentStatus
-        };
+    Logger.log(
+      `Total paid after payment: ${totalPaidAfterPayment}`
+    );
 
-      } catch (error) {
+    Logger.log(
+      `Booking status: ${bookingStatus}`
+    );
 
-        Logger.log(
-          "RECORD PAYMENT ERROR: " +
-          error.toString()
-        );
-        throw error;
-   } finally {
+    return {
+      success: true,
+      action:
+        "recordPayment",
+      bookingReference:
+        bookingReference,
+      amountPaid:
+        roundedAmountPaid,
+      paymentMethod:
+        paymentMethod,
+      paymentType:
+        paymentType,
+      paymentReference:
+        paymentReference,
+      totalPaid:
+        totalPaidAfterPayment,
+      outstandingBalance:
+        Math.max(
+          total -
+          totalPaidAfterPayment,
+          0
+        ),
+      bookingStatus:
+        bookingStatus,
+      paymentStatus:
+        paymentStatus
+    };
+
+  } catch (error) {
+
+    Logger.log(
+      "RECORD PAYMENT ERROR: " +
+      error.toString()
+    );
+    throw error;
+  } finally {
 
     lock.releaseLock();
 
