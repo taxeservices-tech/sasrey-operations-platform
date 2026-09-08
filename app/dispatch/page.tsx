@@ -638,28 +638,11 @@ return (
 
   const availableVehicles =
     useMemo(() => {
-      if (!selectedDriverId) {
-        return [];
-      }
-
-      return vehicles.filter(
-        (vehicle) => {
-          const vehicleDriverId =
-            getValue(
-              vehicle,
-              "Driver ID"
-            );
-
-          return (
-            vehicleDriverId ===
-            selectedDriverId
-          );
-        }
-      );
+      return vehicles;
     }, [
       vehicles,
-      selectedDriverId,
     ]);
+
   async function handleStatusUpdate(
     dispatch: SheetRow,
     status: string
