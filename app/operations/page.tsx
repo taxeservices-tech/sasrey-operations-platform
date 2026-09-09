@@ -821,6 +821,82 @@ const [dispatches, setDispatches] =
       };
 
 
+
+    const destinationServiceMix = new Map<
+      string,
+      {
+        destination: string;
+        serviceType: string;
+        bookingCount: number;
+        revenue: number;
+      }
+    >();
+
+    for (const booking of currentMonthBookings) {
+      const destination =
+        String(booking.Destination ?? "").trim() ||
+        "Unspecified";
+
+      const serviceType =
+        String(booking["Service Type"] ?? "").trim() ||
+        "Unspecified";
+
+      const financial = getBookingFinancial(
+        booking,
+        financialByBookingId
+      );
+
+      const key = `${destination}::${serviceType}`;
+      const existing = destinationServiceMix.get(key);
+
+      if (existing) {
+        existing.bookingCount += 1;
+        existing.revenue = roundCurrency(
+          existing.revenue + financial.total
+        );
+      } else {
+        destinationServiceMix.set(key, {
+          destination,
+          serviceType,
+          bookingCount: 1,
+          revenue: financial.total,
+        });
+      }
+    }
+
+    const destinationServiceMixRows =
+      Array.from(destinationServiceMix.values())
+        .map((values) => ({
+          destination: values.destination,
+          serviceType: values.serviceType,
+          bookingCount: values.bookingCount,
+          revenue: roundCurrency(values.revenue),
+          revenuePercentage:
+            revenueBooked > 0
+              ? roundCurrency(
+                  (values.revenue / revenueBooked) * 100
+                )
+              : 0,
+          averageBookingValue:
+            values.bookingCount > 0
+              ? roundCurrency(
+                  values.revenue / values.bookingCount
+                )
+              : 0,
+        }))
+        .sort((a, b) => b.revenue - a.revenue);
+
+    const topDestinationService =
+      destinationServiceMixRows[0] ?? {
+        destination: "None",
+        serviceType: "None",
+        bookingCount: 0,
+        revenue: 0,
+        revenuePercentage: 0,
+        averageBookingValue: 0,
+      };
+
+
     const currentMonthDispatches = dispatches.filter(
       (dispatch) =>
         isCurrentMonth(dispatch["Pickup Date"])
@@ -938,6 +1014,8 @@ const [dispatches, setDispatches] =
       topService,
       destinationMixRows,
       topDestination,
+      destinationServiceMixRows,
+      topDestinationService,
       completedTrips,
       activeTrips,
       incidentCount,
@@ -1353,6 +1431,81 @@ const [dispatches, setDispatches] =
                             </p>
                             <p className="mt-1 text-sm font-semibold text-slate-500">
                               {destination.revenuePercentage.toFixed(1)}%
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+
+
+            <section className="mb-6">
+              <div className="mb-4">
+                <h2 className="text-lg font-black text-slate-900">
+                  Destination × Service Performance
+                </h2>
+                <p className="text-sm text-slate-500">
+                  Current month revenue performance by destination and service type
+                </p>
+              </div>
+
+              <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p className="text-sm font-medium text-slate-500">
+                  Top Destination × Service
+                </p>
+                <p className="mt-1 text-2xl font-black text-slate-900">
+                  {kpiMetrics.topDestinationService.destination}
+                  {" × "}
+                  {kpiMetrics.topDestinationService.serviceType}
+                </p>
+                <p className="mt-1 text-sm text-slate-500">
+                  {formatCurrency(kpiMetrics.topDestinationService.revenue)} booked
+                  {" · "}
+                  {kpiMetrics.topDestinationService.bookingCount} booking
+                  {kpiMetrics.topDestinationService.bookingCount === 1 ? "" : "s"}
+                  {" · "}
+                  {kpiMetrics.topDestinationService.revenuePercentage.toFixed(1)}% of revenue
+                  {" · "}
+                  {formatCurrency(kpiMetrics.topDestinationService.averageBookingValue)} average
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                {kpiMetrics.destinationServiceMixRows.length === 0 ? (
+                  <p className="text-sm text-slate-500">
+                    No destination and service activity recorded for the current month.
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {kpiMetrics.destinationServiceMixRows.map((combination) => (
+                      <div
+                        key={`${combination.destination}-${combination.serviceType}`}
+                        className="rounded-xl border border-slate-100 bg-slate-50 p-4"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div>
+                            <p className="font-bold text-slate-900">
+                              {combination.destination}
+                              {" × "}
+                              {combination.serviceType}
+                            </p>
+                            <p className="mt-1 text-sm text-slate-500">
+                              {combination.bookingCount} booking
+                              {combination.bookingCount === 1 ? "" : "s"}
+                              {" · "}
+                              {formatCurrency(combination.averageBookingValue)} average
+                            </p>
+                          </div>
+
+                          <div className="text-right">
+                            <p className="font-black text-slate-900">
+                              {formatCurrency(combination.revenue)}
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-slate-500">
+                              {combination.revenuePercentage.toFixed(1)}%
                             </p>
                           </div>
                         </div>
