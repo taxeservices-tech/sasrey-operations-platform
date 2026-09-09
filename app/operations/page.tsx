@@ -1409,6 +1409,76 @@ const [dispatches, setDispatches] =
             <section className="mb-6">
               <div className="mb-4">
                 <h2 className="text-lg font-black text-slate-900">
+                  Weekly Sales Meeting Dashboard
+                </h2>
+                <p className="text-sm text-slate-500">
+                  The key sales priorities to review and act on this week
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  <div className="rounded-xl bg-slate-50 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                      Primary Destination
+                    </p>
+                    <p className="mt-2 text-xl font-black text-slate-900">
+                      {kpiMetrics.weeklySalesFocus.primaryDestination}
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl bg-slate-50 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                      Recommended Action
+                    </p>
+                    <p className="mt-2 text-xl font-black text-slate-900">
+                      {kpiMetrics.weeklySalesFocus.recommendedAction}
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl bg-slate-50 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                      Target Contribution
+                    </p>
+                    <p className="mt-2 text-xl font-black text-slate-900">
+                      {formatCurrency(kpiMetrics.weeklySalesFocus.targetContribution)}
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl bg-slate-50 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                      Required Daily Revenue
+                    </p>
+                    <p className="mt-2 text-xl font-black text-slate-900">
+                      {formatCurrency(kpiMetrics.weeklySalesFocus.requiredDailyRevenue)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-xl border border-slate-200 p-4">
+                  <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Why This Is the Focus
+                  </p>
+                  <p className="mt-2 text-sm text-slate-700">
+                    {kpiMetrics.weeklySalesFocus.reason}
+                  </p>
+                </div>
+
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+                  <span className="text-sm font-medium text-slate-500">
+                    Remaining Monthly Target
+                  </span>
+                  <span className="text-lg font-black text-slate-900">
+                    {formatCurrency(kpiMetrics.weeklySalesFocus.remainingTarget)}
+                  </span>
+                </div>
+              </div>
+            </section>
+
+
+            <section className="mb-6">
+              <div className="mb-4">
+                <h2 className="text-lg font-black text-slate-900">
                   Service Mix Analysis
                 </h2>
                 <p className="text-sm text-slate-500">
