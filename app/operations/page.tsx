@@ -956,29 +956,6 @@ const [dispatches, setDispatches] =
       });
 
 
-    const destinationTargetPriorities =
-      destinationSalesActions
-        .map((destination) => ({
-          ...destination,
-          priorityScore:
-            destination.revenueRank +
-            destination.volumeRank +
-            destination.averageValueRank,
-          targetGapShare:
-            revenueBooked > 0
-              ? roundCurrency(
-                  (destination.revenue / revenueBooked) *
-                    remainingTarget
-                )
-              : 0,
-        }))
-        .sort(
-          (a, b) =>
-            a.priorityScore - b.priorityScore ||
-            b.revenue - a.revenue
-        );
-
-
     const currentMonthDispatches = dispatches.filter(
       (dispatch) =>
         isCurrentMonth(dispatch["Pickup Date"])
@@ -1024,6 +1001,29 @@ const [dispatches, setDispatches] =
     const remainingTarget = roundCurrency(
       Math.max(monthlyRevenueTarget - revenueBooked, 0)
     );
+
+    const destinationTargetPriorities =
+      destinationSalesActions
+        .map((destination) => ({
+          ...destination,
+          priorityScore:
+            destination.revenueRank +
+            destination.volumeRank +
+            destination.averageValueRank,
+          targetGapShare:
+            revenueBooked > 0
+              ? roundCurrency(
+                  (destination.revenue / revenueBooked) *
+                    remainingTarget
+                )
+              : 0,
+        }))
+        .sort(
+          (a, b) =>
+            a.priorityScore - b.priorityScore ||
+            b.revenue - a.revenue
+        );
+
 
     const daysInCurrentMonth = new Date(
       currentYear,
@@ -1075,6 +1075,22 @@ const [dispatches, setDispatches] =
         : remainingTarget;
 
 
+    const weeklySalesFocus = {
+      primaryDestination:
+        destinationTargetPriorities[0]?.destination ||
+        "None",
+      recommendedAction:
+        destinationTargetPriorities[0]?.action ||
+        "Maintain",
+      reason:
+        destinationTargetPriorities[0]?.reason ||
+        "No destination-specific sales action available.",
+      targetContribution:
+        destinationTargetPriorities[0]?.targetGapShare || 0,
+      remainingTarget,
+      requiredDailyRevenue,
+    };
+
     return {
       monthlyRevenueTarget,
       targetCurrency,
@@ -1101,6 +1117,7 @@ const [dispatches, setDispatches] =
       destinationOpportunityRows,
       destinationSalesActions,
       destinationTargetPriorities,
+      weeklySalesFocus,
       completedTrips,
       activeTrips,
       incidentCount,
@@ -1746,6 +1763,7 @@ const [dispatches, setDispatches] =
             <section className="mb-6">
               <div className="mb-4">
                 <h2 className="text-lg font-black text-slate-900">
+
                   Destination × Service Performance
                 </h2>
                 <p className="text-sm text-slate-500">
