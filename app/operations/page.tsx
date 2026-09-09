@@ -804,6 +804,56 @@ const [dispatches, setDispatches] =
       Math.max(monthlyRevenueTarget - revenueBooked, 0)
     );
 
+    const daysInCurrentMonth = new Date(
+      currentYear,
+      currentMonth + 1,
+      0
+    ).getDate();
+
+    const daysElapsed = Math.min(
+      now.getDate(),
+      daysInCurrentMonth
+    );
+
+    const daysRemaining = Math.max(
+      daysInCurrentMonth - daysElapsed,
+      0
+    );
+
+    const expectedRevenueByToday =
+      monthlyRevenueTarget > 0
+        ? roundCurrency(
+            (monthlyRevenueTarget * daysElapsed) /
+              daysInCurrentMonth
+          )
+        : 0;
+
+    const paceVariance = roundCurrency(
+      revenueBooked - expectedRevenueByToday
+    );
+
+    const revenuePacePercentage =
+      expectedRevenueByToday > 0
+        ? roundCurrency(
+            (revenueBooked / expectedRevenueByToday) * 100
+          )
+        : 0;
+
+    const additionalBookingsNeeded =
+      remainingTarget > 0 && averageBookingValue > 0
+        ? Math.ceil(
+            remainingTarget / averageBookingValue
+          )
+        : 0;
+
+    const requiredDailyRevenue =
+      daysRemaining > 0
+        ? roundCurrency(
+            remainingTarget / daysRemaining
+          )
+        : remainingTarget;
+
+
     return {
       monthlyRevenueTarget,
       targetCurrency,
@@ -812,6 +862,13 @@ const [dispatches, setDispatches] =
       outstandingRevenue,
       targetPercentage,
       remainingTarget,
+      daysElapsed,
+      daysRemaining,
+      expectedRevenueByToday,
+      paceVariance,
+      revenuePacePercentage,
+      additionalBookingsNeeded,
+      requiredDailyRevenue,
       bookingCount,
       averageBookingValue,
       serviceMixRows,
@@ -1037,6 +1094,68 @@ const [dispatches, setDispatches] =
                   </p>
                   <p className="mt-1 text-xs text-slate-500">
                     {formatCurrency(kpiMetrics.remainingTarget)} remaining
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section className="mb-6">
+              <div className="mb-4">
+                <h2 className="text-lg font-black text-slate-900">
+                  Target Pace & Sales Gap
+                </h2>
+                <p className="text-sm text-slate-500">
+                  Current month sales pace and revenue required to reach target
+                </p>
+              </div>
+
+              <div className="mb-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <p className="text-sm font-medium text-slate-500">
+                    Expected Revenue by Today
+                  </p>
+                  <p className="mt-1 text-2xl font-black text-slate-900">
+                    {formatCurrency(kpiMetrics.expectedRevenueByToday)}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Day {kpiMetrics.daysElapsed} of {kpiMetrics.daysElapsed + kpiMetrics.daysRemaining}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <p className="text-sm font-medium text-slate-500">
+                    Revenue Pace
+                  </p>
+                  <p className="mt-1 text-2xl font-black text-slate-900">
+                    {kpiMetrics.revenuePacePercentage.toFixed(1)}%
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {kpiMetrics.paceVariance >= 0 ? "Ahead" : "Behind"} by{" "}
+                    {formatCurrency(Math.abs(kpiMetrics.paceVariance))}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <p className="text-sm font-medium text-slate-500">
+                    Required Daily Revenue
+                  </p>
+                  <p className="mt-1 text-2xl font-black text-slate-900">
+                    {formatCurrency(kpiMetrics.requiredDailyRevenue)}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {kpiMetrics.daysRemaining} day{kpiMetrics.daysRemaining === 1 ? "" : "s"} remaining
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <p className="text-sm font-medium text-slate-500">
+                    Additional Bookings Needed
+                  </p>
+                  <p className="mt-1 text-2xl font-black text-slate-900">
+                    {kpiMetrics.additionalBookingsNeeded}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Based on current average booking value
                   </p>
                 </div>
               </div>
