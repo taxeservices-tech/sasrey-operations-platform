@@ -987,6 +987,54 @@ const [dispatches, setDispatches] =
               </div>
             </section>
 
+            <section className="mb-6">
+              <div className="mb-4">
+                <h2 className="text-lg font-black text-slate-900">
+                  Operations Performance
+                </h2>
+                <p className="text-sm text-slate-500">
+                  Current month booking and trip activity
+                </p>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <p className="text-sm font-medium text-slate-500">Bookings This Month</p>
+                  <p className="mt-1 text-2xl font-black text-slate-900">
+                    {kpiMetrics.bookingCount}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <p className="text-sm font-medium text-slate-500">Average Booking Value</p>
+                  <p className="mt-1 text-2xl font-black text-slate-900">
+                    {formatCurrency(kpiMetrics.averageBookingValue)}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <p className="text-sm font-medium text-slate-500">Completed Trips</p>
+                  <p className="mt-1 text-2xl font-black text-slate-900">
+                    {kpiMetrics.completedTrips}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <p className="text-sm font-medium text-slate-500">Active Trips</p>
+                  <p className="mt-1 text-2xl font-black text-slate-900">
+                    {kpiMetrics.activeTrips}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <p className="text-sm font-medium text-slate-500">Incidents</p>
+                  <p className="mt-1 text-2xl font-black text-slate-900">
+                    {kpiMetrics.incidentCount}
+                  </p>
+                </div>
+              </div>
+            </section>
+
             <div className="mb-6 grid gap-6 md:grid-cols-2">
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <p className="text-sm font-medium text-slate-500">
