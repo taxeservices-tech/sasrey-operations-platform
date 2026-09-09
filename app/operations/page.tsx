@@ -957,16 +957,26 @@ const [dispatches, setDispatches] =
 
 
     const destinationTargetPriorities =
-      destinationSalesActions.map((destination) => ({
-        ...destination,
-        targetGapShare:
-          revenueBooked > 0
-            ? roundCurrency(
-                (destination.revenue / revenueBooked) *
-                  remainingTarget
-              )
-            : 0,
-      }));
+      destinationSalesActions
+        .map((destination) => ({
+          ...destination,
+          priorityScore:
+            destination.revenueRank +
+            destination.volumeRank +
+            destination.averageValueRank,
+          targetGapShare:
+            revenueBooked > 0
+              ? roundCurrency(
+                  (destination.revenue / revenueBooked) *
+                    remainingTarget
+                )
+              : 0,
+        }))
+        .sort(
+          (a, b) =>
+            a.priorityScore - b.priorityScore ||
+            b.revenue - a.revenue
+        );
 
 
     const currentMonthDispatches = dispatches.filter(
@@ -1542,9 +1552,14 @@ const [dispatches, setDispatches] =
                       >
                         <div className="flex flex-wrap items-start justify-between gap-4">
                           <div>
-                            <p className="font-bold text-slate-900">
-                              {destination.destination}
-                            </p>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="font-bold text-slate-900">
+                                {destination.destination}
+                              </p>
+                              <span className="rounded-full bg-slate-900 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-white">
+                                Priority #{kpiMetrics.destinationTargetPriorities.findIndex((item) => item.destination === destination.destination) + 1}
+                              </span>
+                            </div>
                             <p className="mt-1 text-sm text-slate-500">
                               {destination.bookingCount} booking
                               {destination.bookingCount === 1 ? "" : "s"}
