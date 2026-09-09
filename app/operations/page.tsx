@@ -1438,7 +1438,7 @@ const [dispatches, setDispatches] =
 
                   <div className="rounded-xl bg-slate-50 p-4">
                     <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
-                      Target Contribution
+                      Target Contribution Opportunity
                     </p>
                     <p className="mt-2 text-xl font-black text-slate-900">
                       {formatCurrency(kpiMetrics.weeklySalesFocus.targetContribution)}
@@ -1484,6 +1484,50 @@ const [dispatches, setDispatches] =
                   <p className="text-sm text-slate-500">
                     Convert this week&apos;s sales focus into clear meeting actions
                   </p>
+
+                  <div className="mb-4 border-b border-slate-100 pb-4">
+                    <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                      Weekly Sales Results
+                    </p>
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                      <div>
+                        <p className="text-sm font-medium text-slate-500">
+                          Bookings Closed
+                        </p>
+                        <p className="mt-1 text-lg font-black text-slate-900">
+                          {kpiMetrics.bookingCount}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium text-slate-500">
+                          Revenue Booked
+                        </p>
+                        <p className="mt-1 text-lg font-black text-slate-900">
+                          {formatCurrency(kpiMetrics.revenueBooked)}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium text-slate-500">
+                          Average Booking
+                        </p>
+                        <p className="mt-1 text-lg font-black text-slate-900">
+                          {formatCurrency(kpiMetrics.averageBookingValue)}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium text-slate-500">
+                          Revenue Pace
+                        </p>
+                        <p className="mt-1 text-lg font-black text-slate-900">
+                          {kpiMetrics.revenuePacePercentage.toFixed(1)}%
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
 
                 <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -1523,7 +1567,7 @@ const [dispatches, setDispatches] =
                     <div className="grid gap-4 sm:grid-cols-3">
                       <div>
                         <p className="text-sm font-medium text-slate-500">
-                          Target Contribution
+                          Target Contribution Opportunity
                         </p>
                         <p className="mt-1 text-lg font-black text-slate-900">
                           {formatCurrency(kpiMetrics.weeklySalesFocus.targetContribution)}
@@ -1873,7 +1917,7 @@ const [dispatches, setDispatches] =
 
                           <div className="text-right">
                             <p className="text-xs font-medium text-slate-500">
-                              Target Contribution
+                              Target Contribution Opportunity
                             </p>
                             <p className="mt-1 text-xl font-black text-slate-900">
                               {formatCurrency(destination.targetGapShare)}
