@@ -897,6 +897,30 @@ const [dispatches, setDispatches] =
       };
 
 
+
+    const destinationOpportunityRows =
+      destinationMixRows
+        .map((destination, index) => ({
+          ...destination,
+          revenueRank: index + 1,
+        }))
+        .sort((a, b) => b.bookingCount - a.bookingCount)
+        .map((destination, index) => ({
+          ...destination,
+          volumeRank: index + 1,
+        }))
+        .sort(
+          (a, b) =>
+            b.averageBookingValue -
+            a.averageBookingValue
+        )
+        .map((destination, index) => ({
+          ...destination,
+          averageValueRank: index + 1,
+        }))
+        .sort((a, b) => a.revenueRank - b.revenueRank);
+
+
     const currentMonthDispatches = dispatches.filter(
       (dispatch) =>
         isCurrentMonth(dispatch["Pickup Date"])
@@ -1016,6 +1040,7 @@ const [dispatches, setDispatches] =
       topDestination,
       destinationServiceMixRows,
       topDestinationService,
+      destinationOpportunityRows,
       completedTrips,
       activeTrips,
       incidentCount,
@@ -1441,6 +1466,87 @@ const [dispatches, setDispatches] =
               </div>
             </section>
 
+
+
+            <section className="mb-6">
+              <div className="mb-4">
+                <h2 className="text-lg font-black text-slate-900">
+                  Sales Growth Opportunities
+                </h2>
+                <p className="text-sm text-slate-500">
+                  Compare destination demand, revenue contribution, and booking value
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                {kpiMetrics.destinationOpportunityRows.length === 0 ? (
+                  <p className="text-sm text-slate-500">
+                    No destination activity recorded for the current month.
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {kpiMetrics.destinationOpportunityRows.map((destination) => (
+                      <div
+                        key={destination.destination}
+                        className="rounded-xl border border-slate-100 bg-slate-50 p-4"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-4">
+                          <div>
+                            <p className="font-bold text-slate-900">
+                              {destination.destination}
+                            </p>
+                            <p className="mt-1 text-sm text-slate-500">
+                              {destination.bookingCount} booking
+                              {destination.bookingCount === 1 ? "" : "s"}
+                              {" · "}
+                              {formatCurrency(destination.averageBookingValue)} average
+                            </p>
+                          </div>
+
+                          <div className="text-right">
+                            <p className="font-black text-slate-900">
+                              {formatCurrency(destination.revenue)}
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-slate-500">
+                              {destination.revenuePercentage.toFixed(1)}% of revenue
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                          <div className="rounded-lg bg-white px-3 py-2">
+                            <p className="text-xs font-medium text-slate-500">
+                              Revenue Rank
+                            </p>
+                            <p className="mt-1 font-bold text-slate-900">
+                              #{destination.revenueRank}
+                            </p>
+                          </div>
+
+                          <div className="rounded-lg bg-white px-3 py-2">
+                            <p className="text-xs font-medium text-slate-500">
+                              Volume Rank
+                            </p>
+                            <p className="mt-1 font-bold text-slate-900">
+                              #{destination.volumeRank}
+                            </p>
+                          </div>
+
+                          <div className="rounded-lg bg-white px-3 py-2">
+                            <p className="text-xs font-medium text-slate-500">
+                              Avg. Value Rank
+                            </p>
+                            <p className="mt-1 font-bold text-slate-900">
+                              #{destination.averageValueRank}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
 
             <section className="mb-6">
               <div className="mb-4">
