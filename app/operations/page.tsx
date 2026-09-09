@@ -920,6 +920,41 @@ const [dispatches, setDispatches] =
         }))
         .sort((a, b) => a.revenueRank - b.revenueRank);
 
+    const destinationSalesActions =
+      destinationOpportunityRows.map((destination) => {
+        let action = "Maintain";
+        let reason = "Continue current sales activity.";
+
+        if (
+          destination.volumeRank === 1 &&
+          destination.revenueRank !== 1
+        ) {
+          action = "Increase Revenue";
+          reason =
+            "High booking volume but lower revenue contribution.";
+        } else if (
+          destination.averageValueRank === 1 &&
+          destination.revenueRank !== 1
+        ) {
+          action = "Protect High Value";
+          reason =
+            "Highest average booking value in the current month.";
+        } else if (
+          destination.revenueRank === 1 &&
+          destination.volumeRank !== 1
+        ) {
+          action = "Scale";
+          reason =
+            "Leading revenue destination with room to increase booking volume.";
+        }
+
+        return {
+          ...destination,
+          action,
+          reason,
+        };
+      });
+
 
     const currentMonthDispatches = dispatches.filter(
       (dispatch) =>
@@ -1041,6 +1076,7 @@ const [dispatches, setDispatches] =
       destinationServiceMixRows,
       topDestinationService,
       destinationOpportunityRows,
+      destinationSalesActions,
       completedTrips,
       activeTrips,
       incidentCount,
@@ -1540,6 +1576,66 @@ const [dispatches, setDispatches] =
                               #{destination.averageValueRank}
                             </p>
                           </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section className="mb-6">
+              <div className="mb-4">
+                <h2 className="text-lg font-black text-slate-900">
+                  Sales Growth Actions
+                </h2>
+                <p className="text-sm text-slate-500">
+                  Recommended actions based on destination demand, revenue, and booking value
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                {kpiMetrics.destinationSalesActions.length === 0 ? (
+                  <p className="text-sm text-slate-500">
+                    No destination activity recorded for the current month.
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {kpiMetrics.destinationSalesActions.map((destination) => (
+                      <div
+                        key={destination.destination}
+                        className="rounded-xl border border-slate-100 bg-slate-50 p-4"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-4">
+                          <div>
+                            <p className="font-bold text-slate-900">
+                              {destination.destination}
+                            </p>
+                            <p className="mt-1 text-sm text-slate-500">
+                              {destination.bookingCount} booking
+                              {destination.bookingCount === 1 ? "" : "s"}
+                              {" · "}
+                              {formatCurrency(destination.averageBookingValue)} average
+                            </p>
+                          </div>
+
+                          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                            <p className="text-xs font-medium text-slate-500">
+                              Recommended Action
+                            </p>
+                            <p className="mt-1 font-bold text-slate-900">
+                              {destination.action}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="mt-3 rounded-lg bg-white px-3 py-2">
+                          <p className="text-xs font-medium text-slate-500">
+                            Why
+                          </p>
+                          <p className="mt-1 text-sm text-slate-700">
+                            {destination.reason}
+                          </p>
                         </div>
                       </div>
                     ))}
