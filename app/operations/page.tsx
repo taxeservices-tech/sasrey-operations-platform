@@ -67,6 +67,12 @@ interface AccountingPayment {
   Total?: string | number;
   "Amount Paid"?: string | number;
 }
+interface SettingsResponse {
+  success: boolean;
+  settings?: Record<string, string>;
+  message?: string;
+  error?: string;
+}
 
 interface AccountingResponse {
   success: boolean;
@@ -364,6 +370,7 @@ const [dispatches, setDispatches] =
   ] = useState<Map<string, BookingFinancial>>(
     new Map()
   );
+  const [settings, setSettings] = useState<Record<string, string>>({});
 
   const [sortOption, setSortOption] =
     useState<SortOption>("pickup-asc");
@@ -378,28 +385,35 @@ const [dispatches, setDispatches] =
       try {
         setLoading(true);
         setError("");
-
-       const [
-  bookingsResponse,
-  accountingResponse,
-  dispatchResponse,
-] = await Promise.all([
-  fetch("/api/bookings", {
-    method: "GET",
-    cache: "no-store",
-  }),
-  fetch("/api/accounting", {
-    method: "GET",
-    cache: "no-store",
-  }),
-  fetch(
-    "/api/dispatch?action=listDispatch",
-    {
-      method: "GET",
-      cache: "no-store",
-    }
-  ),
-]);
+        const [
+          bookingsResponse,
+          accountingResponse,
+          dispatchResponse,
+          settingsResponse,
+        ] = await Promise.all([
+          fetch("/api/bookings", {
+            method: "GET",
+            cache: "no-store",
+          }),
+          fetch("/api/accounting", {
+            method: "GET",
+            cache: "no-store",
+          }),
+          fetch(
+            "/api/dispatch?action=listDispatch",
+            {
+              method: "GET",
+              cache: "no-store",
+            }
+          ),
+          fetch(
+            "/api/dispatch?action=getSettings",
+            {
+              method: "GET",
+              cache: "no-store",
+            }
+          ),
+        ]);
 
         const bookingsData: BookingsResponse =
           await bookingsResponse.json();
@@ -417,19 +431,32 @@ const [dispatches, setDispatches] =
 
         const accountingData: AccountingResponse =
           await accountingResponse.json();
-          const dispatchData: DispatchResponse =
-  await dispatchResponse.json();
+        const settingsData: SettingsResponse =
+          await settingsResponse.json();
+        if (
+          !settingsResponse.ok ||
+          !settingsData.success
+        ) {
+          throw new Error(
+            settingsData.message ??
+              settingsData.error ??
+              "Unable to load settings."
+          );
+        }
 
-if (
-  !dispatchResponse.ok ||
-  !dispatchData.success
-) {
-  throw new Error(
-    dispatchData.message ??
-      dispatchData.error ??
-      "Unable to load dispatch data."
-  );
-}
+        const dispatchData: DispatchResponse =
+          await dispatchResponse.json();
+
+        if (
+          !dispatchResponse.ok ||
+          !dispatchData.success
+        ) {
+          throw new Error(
+            dispatchData.message ??
+              dispatchData.error ??
+              "Unable to load dispatch data."
+          );
+        }
 
         if (
           !accountingResponse.ok ||
@@ -515,9 +542,11 @@ if (
 
         setBookings(validBookings);
         setDispatches(
-  dispatchData.dispatches ?? []
-);
+          dispatchData.dispatches ?? []
+        );
         setFinancialByBookingId(financialMap);
+        setSettings(settingsData.settings ?? {});
+
       } catch (err) {
         console.error(
           "Operations data load error:",
@@ -618,6 +647,130 @@ if (
       setUpdatingBookingId(null);
     }
   }
+
+  const kpiMetrics = useMemo(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const isCurrentMonth = (value: string): boolean => {
+      if (!value) return false;
+
+      const date = new Date(value);
+
+      return (
+        !Number.isNaN(date.getTime()) &&
+        date.getMonth() === currentMonth &&
+        date.getFullYear() === currentYear
+      );
+    };
+
+    const currentMonthBookings = bookings.filter(
+      (booking) =>
+        isCurrentMonth(booking["Pickup Date"])
+    );
+
+    const revenueBooked = roundCurrency(
+      currentMonthBookings.reduce(
+        (sum, booking) =>
+          sum +
+          getBookingFinancial(
+            booking,
+            financialByBookingId
+          ).total,
+        0
+      )
+    );
+
+    const revenueCollected = roundCurrency(
+      currentMonthBookings.reduce(
+        (sum, booking) =>
+          sum +
+          getBookingFinancial(
+            booking,
+            financialByBookingId
+          ).paid,
+        0
+      )
+    );
+
+    const outstandingRevenue = roundCurrency(
+      Math.max(revenueBooked - revenueCollected, 0)
+    );
+
+    const bookingCount = currentMonthBookings.length;
+
+    const averageBookingValue =
+      bookingCount > 0
+        ? roundCurrency(revenueBooked / bookingCount)
+        : 0;
+
+    const currentMonthDispatches = dispatches.filter(
+      (dispatch) =>
+        isCurrentMonth(dispatch["Pickup Date"])
+    );
+
+    const completedTrips = currentMonthDispatches.filter(
+      (dispatch) =>
+        dispatch["Dispatch Status"] === "Completed"
+    ).length;
+
+    const activeTrips = currentMonthDispatches.filter(
+      (dispatch) =>
+        [
+          "Assigned",
+          "En Route",
+          "Passenger Onboard",
+          "Incident",
+        ].includes(dispatch["Dispatch Status"])
+    ).length;
+
+    const incidentCount = currentMonthDispatches.filter(
+      (dispatch) =>
+        dispatch["Dispatch Status"] === "Incident"
+    ).length;
+
+    const monthlyRevenueTarget = toAmount(
+      settings["Monthly Revenue Target"]
+    );
+
+    const targetCurrency =
+      String(settings["Target Currency"] ?? "USD").trim() || "USD";
+
+    const targetPercentage =
+      monthlyRevenueTarget > 0
+        ? Math.min(
+            roundCurrency(
+              (revenueBooked / monthlyRevenueTarget) * 100
+            ),
+            100
+          )
+        : 0;
+
+    const remainingTarget = roundCurrency(
+      Math.max(monthlyRevenueTarget - revenueBooked, 0)
+    );
+
+    return {
+      monthlyRevenueTarget,
+      targetCurrency,
+      revenueBooked,
+      revenueCollected,
+      outstandingRevenue,
+      targetPercentage,
+      remainingTarget,
+      bookingCount,
+      averageBookingValue,
+      completedTrips,
+      activeTrips,
+      incidentCount,
+    };
+  }, [
+    bookings,
+    dispatches,
+    financialByBookingId,
+    settings,
+  ]);
 
   const filteredBookings = useMemo(() => {
     const normalizedSearch =
@@ -783,6 +936,57 @@ if (
 
         {!loading && !error && (
           <>
+            <section className="mb-6">
+              <div className="mb-4">
+                <h2 className="text-lg font-black text-slate-900">
+                  Revenue Performance
+                </h2>
+                <p className="text-sm text-slate-500">
+                  Current month revenue against the configured target
+                </p>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <p className="text-sm font-medium text-slate-500">Monthly Target</p>
+                  <p className="mt-1 text-2xl font-black text-slate-900">
+                    {formatCurrency(kpiMetrics.monthlyRevenueTarget)}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <p className="text-sm font-medium text-slate-500">Revenue Booked</p>
+                  <p className="mt-1 text-2xl font-black text-slate-900">
+                    {formatCurrency(kpiMetrics.revenueBooked)}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <p className="text-sm font-medium text-slate-500">Revenue Collected</p>
+                  <p className="mt-1 text-2xl font-black text-slate-900">
+                    {formatCurrency(kpiMetrics.revenueCollected)}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <p className="text-sm font-medium text-slate-500">Outstanding Revenue</p>
+                  <p className="mt-1 text-2xl font-black text-slate-900">
+                    {formatCurrency(kpiMetrics.outstandingRevenue)}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <p className="text-sm font-medium text-slate-500">Target Achieved</p>
+                  <p className="mt-1 text-2xl font-black text-slate-900">
+                    {kpiMetrics.targetPercentage.toFixed(1)}%
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {formatCurrency(kpiMetrics.remainingTarget)} remaining
+                  </p>
+                </div>
+              </div>
+            </section>
+
             <div className="mb-6 grid gap-6 md:grid-cols-2">
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <p className="text-sm font-medium text-slate-500">
