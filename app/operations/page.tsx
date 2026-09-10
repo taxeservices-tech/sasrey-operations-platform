@@ -73,6 +73,25 @@ interface SettingsResponse {
   message?: string;
   error?: string;
 }
+interface SalesActivityRecord {
+  "Activity ID"?: string;
+  "Activity Date"?: string;
+  Salesperson?: string;
+  "Lead Name"?: string;
+  "Lead Source"?: string;
+  "Activity Type"?: string;
+  "Booking ID"?: string;
+  Outcome?: string;
+  Notes?: string;
+}
+
+interface SalesActivityResponse {
+  success: boolean;
+  activities?: SalesActivityRecord[];
+  message?: string;
+  error?: string;
+}
+
 
 interface AccountingResponse {
   success: boolean;
@@ -369,7 +388,11 @@ const [dispatches, setDispatches] =
     setFinancialByBookingId,
   ] = useState<Map<string, BookingFinancial>>(
     new Map()
+
   );
+    const [salesActivities, setSalesActivities] =
+      useState<SalesActivityRecord[]>([]);
+
   const [settings, setSettings] = useState<Record<string, string>>({});
 
   const [sortOption, setSortOption] =
@@ -385,35 +408,40 @@ const [dispatches, setDispatches] =
       try {
         setLoading(true);
         setError("");
-        const [
-          bookingsResponse,
-          accountingResponse,
-          dispatchResponse,
-          settingsResponse,
-        ] = await Promise.all([
-          fetch("/api/bookings", {
-            method: "GET",
-            cache: "no-store",
-          }),
-          fetch("/api/accounting", {
-            method: "GET",
-            cache: "no-store",
-          }),
-          fetch(
-            "/api/dispatch?action=listDispatch",
-            {
+          const [
+            bookingsResponse,
+            accountingResponse,
+            dispatchResponse,
+            settingsResponse,
+            salesActivityResponse,
+          ] = await Promise.all([
+            fetch("/api/bookings", {
               method: "GET",
               cache: "no-store",
-            }
-          ),
-          fetch(
-            "/api/dispatch?action=getSettings",
-            {
+            }),
+            fetch("/api/accounting", {
               method: "GET",
               cache: "no-store",
-            }
-          ),
-        ]);
+            }),
+            fetch(
+              "/api/dispatch?action=listDispatch",
+              {
+                method: "GET",
+                cache: "no-store",
+              }
+            ),
+            fetch(
+              "/api/dispatch?action=getSettings",
+              {
+                method: "GET",
+                cache: "no-store",
+              }
+            ),
+            fetch("/api/sales-activity", {
+              method: "GET",
+              cache: "no-store",
+            }),
+          ]);
 
         const bookingsData: BookingsResponse =
           await bookingsResponse.json();
@@ -433,6 +461,7 @@ const [dispatches, setDispatches] =
           await accountingResponse.json();
         const settingsData: SettingsResponse =
           await settingsResponse.json();
+
         if (
           !settingsResponse.ok ||
           !settingsData.success
@@ -457,6 +486,20 @@ const [dispatches, setDispatches] =
               "Unable to load dispatch data."
           );
         }
+        const salesActivityData: SalesActivityResponse =
+          await salesActivityResponse.json();
+
+        if (
+          !salesActivityResponse.ok ||
+          !salesActivityData.success
+        ) {
+          throw new Error(
+            salesActivityData.message ??
+              salesActivityData.error ??
+              "Unable to load sales activity."
+          );
+        }
+
 
         if (
           !accountingResponse.ok ||
@@ -545,6 +588,9 @@ const [dispatches, setDispatches] =
           dispatchData.dispatches ?? []
         );
         setFinancialByBookingId(financialMap);
+        setSalesActivities(
+          salesActivityData.activities ?? []
+        );
         setSettings(settingsData.settings ?? {});
 
       } catch (err) {
@@ -1075,6 +1121,79 @@ const [dispatches, setDispatches] =
         : remainingTarget;
 
 
+    const startOfWeek = new Date(now);
+    const dayOfWeek = startOfWeek.getDay();
+    const daysSinceMonday = (dayOfWeek + 6) % 7;
+    startOfWeek.setDate(startOfWeek.getDate() - daysSinceMonday);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(endOfWeek.getDate() + 7);
+
+    const currentWeekSalesActivities =
+      salesActivities.filter((activity) => {
+        const activityDate = new Date(
+          String(activity["Activity Date"] ?? "")
+        );
+
+        return (
+          !Number.isNaN(activityDate.getTime()) &&
+          activityDate >= startOfWeek &&
+          activityDate < endOfWeek
+        );
+      });
+
+    const salesActivityCounts =
+      currentWeekSalesActivities.reduce(
+        (counts, activity) => {
+          const activityType =
+            String(activity["Activity Type"] ?? "")
+              .trim()
+              .toLowerCase();
+
+          const outcome =
+            String(activity.Outcome ?? "")
+              .trim()
+              .toLowerCase();
+
+          counts.totalActivities += 1;
+
+          if (activityType === "lead") counts.leads += 1;
+          if (activityType === "contact") counts.contacts += 1;
+          if (activityType === "quote") counts.quotes += 1;
+          if (activityType === "follow-up") counts.followUps += 1;
+          if (activityType === "booking") counts.bookings += 1;
+          if (outcome === "open") counts.open += 1;
+          if (outcome === "won") counts.won += 1;
+          if (outcome === "lost") counts.lost += 1;
+          if (outcome === "no response") counts.noResponse += 1;
+
+          return counts;
+        },
+        {
+          totalActivities: 0,
+          leads: 0,
+          contacts: 0,
+          quotes: 0,
+          followUps: 0,
+          bookings: 0,
+          open: 0,
+          won: 0,
+          lost: 0,
+          noResponse: 0,
+        }
+      );
+
+    const leadToBookingConversion =
+      salesActivityCounts.leads > 0
+        ? roundCurrency(
+            (salesActivityCounts.bookings /
+              salesActivityCounts.leads) *
+              100
+          )
+        : 0;
+
+
     const weeklySalesFocus = {
       primaryDestination:
         destinationTargetPriorities[0]?.destination ||
@@ -1117,6 +1236,8 @@ const [dispatches, setDispatches] =
       destinationOpportunityRows,
       destinationSalesActions,
       destinationTargetPriorities,
+      salesActivityCounts,
+      leadToBookingConversion,
       weeklySalesFocus,
       completedTrips,
       activeTrips,
@@ -1127,6 +1248,7 @@ const [dispatches, setDispatches] =
     dispatches,
     financialByBookingId,
     settings,
+    salesActivities,
   ]);
 
   const filteredBookings = useMemo(() => {
@@ -1527,6 +1649,85 @@ const [dispatches, setDispatches] =
                       </div>
                     </div>
                   </div>
+                  <div className="mb-4 border-b border-slate-100 pb-4">
+                    <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                      Sales Activity Funnel
+                    </p>
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                      <div>
+                        <p className="text-sm font-medium text-slate-500">
+                          Total Activities
+                        </p>
+                        <p className="mt-1 text-lg font-black text-slate-900">
+                          {kpiMetrics.salesActivityCounts.totalActivities}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium text-slate-500">
+                          Leads
+                        </p>
+                        <p className="mt-1 text-lg font-black text-slate-900">
+                          {kpiMetrics.salesActivityCounts.leads}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium text-slate-500">
+                          Contacts
+                        </p>
+                        <p className="mt-1 text-lg font-black text-slate-900">
+                          {kpiMetrics.salesActivityCounts.contacts}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium text-slate-500">
+                          Quotes
+                        </p>
+                        <p className="mt-1 text-lg font-black text-slate-900">
+                          {kpiMetrics.salesActivityCounts.quotes}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium text-slate-500">
+                          Follow-ups
+                        </p>
+                        <p className="mt-1 text-lg font-black text-slate-900">
+                          {kpiMetrics.salesActivityCounts.followUps}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium text-slate-500">
+                          Booking Activities
+                        </p>
+                        <p className="mt-1 text-lg font-black text-slate-900">
+                          {kpiMetrics.salesActivityCounts.bookings}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium text-slate-500">
+                          Lead → Booking Conversion
+                        </p>
+                        <p className="mt-1 text-lg font-black text-slate-900">
+                          {kpiMetrics.leadToBookingConversion.toFixed(1)}%
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium text-slate-500">
+                          Won / Lost / No Response
+                        </p>
+                        <p className="mt-1 text-lg font-black text-slate-900">
+                          {kpiMetrics.salesActivityCounts.won} / {kpiMetrics.salesActivityCounts.lost} / {kpiMetrics.salesActivityCounts.noResponse}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
 
                 </div>
 

@@ -3,6 +3,7 @@ const BOOKING_SHEET_NAME = "Booking Records";
 const DRIVERS_SHEET_NAME = "Drivers";
 const VEHICLES_SHEET_NAME = "Vehicles";
 const INCIDENTS_SHEET_NAME = "Incidents";
+const SALES_ACTIVITY_SHEET_NAME = "Sales Activity";
 /**
  * GET API
  *
@@ -251,6 +252,30 @@ function doGet(e) {
           ContentService.MimeType.JSON
         );
     }
+
+
+      /*
+       * ==========================================
+       * LIST SALES ACTIVITY
+       * ==========================================
+       *
+       * Request:
+       * ?action=listSalesActivity
+       */
+
+      if (action === "listSalesActivity") {
+
+        const result =
+          listSalesActivityRecords();
+
+        return ContentService
+          .createTextOutput(
+            JSON.stringify(result)
+          )
+          .setMimeType(
+            ContentService.MimeType.JSON
+          );
+      }
 
 
     /*
@@ -723,7 +748,8 @@ function getRequiredSheet_(
       dispatches: []
     };
   }
-}/**
+}
+/**
  * Ensure the Dispatch sheet has the
  * required header row.
  */
@@ -844,7 +870,56 @@ function ensureDispatchHeaders_(sheet) {
       missingHeaders
     ]);
 }
- /**
+/**
+ * List sales activity records from the Sales Activity sheet.
+ *
+ * Returns one object per non-empty activity row using the sheet header row as keys.
+ */
+function listSalesActivityRecords() {
+  try {
+    const sheet = getRequiredSheet_(SALES_ACTIVITY_SHEET_NAME);
+    const values = sheet.getDataRange().getValues();
+
+    if (values.length < 2) {
+      return {
+        success: true,
+        activities: []
+      };
+    }
+
+    const headers = values[0].map((header) => String(header).trim());
+
+    const activities = values
+      .slice(1)
+      .filter((row) =>
+        row.some((value) => String(value ?? "").trim() !== "")
+      )
+      .map((row) => {
+        const activity = {};
+
+        headers.forEach((header, index) => {
+          if (header) {
+            activity[header] = row[index] ?? "";
+          }
+        });
+
+        return activity;
+      });
+
+    return {
+      success: true,
+      activities: activities
+    };
+  } catch (error) {
+    return {
+      success: false,
+      activities: [],
+      error: error.toString()
+    };
+  }
+}
+
+/**
  * Create a dispatch for a confirmed booking.
  *
  * Required data:
