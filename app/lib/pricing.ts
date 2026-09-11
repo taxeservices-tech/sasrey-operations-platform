@@ -49,30 +49,62 @@ export function calculateBookingPrice(
   /*
    * Tour pricing
    *
-   * Tours use fixed starting prices by tour type
-   * and do not depend on the airport-transfer route table.
+   * When a tourId is supplied, pricing comes from the
+   * existing Master Tours catalogue. The legacy tourType
+   * pricing remains as a compatibility fallback for
+   * callers that have not yet been migrated to tourId.
    */
   if (booking.service === "Tour") {
-    if (!booking.tourType) {
-      return null;
-    }
-
     if (booking.passengers < 1 || booking.passengers > 7) {
       return null;
     }
 
-    const tourPrices: Record<
-      NonNullable<BookingPriceInput["tourType"]>,
-      number
-    > = {
-      "Private Tour": 275,
-      "Full-Day Tour": 350,
-      "Custom/Private Excursion": 450,
-    };
+    const selectedTour = booking.tourId
+      ? tours.find((tour) => tour.id === booking.tourId)
+      : undefined;
 
-    const baseFare = tourPrices[booking.tourType];
+    if (booking.tourId && !selectedTour) {
+      return null;
+    }
 
-    const passengerFee = 0;
+    let baseFare: number;
+    let passengerFee = 0;
+
+    if (selectedTour) {
+      baseFare = selectedTour.basePrice;
+
+      if (
+        selectedTour.includedPassengers !== null &&
+        booking.passengers > selectedTour.includedPassengers
+      ) {
+        passengerFee =
+          (booking.passengers -
+            selectedTour.includedPassengers) *
+          selectedTour.additionalPassengerFee;
+      }
+
+      if (
+        selectedTour.maxPassengers !== null &&
+        booking.passengers > selectedTour.maxPassengers
+      ) {
+        return null;
+      }
+    } else {
+      if (!booking.tourType) {
+        return null;
+      }
+
+      const tourPrices: Record<
+        NonNullable<BookingPriceInput["tourType"]>,
+        number
+      > = {
+        "Private Tour": 275,
+        "Full-Day Tour": 350,
+        "Custom/Private Excursion": 450,
+      };
+
+      baseFare = tourPrices[booking.tourType];
+    }
 
     const childSeatFee = booking.childSeat ? 10 : 0;
 
