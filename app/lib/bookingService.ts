@@ -32,6 +32,7 @@ export async function processBooking(
     destination: booking.destination,
     tripType: booking.tripType,
     passengers: booking.passengers,
+    tourId: booking.tourId,
     tourType: booking.tourType,
     childSeat: booking.childSeat > 0,
     extraStop: booking.extraStop > 0,
