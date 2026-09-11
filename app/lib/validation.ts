@@ -231,8 +231,8 @@ export function validateTripDetails(
 
 
   if (booking.serviceCategory === "Tour") {
-    if (!booking.tourType) {
-      errors.push("Tour type is required.");
+    if (!booking.tourId) {
+      errors.push("Tour selection is required.");
     }
   } else {
     const matchingRoute =
