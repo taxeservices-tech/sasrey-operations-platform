@@ -19,11 +19,13 @@ export interface Booking {
   pickupTime: string;
   passengers: number;
   serviceCategory: "Airport Transfer" | "Tour";
-tourType?:
-  | "Private Tour"
-  | "Full-Day Tour"
-  | "Custom/Private Excursion";
-tourDestination?: string;
+  tourId?: string;
+
+  tourType?:
+    | "Private Tour"
+    | "Full-Day Tour"
+    | "Custom/Private Excursion";
+  tourDestination?: string;
 
   // Passenger Details
   customerName: string;
