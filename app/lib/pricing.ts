@@ -1,4 +1,5 @@
 import { findBookingRoute } from "./routeResolver";
+import { tours } from "./tours";
 
 export interface BookingPriceInput {
   service: "Airport Transfer" | "Tour";
@@ -9,6 +10,8 @@ export interface BookingPriceInput {
   tripType?: "One Way" | "Round Trip";
 
   passengers: number;
+
+  tourId?: string;
 
   tourType?:
     | "Private Tour"
