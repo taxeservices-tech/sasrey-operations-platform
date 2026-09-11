@@ -34,6 +34,8 @@ export default function QuoteSummary() {
         booking.passengers ?? 1,
       tourType:
         booking.tourType,
+        tourId:
+          booking.tourId,
       childSeat:
         (booking.childSeat ?? 0) > 0,
       extraStop:
