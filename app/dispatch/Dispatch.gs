@@ -1498,11 +1498,13 @@ Logger.log(
     }
 /*
  * ------------------------------------------
- * RESOURCE AVAILABILITY VALIDATION
+ * RESOURCE STATUS VALIDATION
  * ------------------------------------------
  *
- * A driver and vehicle must both be Available
- * before a new dispatch can be created.
+ * Available and On Trip are both valid resource
+ * states for scheduling. Actual scheduling
+ * availability is enforced by the time-window
+ * conflict checks below.
  */
 
 const currentDriverStatus =
@@ -1512,11 +1514,11 @@ const currentDriverStatus =
   ).trim();
 
 if (
-  currentDriverStatus !==
-  "Available"
+  currentDriverStatus !== "Available" &&
+  currentDriverStatus !== "On Trip"
 ) {
   throw new Error(
-    `Driver ${driverId} is not Available. Current status: ${currentDriverStatus || "Unknown"}.`
+    `Driver ${driverId} cannot be assigned. Current status: ${currentDriverStatus || "Unknown"}.`
   );
 }
 
@@ -1527,11 +1529,11 @@ const currentVehicleStatus =
   ).trim();
 
 if (
-  currentVehicleStatus !==
-  "Available"
+  currentVehicleStatus !== "Available" &&
+  currentVehicleStatus !== "On Trip"
 ) {
   throw new Error(
-    `Vehicle ${vehicleId} is not Available. Current status: ${currentVehicleStatus || "Unknown"}.`
+    `Vehicle ${vehicleId} cannot be assigned. Current status: ${currentVehicleStatus || "Unknown"}.`
   );
 }
     /*

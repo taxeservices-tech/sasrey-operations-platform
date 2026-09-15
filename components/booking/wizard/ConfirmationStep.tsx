@@ -8,9 +8,9 @@ export default function ConfirmationStep() {
 
   const quote =
     booking.pickup &&
-    booking.destination &&
-    booking.tripType &&
-    booking.passengers
+      booking.destination &&
+      booking.tripType &&
+      booking.passengers
       ? calculateBookingPrice({
           service:
             booking.serviceCategory ??
@@ -69,11 +69,13 @@ export default function ConfirmationStep() {
         </p>
 
         <p className="mt-3 text-2xl font-black tracking-wider">
-          Pending Confirmation
+          {booking.bookingReference ?? "Pending Confirmation"}
         </p>
 
         <p className="mt-2 text-sm text-slate-400">
-          Your reservation team will provide your final booking reference.
+          {booking.bookingReference
+            ? "Please keep this reference for your records."
+            : "Your reservation team will provide your final booking reference."}
         </p>
       </div>
 

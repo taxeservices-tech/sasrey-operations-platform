@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import { calculateBookingPrice } from "@/app/lib/pricing";
 import { processBooking } from "@/app/lib/bookingService";
@@ -75,6 +78,12 @@ export default function PaymentStep() {
     quote?.total ??
     0;
 
+  useEffect(() => {
+    if (paymentSuccess) {
+      setCurrentStep(5);
+    }
+  }, [paymentSuccess, setCurrentStep]);
+
   async function handlePayment() {
     setPaymentError(null);
 
@@ -86,11 +95,11 @@ export default function PaymentStep() {
     }
 
     setIsSubmitting(true);
-
     try {
       const result = await processBooking(
         booking as Booking
       );
+
 
       if (!result.success) {
         throw new Error(
@@ -98,13 +107,14 @@ export default function PaymentStep() {
             "Unable to create booking."
         );
       }
+updateBooking({
+  ...(result.booking ?? {}),
+  bookingReference:
+    result.bookingReference,
+});
 
-      if (result.booking) {
-        updateBooking(result.booking);
-      }
+setPaymentSuccess(true);
 
-      setPaymentSuccess(true);
-      setCurrentStep(5);
     } catch (error) {
       setPaymentError(
         error instanceof Error
@@ -123,8 +133,8 @@ export default function PaymentStep() {
       </h2>
 
       <p className="mt-2 text-slate-600">
-        Choose your preferred payment method
-        and enter your payment reference.
+        Choose your preferred payment method to submit
+        your booking request.
       </p>
 
       {!quote ? (
@@ -214,7 +224,6 @@ export default function PaymentStep() {
             </label>
           </div>
 
-
           {paymentError && (
             <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
               {paymentError}
@@ -223,8 +232,9 @@ export default function PaymentStep() {
 
           {paymentSuccess && (
             <div className="mt-6 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-              Booking submitted successfully. Our team will confirm your payment in Operations.
-
+              Booking submitted successfully. Our
+              team will confirm your payment in
+              Operations.
             </div>
           )}
 

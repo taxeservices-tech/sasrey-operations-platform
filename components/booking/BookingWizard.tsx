@@ -100,32 +100,32 @@ export default function BookingWizard() {
     <section>
       {/* Progress */}
 
-<div className="mb-12 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-  <div className="flex items-center justify-between">
-    <div>
-      <p className="text-xs font-bold uppercase tracking-[0.3em] text-sky-600">
-        Booking Progress
-      </p>
+      <div className="mb-12 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-sky-600">
+              Booking Progress
+            </p>
 
-      <p className="mt-2 text-lg font-bold text-slate-900">
-        Step {currentStep} of 5
-      </p>
-    </div>
+            <p className="mt-2 text-lg font-bold text-slate-900">
+              Step {currentStep} of 5
+            </p>
+          </div>
 
-    <span className="rounded-full bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700">
-      {currentStep * 20}% Complete
-    </span>
-  </div>
+          <span className="rounded-full bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700">
+            {currentStep * 20}% Complete
+          </span>
+        </div>
 
-  <div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-200">
-    <div
-      className="h-full rounded-full bg-sky-500 transition-all duration-300"
-      style={{
-        width: `${currentStep * 20}%`,
-      }}
-    />
-  </div>
-</div>
+        <div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-200">
+          <div
+            className="h-full rounded-full bg-sky-500 transition-all duration-300"
+            style={{
+              width: `${currentStep * 20}%`,
+            }}
+          />
+        </div>
+      </div>
 
       {/* Heading */}
 
@@ -196,31 +196,32 @@ export default function BookingWizard() {
           disabled={
             currentStep === 1 || submitting
           }
-          className={`rounded-full px-8 py-4 text-lg font-semibold transition ${
-            currentStep === 1 || submitting
-              ? "cursor-not-allowed bg-slate-200 text-slate-400"
-              : "bg-slate-700 text-white hover:bg-slate-800"
-          }`}
+          className={`rounded-full px-8 py-4 text-lg font-semibold transition ${currentStep === 1 || submitting
+            ? "cursor-not-allowed bg-slate-200 text-slate-400"
+            : "bg-slate-700 text-white hover:bg-slate-800"
+            }`}
         >
           ← Previous
         </button>
 
-        <button
-          type="button"
-          onClick={
-            currentStep === 5
-              ? resetBooking
-              : handleContinue
-          }
-          disabled={submitting}
-          className="rounded-full bg-sky-500 px-8 py-4 text-lg font-semibold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {submitting
-            ? "Submitting..."
-            : currentStep === 5
-              ? "Finish"
-              : "Continue →"}
-        </button>
+        {currentStep !== 4 && (
+          <button
+            type="button"
+            onClick={
+              currentStep === 5
+                ? resetBooking
+                : handleContinue
+            }
+            disabled={submitting}
+            className="rounded-full bg-sky-500 px-8 py-4 text-lg font-semibold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {submitting
+              ? "Submitting..."
+              : currentStep === 5
+                ? "Finish"
+                : "Continue →"}
+          </button>
+        )}
       </div>
     </section>
   );

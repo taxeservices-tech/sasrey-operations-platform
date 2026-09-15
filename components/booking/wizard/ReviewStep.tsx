@@ -19,7 +19,7 @@ export default function ReviewStep() {
           destination: booking.destination,
           tripType: booking.tripType,
           passengers: booking.passengers,
-
+          tourId: booking.tourId,
           childSeat:
             (booking.childSeat ?? 0) > 0,
 

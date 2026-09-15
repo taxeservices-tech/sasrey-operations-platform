@@ -14,13 +14,20 @@ interface BookingContextType {
   currentStep: number;
   setCurrentStep: (step: number) => void;
   updateBooking: (values: Partial<Booking>) => void;
-
-
   resetBooking: () => void;
 }
 
 const BookingContext =
   createContext<BookingContextType | null>(null);
+
+const initialBooking: Partial<Booking> = {
+  serviceCategory: "Airport Transfer",
+  tripType: "One Way",
+  passengers: 1,
+  waitingTimeHours: 0,
+  childSeat: 0,
+  extraStop: 0,
+};
 
 export function BookingProvider({
   children,
@@ -28,14 +35,8 @@ export function BookingProvider({
   children: ReactNode;
 }) {
   const [booking, setBooking] =
-    useState<Partial<Booking>>({
-      serviceCategory: "Airport Transfer",
-      tripType: "One Way",
-      passengers: 1,
-      waitingTimeHours: 0,
-      childSeat: 0,
-      extraStop: 0,
-    });
+    useState<Partial<Booking>>(initialBooking);
+
   const [currentStep, setCurrentStep] =
     useState(1);
 
@@ -63,7 +64,10 @@ export function BookingProvider({
   }
 
   function resetBooking() {
-    setBooking({});
+    setBooking({
+      ...initialBooking,
+    });
+
     setCurrentStep(1);
   }
 

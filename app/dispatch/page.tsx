@@ -468,7 +468,9 @@ export default function DispatchPage() {
             setTargetCurrency(
               configuredTargetCurrency
             );
-          } setBookings(
+          }
+
+          setBookings(
             bookingsData.bookings ?? []
           );
 
@@ -499,7 +501,6 @@ export default function DispatchPage() {
                 )
             )
           );
-
           if (bookingId) {
             const requestedBooking =
               (
@@ -603,24 +604,7 @@ export default function DispatchPage() {
 
           const outstanding =
             financial?.outstanding ?? 0;
-          if (
-            bookingId ===
-            "SAS-20260820-772529299561"
-          ) {
-            console.log(
-              "DISPATCH TEST BOOKING:",
-              {
-                bookingId,
-                status,
-                financial,
-                outstanding,
-                alreadyDispatched:
-                  dispatchedBookingIds.has(
-                    bookingId
-                  ),
-              }
-            );
-          }
+
           return (
             bookingId &&
             status === "Confirmed" &&
@@ -1825,7 +1809,8 @@ export default function DispatchPage() {
                       );
 
                     const unavailable =
-                      driverStatus !== "Available";
+                      driverStatus !== "Available" &&
+                      driverStatus !== "On Trip";
                     return (
 
                       <option
@@ -1912,7 +1897,8 @@ export default function DispatchPage() {
                       );
 
                     const unavailable =
-                      vehicleStatus !== "Available";
+                      vehicleStatus !== "Available" &&
+                      vehicleStatus !== "On Trip";
                     return (
                       <option
                         key={vehicleId}
@@ -1972,19 +1958,7 @@ export default function DispatchPage() {
                   saving ||
                   !selectedBookingId ||
                   !selectedDriverId ||
-                  !selectedVehicleId ||
-                  isDispatchResourceBusy(
-                    selectedDriverId,
-                    "Driver ID",
-                    selectedBooking,
-                    dispatches
-                  ) ||
-                  isDispatchResourceBusy(
-                    selectedVehicleId,
-                    "Vehicle ID",
-                    selectedBooking,
-                    dispatches
-                  )
+                  !selectedVehicleId
                 }
                 className="rounded-full bg-sky-600 px-8 py-3 font-bold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
