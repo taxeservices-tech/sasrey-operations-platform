@@ -22,7 +22,7 @@ export default function PaymentStep() {
             <span>Deposit (25%)</span>
 
             <strong>
-              USD {booking.deposit.toFixed(2)}
+              USD {(booking.deposit ?? 0).toFixed(2)}
             </strong>
           </div>
 
@@ -30,7 +30,7 @@ export default function PaymentStep() {
             <span>Balance</span>
 
             <strong>
-              USD {booking.balance.toFixed(2)}
+             USD {(booking.balance ?? 0).toFixed(2)}
             </strong>
           </div>
 
@@ -38,7 +38,7 @@ export default function PaymentStep() {
             <span>Total</span>
 
             <span>
-              USD {booking.total.toFixed(2)}
+            USD {(booking.total ?? 0).toFixed(2)}
             </span>
           </div>
         </div>

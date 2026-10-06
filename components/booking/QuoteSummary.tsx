@@ -17,8 +17,8 @@ export default function QuoteSummary() {
       destination: booking.destination,
       tripType: booking.tripType ?? "One Way",
       passengers: booking.passengers ?? 1,
-      childSeat: booking.childSeat,
-      extraStop: booking.extraStop,
+      childSeat: (booking.childSeat ?? 0) > 0,
+      extraStop: (booking.extraStop ?? 0) > 0,
       waitingTimeHours: booking.waitingTimeHours ?? 0,
     });
   }, [booking]);

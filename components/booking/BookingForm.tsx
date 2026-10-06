@@ -156,7 +156,6 @@ export default function BookingForm() {
               updateBooking({
                 pickup: e.target.value,
                 destination: "",
-                service: "",
               })
             }
           >
@@ -191,7 +190,7 @@ export default function BookingForm() {
 
               updateBooking({
                 destination,
-                service: route?.service ?? "",
+                serviceCategory: route?.service === "Airport Transfer" ? "Airport Transfer" : route?.service === "Tour" ? "Tour" : undefined,
               });
             }}
           >
@@ -328,7 +327,7 @@ export default function BookingForm() {
           <input
             readOnly
             className="w-full rounded-xl border border-slate-300 bg-slate-100 p-4"
-            value={booking.service ?? ""}
+            value={booking.serviceCategory ?? ""}
             placeholder="Automatically selected"
           />
         </div>
@@ -347,10 +346,10 @@ export default function BookingForm() {
           <label className="flex items-center gap-3">
             <input
               type="checkbox"
-              checked={booking.childSeat ?? false}
+              checked={(booking.childSeat ?? 0) > 0}
               onChange={(e) =>
                 updateBooking({
-                  childSeat: e.target.checked,
+                childSeat: e.target.checked ? 1 : 0,
                 })
               }
             />
@@ -360,10 +359,10 @@ export default function BookingForm() {
           <label className="flex items-center gap-3">
             <input
               type="checkbox"
-              checked={booking.extraStop ?? false}
+              checked={(booking.extraStop ?? 0) > 0}
               onChange={(e) =>
                 updateBooking({
-                  extraStop: e.target.checked,
+                extraStop: e.target.checked ? 1 : 0,
                 })
               }
             />

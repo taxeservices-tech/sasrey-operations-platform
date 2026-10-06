@@ -37,9 +37,9 @@ export default function ConfirmationStep() {
           <SummaryItem label="Pickup Date" value={booking.pickupDate} />
           <SummaryItem label="Pickup Time" value={booking.pickupTime} />
           <SummaryItem label="Passengers" value={booking.passengers} />
-          <SummaryItem label="Total" value={`USD ${booking.total.toFixed(2)}`} />
-          <SummaryItem label="Deposit" value={`USD ${booking.deposit.toFixed(2)}`} />
-          <SummaryItem label="Balance" value={`USD ${booking.balance.toFixed(2)}`} />
+          <SummaryItem label="Total" value={`USD ${(booking.total ?? 0).toFixed(2)}`} />
+          <SummaryItem label="Deposit" value={`USD ${(booking.deposit ?? 0).toFixed(2)}`} />
+          <SummaryItem label="Balance" value={`USD ${(booking.balance ?? 0).toFixed(2)}`} />
           <SummaryItem label="Payment Method" value={booking.paymentMethod} />
 
         </div>

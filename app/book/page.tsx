@@ -14,7 +14,7 @@ export default function BookPage() {
 
       <BookingBenefits />
 
-      <BookingWizard booking={booking as any} />
+      <BookingWizard  />
     </main>
   );
 }

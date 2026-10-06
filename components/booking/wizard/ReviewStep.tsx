@@ -24,7 +24,6 @@ export default function ReviewStep() {
         <ReviewItem label="Trip Type" value={booking.tripType} />
         <ReviewItem label="Passengers" value={String(booking.passengers)} />
         <ReviewItem label="Flight" value={booking.flightNumber} />
-        <ReviewItem label="Airline" value={booking.airline} />
         <ReviewItem label="Customer" value={booking.customerName} />
         <ReviewItem label="Email" value={booking.email} />
         <ReviewItem label="Phone" value={booking.phone} />
