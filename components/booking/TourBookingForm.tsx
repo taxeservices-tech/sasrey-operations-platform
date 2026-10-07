@@ -54,8 +54,8 @@ export default function TourBookingForm() {
         tour.destination ?? "",
       passengers:
         booking.passengers &&
-        booking.passengers >= 1 &&
-        booking.passengers <= 7
+          booking.passengers >= 1 &&
+          booking.passengers <= 7
           ? booking.passengers
           : 1,
     });
@@ -91,9 +91,8 @@ export default function TourBookingForm() {
         </h2>
 
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          Select one of our Jamaica experiences. Your
-          SASREY transportation price is shown before
-          you continue to booking.
+          Select one of our Jamaica experiences. Your private SASREY tour price is shown before
+          you continue.
         </p>
       </div>
 
@@ -131,7 +130,6 @@ export default function TourBookingForm() {
         </select>
       </div>
 
-      {/* Passenger Count */}
       <div>
         <label
           htmlFor="tour-passengers"
@@ -171,6 +169,30 @@ export default function TourBookingForm() {
           maximum 7 passengers.
         </p>
       </div>
+      {/* Tour Type */}
+      <div>
+        <label
+          htmlFor="tour-type"
+          className="mb-2 block text-sm font-bold text-slate-800"
+        >
+          Tour Type
+        </label>
+
+        <input
+          id="tour-type"
+          type="text"
+          value={selectedTour?.type ?? ""}
+          placeholder="Select a tour first"
+          readOnly
+          className="w-full rounded-2xl border border-slate-300 bg-slate-50 p-4 text-slate-700 outline-none"
+        />
+
+        <p className="mt-2 text-xs text-slate-500">
+          Tour type is automatically determined by the selected experience.
+        </p>
+      </div>
+
+      {/* Passenger Count */}
 
       {/* Selected Tour */}
       {selectedTour && (
@@ -309,10 +331,10 @@ export default function TourBookingForm() {
           <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
             <p className="text-sm font-bold text-emerald-900">
               {selectedTour.pricingModel ===
-              "dynamic_activity"
+                "dynamic_activity"
                 ? "Activity pricing is calculated separately."
                 : selectedTour.pricingModel ===
-                    "custom"
+                  "custom"
                   ? "Custom tour pricing is calculated from your selected itinerary."
                   : "This is the current SASREY launch price."}
             </p>
@@ -327,25 +349,25 @@ export default function TourBookingForm() {
           {/* Booking Notes */}
           {selectedTour.bookingNotes.length >
             0 && (
-            <div>
-              <h4 className="mb-3 text-sm font-black uppercase tracking-wide text-slate-900">
-                Important Information
-              </h4>
+              <div>
+                <h4 className="mb-3 text-sm font-black uppercase tracking-wide text-slate-900">
+                  Important Information
+                </h4>
 
-              <ul className="space-y-2">
-                {selectedTour.bookingNotes.map(
-                  (note) => (
-                    <li
-                      key={note}
-                      className="text-sm leading-6 text-slate-600"
-                    >
-                      • {note}
-                    </li>
-                  )
-                )}
-              </ul>
-            </div>
-          )}
+                <ul className="space-y-2">
+                  {selectedTour.bookingNotes.map(
+                    (note) => (
+                      <li
+                        key={note}
+                        className="text-sm leading-6 text-slate-600"
+                      >
+                        • {note}
+                      </li>
+                    )
+                  )}
+                </ul>
+              </div>
+            )}
         </div>
       )}
     </section>
