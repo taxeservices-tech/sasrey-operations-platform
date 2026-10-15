@@ -19,8 +19,15 @@ function validSecret(
 export async function POST(request: NextRequest) {
   const expectedSecret = process.env.WHATSAPP_DELIVERY_SECRET;
   const suppliedSecret = request.headers.get("x-whatsapp-delivery-secret");
-
-  if (!validSecret(suppliedSecret, expectedSecret)) {
+  const secretConfigured = Boolean(expectedSecret);
+  const headerPresent = Boolean(suppliedSecret);
+  const secretMatches = validSecret(suppliedSecret, expectedSecret);
+console.info("WhatsApp delivery authentication diagnostic", {
+    secretConfigured,
+    headerPresent,
+    secretMatches,
+  });
+  if (!secretMatches) {
     return NextResponse.json(
       { success: false, message: "Unauthorized" },
       { status: 401 }
