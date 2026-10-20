@@ -6,6 +6,11 @@ export type BookingStatus =
   | "Completed"
   | "Cancelled";
 
+export type CustomTourServiceLevel =
+  | "Private Excursion"
+  | "Private Custom Tour"
+  | "Full-Day Private Custom Tour";
+
 export interface Booking {
   bookingReference?: string;
   routeId?: string;
@@ -26,6 +31,13 @@ export interface Booking {
     | "Full-Day Tour"
     | "Custom/Private Excursion";
   tourDestination?: string;
+
+  // Custom Tour
+  customTourServiceLevel?: CustomTourServiceLevel;
+  customTourDurationHours?: number;
+  customTourAdditionalHours?: number;
+  customTourStops?: string[];
+  customTourReturnToPickup?: boolean;
 
   // Passenger Details
   customerName: string;

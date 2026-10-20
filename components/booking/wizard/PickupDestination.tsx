@@ -5,6 +5,16 @@ import { useMemo } from "react";
 import { routes } from "@/app/lib/routes";
 import { useBooking } from "@/context/BookingContext";
 
+const destinationParishes: Record<string, string> = {
+  "Montego Bay Hotels": "St. James",
+  "Rose Hall": "St. James",
+  Falmouth: "Trelawny",
+  "Runaway Bay": "St. Ann",
+  "Ocho Rios": "St. Ann",
+  Negril: "Westmoreland",
+  Kingston: "Kingston & St. Andrew",
+};
+
 export default function PickupDestination() {
   const { booking, updateBooking } = useBooking();
 
@@ -13,22 +23,30 @@ export default function PickupDestination() {
     []
   );
 
-  const destinations = useMemo(() => {
-    if (!booking.pickup) return [];
+  const groupedDestinations = useMemo(() => {
+    const groups: Record<string, string[]> = {};
 
-    return [
-      ...new Set(
-        routes
-          .filter((route) => route.pickup === booking.pickup)
-          .map((route) => route.destination)
-      ),
-    ];
+    if (!booking.pickup) return groups;
+
+    for (const route of routes) {
+      if (route.pickup !== booking.pickup) continue;
+
+      const destination = route.destination;
+      const parish =
+        destinationParishes[destination] ?? "Other Destinations";
+
+      if (!groups[parish]) groups[parish] = [];
+
+      if (!groups[parish].includes(destination)) {
+        groups[parish].push(destination);
+      }
+    }
+
+    return groups;
   }, [booking.pickup]);
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      {/* Pickup */}
-
       <div className="space-y-2">
         <label
           htmlFor="pickup"
@@ -58,8 +76,6 @@ export default function PickupDestination() {
           ))}
         </select>
       </div>
-
-      {/* Destination */}
 
       <div className="space-y-2">
         <label
@@ -95,10 +111,14 @@ export default function PickupDestination() {
               : "Choose Pickup First"}
           </option>
 
-          {destinations.map((destination) => (
-            <option key={destination} value={destination}>
-              {destination}
-            </option>
+          {Object.entries(groupedDestinations).map(([parish, destinations]) => (
+            <optgroup key={parish} label={parish}>
+              {destinations.map((destination) => (
+                <option key={destination} value={destination}>
+                  {destination}
+                </option>
+              ))}
+            </optgroup>
           ))}
         </select>
       </div>

@@ -84,8 +84,8 @@ export const routes: RoutePricing[] = [
   {
     pickup: "MBJ Airport",
     destination: "Ocho Rios",
-    basePrice: 120,
-    roundTrip: 240,
+    basePrice: 140,
+    roundTrip: 280,
     additionalPassengerFee: 20,
     maxPassengers: 7,
   },
@@ -117,12 +117,11 @@ export function calculateBookingPrice(
       : route.basePrice;
 
   const extraPassengers =
-    Math.max(booking.passengers - 1, 0);
+    Math.max(booking.passengers - 4, 0);
 
   const passengerFee =
     extraPassengers *
     route.additionalPassengerFee;
-
   const childSeatFee =
     booking.childSeat ? 10 : 0;
 
