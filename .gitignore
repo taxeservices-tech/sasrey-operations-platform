@@ -1,4 +1,4 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+﻿# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
 /node_modules
@@ -39,3 +39,24 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# Local database and recovery copies â€” never commit
+/data/
+*.db
+*.db-shm
+*.db-wal
+
+# Local deployment state
+.netlify/
+
+# Local dependency backups
+node_modules-backup-*/
+
+# Local diagnostics
+db-historical-review.ts
+tsconfig-effective-check.json
+tsconfig-effective.txt
+
+# Recovery copies of source files
+*.backup-*
+*.before-*.ts
+* copy.tsx backup
